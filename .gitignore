@@ -2,6 +2,7 @@
 .mr.developer.cfg
 bin
 build
+dist
 develop-eggs
 eggs
 node_modules

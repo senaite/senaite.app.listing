@@ -1,5 +1,8 @@
 include LICENSE
 include *.rst
 include *.md
-recursive-exclude docs *
-recursive-exclude src *.pyc
+recursive-include docs *
+recursive-include src/senaite/core/listing *
+recursive-exclude src/senaite/core/listing *.pyc
+recursive-exclude src/senaite/core/listing/tests *
+recursive-exclude src/senaite/core/listing/react *
