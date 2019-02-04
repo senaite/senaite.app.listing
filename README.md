@@ -4,7 +4,7 @@
     <img src="static/logo.png" alt="senaite.core.listing" height="128" />
   </a>
 
-  <p>ReactJS powered Listings for SENAITE</p>
+  <p>ReactJS powered listings for SENAITE</p>
 
   <div>
     <a href="https://pypi.python.org/pypi/senaite.core.listing">

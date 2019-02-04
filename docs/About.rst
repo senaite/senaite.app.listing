@@ -1,9 +1,16 @@
-.. image:: https://raw.githubusercontent.com/senaite/senaite.core.listing/master/static/logo.png
-   :alt: senaite.core.listing
-   :height: 64
-   :align: center
+.. raw:: html
 
-- **SENAITE.CORE.LISTING**: *ReactJS powered listing component for SENAITE*
+  <div align="center">
+    <h1>
+      <a href="https://github.com/senaite/senaite.core">
+        <div>
+          <img src="https://raw.githubusercontent.com/senaite/senaite.core.listing/master/static/logo.png" alt="senaite.core.listing" height="128" />
+        </div>
+      </a>
+    </h1>
+  </div>
+
+- **SENAITE.CORE.LISTING**: *ReactJS powered listings for SENAITE*
 
 .. image:: https://img.shields.io/pypi/v/senaite.core.listing.svg?style=flat-square
    :target: https://pypi.python.org/pypi/senaite.core.listing
@@ -21,7 +28,7 @@
 About
 =====
 
-The SENAITE.CORE.LISTING is a ReactJS based listing component for SENAITE CORE.
+This package provides a ReactJS based listing component for SENAITE.
 
 
 Installation
