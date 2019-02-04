@@ -1,2 +1,9 @@
+.installed.cfg
+.mr.developer.cfg
+bin
+develop-eggs
+eggs
 node_modules
+parts
+src/senaite.core
 yarn.lock
