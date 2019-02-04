@@ -8,5 +8,5 @@ from zope.interface import Interface
 
 
 class IListingView(Interface):
-    """Super model wrapper
+    """Senaite Core Listing View
     """

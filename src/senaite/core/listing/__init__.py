@@ -13,6 +13,9 @@ senaiteMessageFactory = MessageFactory("senaite.core.listing")
 
 logger = logging.getLogger("senaite.core.listing")
 
+# convenience import
+from senaite.core.listing.view import ListingView
+
 
 def initialize(context):
     """Initializer called when used as a Zope 2 product."""

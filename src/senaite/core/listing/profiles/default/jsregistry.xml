@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<object name="portal_javascripts">
+
+  <!-- Listing ReactJS -->
+  <javascript
+    authenticated="False"
+    id=""
+    cacheable="True"
+    compression="safe"
+    conditionalcomment=""
+    cookable="True"
+    enabled="on"
+    expression=""
+    inline="False"
+    insert-after="*"/>
+
+</object>

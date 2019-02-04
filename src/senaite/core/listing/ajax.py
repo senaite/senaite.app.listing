@@ -17,6 +17,7 @@ from plone.memoize.volatile import cache
 from plone.memoize.volatile import store_on_context
 from Products.Archetypes.utils import mapply
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
+from senaite.core.listing.interfaces import IListingView
 from zope.interface import implements
 from zope.lifecycleevent import modified
 from zope.publisher.interfaces import IPublishTraverse
@@ -38,7 +39,7 @@ class AjaxListingView(BrowserView):
     The main purpose of this class is to provide a JSON API endpoint for the
     ReactJS based listing table.
     """
-    implements(IPublishTraverse)
+    implements(IListingView, IPublishTraverse)
     contents_table_template = ViewPageTemplateFile(
         "templates/contents_table.pt")
 
