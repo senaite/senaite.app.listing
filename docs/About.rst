@@ -2,7 +2,7 @@
 
   <div align="center">
     <h1>
-      <a href="https://github.com/senaite/senaite.core">
+      <a href="https://github.com/senaite/senaite.core.listing">
         <div>
           <img src="https://raw.githubusercontent.com/senaite/senaite.core.listing/master/static/logo.png" alt="senaite.core.listing" height="128" />
         </div>

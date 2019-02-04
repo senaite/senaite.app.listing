@@ -25,7 +25,7 @@ setup(
         "Framework :: Plone",
         "Framework :: Zope2",
     ],
-    keywords="",
+    keywords=['senaite', 'lims', 'opensource', 'reactjs'],
     author="SENAITE Foundation",
     author_email="hello@senaite.com",
     url="https://github.com/senaite/senaite.core.listing",
