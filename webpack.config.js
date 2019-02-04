@@ -7,7 +7,7 @@ module.exports = {
   },
   output: {
     filename: 'senaite.core.[name].js',
-    path: path.resolve(__dirname, './src/senaite/core/listig/static/js')
+    path: path.resolve(__dirname, './src/senaite/core/listing/static/js')
   },
   module: {
     rules: [
