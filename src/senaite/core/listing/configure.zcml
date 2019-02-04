@@ -1,0 +1,15 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    i18n_domain="senaite.core.listing">
+
+  <five:registerPackage package="." initialize=".initialize" />
+
+  <!-- Register the static resource directory -->
+  <browser:resourceDirectory
+      name="senaite.core.browser.listing.static"
+      directory="static"
+      layer="bika.lims.interfaces.IBikaLIMS"
+      />
+
+</configure>
