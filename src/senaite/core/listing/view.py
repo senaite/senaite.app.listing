@@ -9,7 +9,6 @@ import time
 import DateTime
 import Missing
 from AccessControl import getSecurityManager
-from ajax import AjaxListingView
 from bika.lims import api
 from bika.lims import bikaMessageFactory as _
 from bika.lims import deprecated
@@ -22,6 +21,7 @@ from plone.memoize import view
 from Products.CMFCore.utils import getToolByName
 from Products.CMFPlone.utils import safe_unicode
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
+from senaite.core.listing.ajax import AjaxListingView
 from zope.component import getAdapters
 from zope.component import getMultiAdapter
 
