@@ -31,6 +31,31 @@
 The SENAITE.CORE.LISTING is a ReactJS based listing component for SENAITE CORE.
 
 
+## Screenshots
+
+This section shows some screenshots how `senaite.core.listing` looks like.
+
+
+### Samples Listing
+
+<img src="static/1_samples_listing.png" alt="Samples Listing" />
+
+
+### Worksheet Classic Listing
+
+<img src="static/2_worksheet_classic_listing.png" alt="Worksheet Classic Listing" />
+
+
+### Worksheet Transposed Listing
+
+<img src="static/3_worksheet_transposed_listing.png" alt="Worksheet Transposed Listing" />
+
+
+### Clients Listing
+
+<img src="static/4_clients_listing.png" alt="Clients Listing" />
+
+
 ## Development
 
 This package uses [webpack](https://webpack.js.org) to bundle all assets for the
