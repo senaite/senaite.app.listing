@@ -16,7 +16,7 @@ with open("docs/Changelog.rst", "r") as fh:
 setup(
     name="senaite.core.listing",
     version=version,
-    description="SENAITE.CORE.LISTING",
+    description="ReactJS powered listing component for SENAITE",
     long_description=long_description,
     # Get more strings from
     # http://pypi.python.org/pypi?:action=list_classifiers
@@ -32,7 +32,7 @@ setup(
     license="GPLv2",
     packages=find_packages("src", exclude=["ez_setup"]),
     package_dir={"": "src"},
-    namespace_packages=["senaite"],
+    namespace_packages=["senaite", "senaite.core"],
     include_package_data=True,
     zip_safe=False,
     install_requires=[
