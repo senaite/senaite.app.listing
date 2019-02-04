@@ -4,7 +4,7 @@
   <!-- Listing ReactJS -->
   <javascript
     authenticated="False"
-    id=""
+    id="++resource++senaite.core.listing.static/js/senaite.core.listing.js"
     cacheable="True"
     compression="safe"
     conditionalcomment=""
@@ -13,5 +13,10 @@
     expression=""
     inline="False"
     insert-after="*"/>
+
+  <!-- Cleanup after package outsourcing-->
+  <javascript
+    remove="True"
+    id="++resource++senaite.core.browser.listing.static/js/senaite.core.listing.js"/>
 
 </object>

@@ -1,6 +1,8 @@
 <configure
     xmlns="http://namespaces.zope.org/zope"
     xmlns:five="http://namespaces.zope.org/five"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
     i18n_domain="senaite.core.listing">
 
   <five:registerPackage package="." initialize=".initialize" />
@@ -9,7 +11,6 @@
   <browser:resourceDirectory
       name="senaite.core.listing.static"
       directory="static"
-      layer="bika.lims.interfaces.IBikaLIMS"
       />
 
   <!-- Generic Setup *INSTALL* Profile -->
@@ -26,8 +27,8 @@
       name="uninstall"
       title="SENAITE CORE LISTING"
       directory="profiles/uninstall"
-      description="SENAITE LIMS Add-on"
-      post_handler="senaite.lims.setuphandlers.post_uninstall"
+      description="SENAITE CORE LISTING"
+      post_handler="senaite.core.listing.setuphandlers.post_uninstall"
       provides="Products.GenericSetup.interfaces.EXTENSION"/>
 
   <!-- Generic Setup *IMPORT STEP* -->
@@ -35,6 +36,6 @@
       name="senaite.core.listing.setupHandler"
       title="SENAITE CORE LISTING: Run Setup Handler"
       description="Run various configuration actions"
-      handler="senaite.ore.listing.setuphandlers.setup_handler"/>
+      handler="senaite.core.listing.setuphandlers.setup_handler"/>
 
 </configure>
