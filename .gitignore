@@ -1,6 +1,7 @@
 .installed.cfg
 .mr.developer.cfg
 bin
+build
 develop-eggs
 eggs
 node_modules

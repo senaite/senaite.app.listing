@@ -4,7 +4,7 @@
     <img src="static/logo.png" alt="senaite.core.listing" height="128" />
   </a>
 
-  <p>ReactJS powered Listing View for SENAITE</p>
+  <p>ReactJS powered Listings for SENAITE</p>
 
   <div>
     <a href="https://pypi.python.org/pypi/senaite.core.listing">
@@ -22,13 +22,16 @@
     <a href="#">
       <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="pr" />
     </a>
+    <a href="https://www.senaite.com">
+      <img src="https://img.shields.io/badge/Made%20for%20SENAITE-%E2%AC%A1-lightgrey.svg" alt="Made for SENAITE" />
+    </a>
   </div>
 </div>
 
 
 ## About
 
-The SENAITE.CORE.LISTING is a ReactJS based listing component for SENAITE CORE.
+This package provides a ReactJS based listing component for SENAITE.
 
 
 ## Screenshots
