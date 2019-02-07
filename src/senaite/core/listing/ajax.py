@@ -9,8 +9,6 @@ from bika.lims import logger
 from bika.lims.browser import BrowserView
 from bika.lims.interfaces import IReferenceAnalysis
 from bika.lims.interfaces import IRoutineAnalysis
-from plone.memoize.volatile import cache
-from plone.memoize.volatile import store_on_context
 from Products.Archetypes.utils import mapply
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from senaite.core.listing.decorators import inject_runtime
@@ -21,16 +19,6 @@ from senaite.core.listing.interfaces import IListingView
 from zope.interface import implements
 from zope.lifecycleevent import modified
 from zope.publisher.interfaces import IPublishTraverse
-
-
-def cache_transitions(method, view, obj):
-    """Cache key for the possible transitions
-    """
-    keys = [
-        api.get_uid(obj),
-        api.get_workflow_status_of(obj),
-    ]
-    return "-".join(keys)
 
 
 class AjaxListingView(BrowserView):
@@ -155,7 +143,6 @@ class AjaxListingView(BrowserView):
         view_name = self.__name__
         return "{}/{}".format(url, view_name)
 
-    @cache(cache_transitions, store_on_context)
     def get_transitions_for(self, obj):
         """Get the allowed transitions for the given object
         """
