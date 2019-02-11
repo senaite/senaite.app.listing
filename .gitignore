@@ -9,3 +9,5 @@ node_modules
 parts
 src/senaite.core
 yarn.lock
+*.egg-info
+*.pyc
