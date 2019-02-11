@@ -22,13 +22,17 @@ from Products.CMFCore.utils import getToolByName
 from Products.CMFPlone.utils import safe_unicode
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from senaite.core.listing.ajax import AjaxListingView
+from senaite.core.listing.interfaces import IListingView, IListingViewAdapter
 from zope.component import getAdapters
 from zope.component import getMultiAdapter
+from zope.component import subscribers
+from zope.interface import implements
 
 
 class ListingView(AjaxListingView):
     """Base Listing View
     """
+    implements(IListingView)
     template = ViewPageTemplateFile("templates/listing.pt")
 
     # The title of the outer listing view
@@ -208,6 +212,19 @@ class ListingView(AjaxListingView):
         """Before render hook
         """
         logger.info(u"ListingView::before_render")
+        for subscriber in self.get_listing_view_adapters():
+            logger.info(u"ListingView::before_render::{}.{}".format(
+                subscriber.__module__, subscriber.__class__.__name__))
+            subscriber.before_render()
+
+    def get_listing_view_adapters(self):
+        """Returns subscriber adapters used to modify the listing behavior
+        """
+        # Allows to override this listing by multiple subscribers without the
+        # need of inheritance. We use subscriber adapters here because we need
+        # different add-ons to be able to modify columns, etc. without
+        # dependencies amongst them.
+        return subscribers((self, self.context), IListingViewAdapter)
 
     def contents_table(self, *args, **kwargs):
         """Render the ReactJS enabled contents table template
@@ -725,6 +742,8 @@ class ListingView(AjaxListingView):
             the template
         :index: current index of the item
         """
+        for subscriber in self.get_listing_view_adapters():
+            subscriber.folder_item(obj, item, index)
         return item
 
     def folderitems(self, full_objects=False, classic=True):

@@ -15,7 +15,7 @@ from senaite.core.listing.decorators import inject_runtime
 from senaite.core.listing.decorators import returns_safe_json
 from senaite.core.listing.decorators import set_application_json_header
 from senaite.core.listing.decorators import translate
-from senaite.core.listing.interfaces import IListingView
+from senaite.core.listing.interfaces import IAjaxListingView
 from zope.interface import implements
 from zope.lifecycleevent import modified
 from zope.publisher.interfaces import IPublishTraverse
@@ -27,7 +27,7 @@ class AjaxListingView(BrowserView):
     The main purpose of this class is to provide a JSON API endpoint for the
     ReactJS based listing table.
     """
-    implements(IListingView, IPublishTraverse)
+    implements(IAjaxListingView, IPublishTraverse)
     contents_table_template = ViewPageTemplateFile(
         "templates/contents_table.pt")
 
