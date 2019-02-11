@@ -74,7 +74,7 @@ def add_column(listing, column_id, column_values, before=None, after=None,
                 if before and before in cols:
                     idx = cols.index(before)
                 elif after and after in cols:
-                    idx = cols.index(after)
+                    idx = cols.index(after) + 1
                 cols.insert(idx, column_id)
                 state["columns"] = cols
         new_states.append(rv_state)
