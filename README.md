@@ -58,6 +58,74 @@ This section shows some screenshots how `senaite.core.listing` looks like.
 
 <img src="static/4_clients_listing.png" alt="Clients Listing" />
 
+## Adapting Listings
+
+In most cases, adding a subscriber adapter for `IListingView` is enough to 
+extend a given listing with additional columns, status or even behavior. With 
+the subscriber approach, a given listing can be modified multiple times by same
+or different add-ons, without the need of inheritance and dependency bindings
+amongst them. More information here: https://docs.zope.org/zope.interface/adapter.html#subscriptions 
+
+For instance, imagine you have two independent add-ons (A and B), 
+with the following use-case:
+ 
+- A adds a column "DateStored" in Samples listing, along with filter "Stored"
+- B adds a column "Participant" in Samples listing, along with filter "Ordered"
+- Both changes are displayed in the result listing when A and B are installed
+
+Making B dependent on A or the other way round is not a solution. With
+subscriber adapters, we can address this problem easily as follows:
+
+### 1. Create a subscriber adapter for each add-on
+
+The skeleton of the subscriber adapter may look like follows:
+
+```python
+from bika.lims import api
+from senaite.core.listing.interfaces import IListingView
+from senaite.core.listing.interfaces import IListingViewAdapter
+from zope.component import adapts
+from zope.component import implements
+  
+
+class SamplesListingViewAdapter(object):
+    adapts(IListingView)
+    implements(IListingViewAdapter)
+    
+    def __init__(self, listing, context):
+        self.listing = listing
+        self.context = context
+    
+    def before_render(self):
+        self.listing.columns["MyColumn"] = {
+            "title": "My new column",
+        }        
+ 
+    def folder_item(self, obj, item, index):
+        item["MyColumn"] = api.get_object(obj).getMyColumnValue()
+        return item
+```
+
+### 2. Register the subscriber adapter in configure.zcml
+
+The next thing is to tell the system to use this adapter when the context is an
+`AnalysisRequestFolder` object and the listing view is `AnalysisRequestsView`. 
+We assume here you created the subscriber adapter inside a `samples.py` file and
+the configure.zcml is in that same directory:
+
+```
+  <!-- Samples view with additional filters and columns -->
+  <subscriber
+    for="bika.lims.browser.analysisrequest.AnalysisRequestsView
+         bika.lims.interfaces.IAnalysisRequestsFolder"
+    provides="senaite.core.listing.interfaces.IListingViewAdapter"
+    factory=".samples.SamplesListingViewAdapter" 
+  />
+```
+
+Note that `AnalysisRequestsView` (from `senaite.core`) inherits from
+`senaite.core.listing`'s `ListingView`, that in turn implements `IListingView`.
+
 
 ## Development
 
