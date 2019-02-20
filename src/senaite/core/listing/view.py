@@ -218,13 +218,16 @@ class ListingView(AjaxListingView):
             subscriber.before_render()
 
     def get_listing_view_adapters(self):
-        """Returns subscriber adapters used to modify the listing behavior
+        """Returns subscriber adapters used to modify the listing behavior,
+        sorted from higher to lower priority
         """
         # Allows to override this listing by multiple subscribers without the
         # need of inheritance. We use subscriber adapters here because we need
         # different add-ons to be able to modify columns, etc. without
         # dependencies amongst them.
-        return subscribers((self, self.context), IListingViewAdapter)
+        adapters = subscribers((self, self.context), IListingViewAdapter)
+        return sorted(adapters, key=lambda ad: api.to_float(
+            ad.get_priority_order(), 0))
 
     def contents_table(self, *args, **kwargs):
         """Render the ReactJS enabled contents table template
@@ -742,8 +745,6 @@ class ListingView(AjaxListingView):
             the template
         :index: current index of the item
         """
-        for subscriber in self.get_listing_view_adapters():
-            subscriber.folder_item(obj, item, index)
         return item
 
     def folderitems(self, full_objects=False, classic=True):
@@ -870,6 +871,11 @@ class ListingView(AjaxListingView):
             # service. folderitem service is frequently overriden by child
             # objects
             item = self.folderitem(obj, results_dict, idx)
+
+            # Call folder_item from subscriber adapters
+            for subscriber in self.get_listing_view_adapters():
+                subscriber.folder_item(obj, item, idx)
+
             if item:
                 results.append(item)
                 idx += 1
@@ -1069,6 +1075,11 @@ class ListingView(AjaxListingView):
             # service. folderitem service is frequently overriden by child
             # objects
             item = self.folderitem(obj, results_dict, idx)
+
+            # Call folder_item from subscriber adapters
+            for subscriber in self.get_listing_view_adapters():
+                subscriber.folder_item(obj, item, idx)
+
             if item:
                 results.append(item)
                 idx += 1
