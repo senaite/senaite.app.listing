@@ -226,7 +226,8 @@ class ListingView(AjaxListingView):
         # different add-ons to be able to modify columns, etc. without
         # dependencies amongst them.
         adapters = subscribers((self, self.context), IListingViewAdapter)
-        return sorted(adapters, key=lambda ad: float(ad.get_priority_order()))
+        return sorted(adapters, key=lambda ad: api.to_float(
+            ad.get_priority_order(), 0))
 
     def contents_table(self, *args, **kwargs):
         """Render the ReactJS enabled contents table template
