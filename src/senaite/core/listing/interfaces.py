@@ -21,12 +21,6 @@ class IListingViewAdapter(Interface):
     """Marker that allows to modify the behavior of ListingView
     """
 
-    def get_priority_order(self):
-        """Returns an number that represents the order of priority of this
-        adapter over other subscriber adapters that adapt same context and
-        listing view. A lower value means more priority.
-        """
-
     def before_render(self):
         """Before render hook
         """

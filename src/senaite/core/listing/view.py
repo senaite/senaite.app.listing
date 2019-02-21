@@ -217,6 +217,7 @@ class ListingView(AjaxListingView):
                 subscriber.__module__, subscriber.__class__.__name__))
             subscriber.before_render()
 
+    @view.memoize
     def get_listing_view_adapters(self):
         """Returns subscriber adapters used to modify the listing behavior,
         sorted from higher to lower priority
@@ -227,7 +228,7 @@ class ListingView(AjaxListingView):
         # dependencies amongst them.
         adapters = subscribers((self, self.context), IListingViewAdapter)
         return sorted(adapters, key=lambda ad: api.to_float(
-            ad.get_priority_order(), 0))
+            getattr(ad, "priority_order", 1000)))
 
     def contents_table(self, *args, **kwargs):
         """Render the ReactJS enabled contents table template
