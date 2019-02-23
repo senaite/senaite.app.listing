@@ -103,7 +103,7 @@ class NumericField extends React.Component
              size={@props.size or 5}
              uid={@props.uid}
              name={@props.name}
-             defaultValue={@props.defaultValue or ""}
+             defaultValue={@props.defaultValue}
              column_key={@props.column_key}
              title={@props.title}
              disabled={@props.disabled}
