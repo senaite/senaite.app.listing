@@ -20,8 +20,6 @@ class Select extends React.Component
     @on_blur = @on_blur.bind @
     @on_change = @on_change.bind @
 
-    @select_field = React.createRef()
-
   ###*
    * componentDidUpdate(prevProps, prevState, snapshot)
    * This is invoked immediately after updating occurs.
@@ -107,7 +105,6 @@ class Select extends React.Component
     <span className="form-group">
       {@props.before and <span className="before_field" dangerouslySetInnerHTML={{__html: @props.before}}></span>}
       <select key={@props.name}
-              ref={@select_field}
               uid={@props.uid}
               name={@props.name}
               value={@state.value}
