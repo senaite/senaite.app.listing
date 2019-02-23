@@ -13,13 +13,23 @@ class Select extends React.Component
   constructor: (props) ->
     super(props)
     # remember the initial value
-    @value = props.defaultValue or ""
+    @state =
+      value: props.defaultValue or ""
 
     # bind event handler to the current context
     @on_blur = @on_blur.bind @
     @on_change = @on_change.bind @
 
     @select_field = React.createRef()
+
+  ###*
+   * componentDidUpdate(prevProps, prevState, snapshot)
+   * This is invoked immediately after updating occurs.
+   * This method is not called for the initial render.
+  ###
+  componentDidUpdate: (prevProps) ->
+    if @props.defaultValue isnt prevProps.defaultValue
+      @setState value: @props.defaultValue
 
   ###*
    * Event handler when the mouse left the select field
@@ -33,6 +43,7 @@ class Select extends React.Component
     name = el.getAttribute("column_key") or el.name
     # Extract the value of the numeric field
     value = el.value
+    @setState value: value
 
     console.debug "Select::on_blur: value=#{value}"
 
@@ -54,13 +65,13 @@ class Select extends React.Component
     value = el.value
 
     # Only propagate for new values
-    if value == @value
+    if value == @state.value
       return
 
     console.debug "Select::on_change: value=#{value}"
 
     # store the new value
-    @value = value
+    @setState value: value
 
     # Call the *update* field handler
     if @props.update_editable_field
@@ -99,7 +110,7 @@ class Select extends React.Component
               ref={@select_field}
               uid={@props.uid}
               name={@props.name}
-              defaultValue={@props.defaultValue}
+              value={@state.value}
               column_key={@props.column_key}
               title={@props.title}
               disabled={@props.disabled}
