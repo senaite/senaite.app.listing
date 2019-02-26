@@ -14,12 +14,21 @@ class NumericField extends React.Component
     super(props)
 
     # remember the initial value
-    @value = props.defaultValue or ""
-    @changed = no
+    @state =
+      value: props.defaultValue
 
     # bind event handler to the current context
     @on_blur = @on_blur.bind @
     @on_change = @on_change.bind @
+
+  ###*
+   * componentDidUpdate(prevProps, prevState, snapshot)
+   * This is invoked immediately after updating occurs.
+   * This method is not called for the initial render.
+  ###
+  componentDidUpdate: (prevProps) ->
+    if @props.defaultValue != prevProps.defaultValue
+      @setState value: @props.defaultValue
 
   ###*
    * Event handler when the mouse left the numeric field
@@ -37,13 +46,6 @@ class NumericField extends React.Component
     value = value.replace(/\.*$/, "")
     # Set the sanitized value back to the field
     el.value = value
-
-    # Only propagate for new values
-    if not @changed
-      return
-
-    # reset the change flag
-    @changed = no
 
     console.debug "NumericField::on_blur: value=#{value}"
 
@@ -68,15 +70,9 @@ class NumericField extends React.Component
     # Set the float value back to the field
     el.value = value
 
-    # Only propagate for new values
-    if value == @value
-      return
-
     # store the new value
-    @value = value
-
-    # set the change flag
-    @changed = yes
+    @setState
+      value: value
 
     console.debug "NumericField::on_change: value=#{value}"
 
@@ -92,7 +88,7 @@ class NumericField extends React.Component
     # Valid -.5; -0.5; -0.555; .5; 0.5; 0.555
     #       -,5; -0,5; -0,555; ,5; 0,5; 0,555
     # Non Valid: -.5.5; 0,5,5; ...;
-    value = value.replace /(^-?)(\d*)([\.,]?\d*)(.*)/, "$1$2$3"
+    value = value.replace /(^[-,<,>]?)(\d*)([\.,]?\d*)(.*)/, "$1$2$3"
     value = value.replace(",", ".")
     return value
 
@@ -103,7 +99,7 @@ class NumericField extends React.Component
              size={@props.size or 5}
              uid={@props.uid}
              name={@props.name}
-             defaultValue={@props.defaultValue or ""}
+             value={@state.value}
              column_key={@props.column_key}
              title={@props.title}
              disabled={@props.disabled}
