@@ -66,33 +66,17 @@ class TableHeaderRow extends React.Component
     required = first_item.required or []
     return key in required
 
-  get_sort_index: (key, column) ->
+  is_sortable: (column, key) ->
     ###
-     * Get the sort index of the given column
+     * Check if the column is sortable
     ###
-
-    # disallow sorting when categories are shown
-    if @props.show_categories
-      return null
-
-    index = column.index
-
-    # lookup the column key in the available indexes
-    catalog_indexes = @props.catalog_indexes
-
-    # if the index is set, return immediately
-    if index and index in catalog_indexes
-      return index
-
-    # lookup the title in the available indexes
-    if key in catalog_indexes
-      return key
-
-    # lookup the title getter in the available indexes
-    get_key = "get" + key.charAt(0).toUpperCase() + key.slice(1)
-    if get_key in catalog_indexes
-      return get_key
-    return null
+    if column.sortable is no
+      return no
+    if column.index
+      return yes
+    if key in @props.sortable_columns
+      return yes
+    return no
 
   all_selected: ->
     ###
@@ -138,14 +122,13 @@ class TableHeaderRow extends React.Component
 
       # get the column object
       column = @props.columns[key]
+      # check if the key is in the sortable columns
+      sortable = @is_sortable column, key
+      # sort index
+      index = column.index or key
 
       title = column.title
-      index = @get_sort_index key, column
-      sortable = index or no
-      # overwrite if sortable is explicitly set to false
-      if column.sortable is no
-        sortable = no
-      # sort_on is the current sort index
+      # sort_on is the current sort index/metadata
       sort_on = @props.sort_on or "created"
       sort_order = @props.sort_order or "ascending"
       # check if the current sort_on is the index of this column
