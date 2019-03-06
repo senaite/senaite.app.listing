@@ -300,6 +300,7 @@ class AjaxListingView(BrowserView):
             "api_url": self.get_api_url(),
             "catalog": self.catalog,
             "catalog_indexes": self.get_catalog_indexes(),
+            "catalog_columns": self.get_metadata_columns(),
             "categories": self.categories,
             "expand_all_categories": self.expand_all_categories,
             "limit_from": self.limit_from,
@@ -315,12 +316,33 @@ class AjaxListingView(BrowserView):
             "show_table_footer": self.show_table_footer,
             "show_workflow_action_buttons": self.show_workflow_action_buttons,
             "sort_on": self.get_sort_on(),
+            "manual_sort_on": self.manual_sort_on,
             "sort_order": self.get_sort_order(),
+            "sortable_columns": self.get_sortable_columns(),
             "show_search": self.show_search,
             "fetch_transitions_on_select": self.fetch_transitions_on_select,
         }
 
         return config
+
+    def get_sortable_columns(self):
+        """Return sortable columns
+
+        Sortable columns have either an index or a metadata column
+
+        :returns: list of sortable columns
+        """
+        # filter out any columns which are explicitly set to False
+        columns = filter(lambda (k, v): v.get("sortable", True),
+                         self.columns.items())
+        # extract the column_keys
+        keys = set(map(lambda (k, v): k, columns))
+        # sortable by index
+        by_index = keys.intersection(self.get_catalog_indexes())
+        # sortable by metadata
+        by_metadata = keys.intersection(self.get_metadata_columns())
+        # return a list of possible sortable columns
+        return list(by_index.union(by_metadata))
 
     def recalculate_results(self, obj, recalculated=None):
         """Recalculate the result of the object and its dependents
@@ -506,6 +528,8 @@ class AjaxListingView(BrowserView):
         # XXX fix broken `sort_on` lookup in BikaListing
         sort_on = payload.get("sort_on")
         if sort_on in self.get_catalog_indexes():
+            data["sort_on"] = sort_on
+        elif sort_on in self.get_metadata_columns():
             data["sort_on"] = sort_on
 
         return data

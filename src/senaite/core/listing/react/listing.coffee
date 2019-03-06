@@ -114,6 +114,10 @@ class ListingController extends React.Component
       transitions: []
       # The available catalog indexes for sorting
       catalog_indexes: []
+      # The available catalog columns for sorting
+      catalog_columns: []
+      # The possible sortable columns
+      sortable_columns: []
       # ajax save queue: mapping of uid: name -> value mapping
       ajax_save_queue: {}
       # Listing specific configs
@@ -466,7 +470,7 @@ class ListingController extends React.Component
         ajax_save_queue: ajax_save_queue
       , ->
         if column.autosave
-          me.ajax_save
+          me.ajax_save()
 
   updateEditableField: (uid, name, value, item) ->
     ###
@@ -882,6 +886,8 @@ class ListingController extends React.Component
             sort_on={@state.sort_on}
             sort_order={@state.sort_order}
             catalog_indexes={@state.catalog_indexes}
+            catalog_columns={@state.catalog_columns}
+            sortable_columns={@state.sortable_columns}
             columns={@state.columns}
             column_toggles={@state.column_toggles}
             column_count={@get_column_count()}
