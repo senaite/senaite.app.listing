@@ -15,11 +15,7 @@ module.exports = {
         test: /\.(js|jsx|coffee)$/,
         exclude: [/node_modules/],
         use: {
-          loader: 'babel-loader',
-          options: {
-            presets: ['react', 'es2015', 'es2016', 'env'],
-            plugins: ['transform-class-properties']
-          }
+          loader: 'babel-loader'
         }
       }, {
         test: /\.coffee$/,
