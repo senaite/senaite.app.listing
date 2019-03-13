@@ -1,58 +1,38 @@
-const path = require('path');
-const webpack = require('webpack');
+const path = require("path");
+const webpack = require("webpack");
 
 module.exports = {
   entry: {
-    listing: path.resolve(__dirname, './src/senaite/core/listing/react/listing.coffee')
+    listing: path.resolve(__dirname, "./src/senaite/core/listing/react/listing.coffee")
   },
   output: {
-    filename: 'senaite.core.[name].js',
-    path: path.resolve(__dirname, './src/senaite/core/listing/static/js')
+    filename: "senaite.core.[name].js",
+    path: path.resolve(__dirname, "./src/senaite/core/listing/static/js")
   },
   module: {
     rules: [
       {
-        test: /\.(js|jsx|coffee)$/,
-        exclude: [/node_modules/],
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: ['react', 'es2015', 'es2016', 'env'],
-            plugins: ['transform-class-properties']
-          }
-        }
-      }, {
         test: /\.coffee$/,
         exclude: [/node_modules/],
-        use: [
-          {
-            loader: 'coffee-loader',
-            options: {}
-          }
-        ]
+        use: ["babel-loader", "coffee-loader"]
+      }, {
+        test: /\.(js|jsx)$/,
+        exclude: [/node_modules/],
+        use: ["babel-loader"]
       }, {
         test: /\.css$/,
-        use: [
-          {
-            loader: 'style-loader'
-          },
-          {
-            loader: 'css-loader'
-          }
-        ]
+        use: ["style-loader", "css-loader"]
       }
     ]
   },
   plugins: [
-    // https://webpack.js.org/plugins/provide-plugin/
-    new webpack.ProvidePlugin({
-    })
+    // e.g. https://webpack.js.org/plugins/provide-plugin/
   ],
   externals: {
     // https://webpack.js.org/configuration/externals
     // use jQuery from the outer scope
-    jquery: 'jQuery',
-    bootstrap: 'bootstrap',
+    jquery: "jQuery",
+    bootstrap: "bootstrap",
     jsi18n: {
       root: "_"
     }
