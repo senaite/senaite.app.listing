@@ -171,14 +171,16 @@ class TableTransposedCell extends TableCell
     # Add a select checkbox for result cells
     before_components[column_key] = [@create_select_checkbox()]
     # Append remarks toggle
-    before_components[column_key].push(
-      <a key={uid + "_remarks"}
-          href="#"
-          className="transposed_remarks"
-          uid={uid}
-          onClick={@props.on_remarks_expand_click}>
-        <span className="remarksicon glyphicon glyphicon-comment"></span>
-      </a>)
+
+    if @get_remarks_columns().length > 0
+      before_components[column_key].push(
+        <a key={uid + "_remarks"}
+            href="#"
+            className="transposed_remarks"
+            uid={uid}
+            onClick={@props.on_remarks_expand_click}>
+          <span className="remarksicon glyphicon glyphicon-comment"></span>
+        </a>)
     item["before_components"] = before_components
 
     # E.g. a submitted result
