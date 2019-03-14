@@ -612,8 +612,8 @@ class ListingController extends React.Component
     folderitems ?= @state.folderitems
     mapping = {}
     folderitems.map (item, index) ->
-      # transposed cells do not have an uid, so we use the index instead
-      uid = item.uid or index
+      # transposed cells have no uid, but a column_key
+      uid = item.uid or item.column_key or index
       mapping[uid] = item
     return mapping
 
