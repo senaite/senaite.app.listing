@@ -438,14 +438,10 @@ class AjaxListingView(BrowserView):
         # check if the object is an analysis and has an interim
         if self.is_analysis(obj):
 
-            # check the permission of the interims field
-            if not self.is_field_writeable(obj, "InterimFields"):
-                logger.error("Field 'InterimFields' not writeable!")
-                return []
-
             interims = obj.getInterimFields()
             interim_keys = map(lambda i: i.get("keyword"), interims)
-            if name in interim_keys:
+            interims_writable = self.is_field_writeable(obj, "InterimFields")
+            if name in interim_keys and interims_writable:
                 for interim in interims:
                     if interim.get("keyword") == name:
                         interim["value"] = value
