@@ -772,11 +772,11 @@ class ListingController extends React.Component
       return yes
     return no
 
-  ajax_save: (reload=yes) ->
+  ajax_save: ->
     ###
-     * Save the items of the ajax_save_queue
+     * Save the items of the `ajax_save_queue`
     ###
-    console.debug "ListingController::ajax_save"
+    console.debug "ListingController::ajax_save:ajax_save_queue=", @state.ajax_save_queue
 
     # turn loader on
     @toggle_loader on
@@ -787,23 +787,72 @@ class ListingController extends React.Component
     me = this
     promise.then (data) ->
       console.debug "ListingController::ajax_save: GOT DATA=", data
+
       # uids of the updated objects
       uids = data.uids or []
-      # make sure all updated UIDs are selected
-      uids.map (uid) -> me.selectUID uid, yes
-      # empty the ajax save queue
+
+      # ensure that all updated UIDs are also selected
+      uids.map (uid, index) -> me.selectUID uid, yes
+
+      # folderitems of the updated objects and their dependencies
+      folderitems = data.folderitems or []
+
+      # update the existing folderitems
+      me.update_existing_folderitems_with folderitems
+
+      # fetch all possible transitions
+      if me.state.fetch_transitions_on_select
+        me.fetch_transitions()
+
+      # empty the ajax save queue and hide the save button
       me.setState
         show_ajax_save: no
         ajax_save_queue: {}
-      # reload the folderitems
-      if reload and uids.length > 0
-        me.fetch_folderitems yes
-        # fetch all possible transitions
-        if me.state.fetch_transitions_on_select
-          me.fetch_transitions()
+
       # toggle loader off
       me.toggle_loader off
 
+  update_existing_folderitems_with: (folderitems) ->
+    ###
+     * Update existing folderitems
+    ###
+    console.log "ListingController::update_existing_folderitems_with: ", folderitems
+
+    # These folderitems get set to the state
+    new_folderitems = []
+
+    # The updated items from the server
+    updated_folderitems = @group_by_uid folderitems
+
+    # The current folderitems in our @state
+    existing_folderitems = @group_by_uid @state.folderitems
+
+    # We iterate through the existing folderitems and check if the items was updated.
+    for uid, folderitem of existing_folderitems
+
+      # shallow copy of the existing folderitem in @state.folderitems
+      old_item = Object.assign {}, folderitem
+
+      if uid not of updated_folderitems
+        # nothing changed -> keep the old folderitem
+        new_folderitems.push old_item
+      else
+        # shallow copy of the updated folderitem from the server
+        new_item = Object.assign {}, updated_folderitems[uid]
+        # keep non-updated properties
+        for key, value of old_item
+          # XXX Workaround for Worksheet classic/transposed views
+          # -> Always keep those values from the original folderitem
+          if key in ["rowspan", "colspan", "skip"]
+            new_item[key] = old_item[key]
+          if not new_item.hasOwnProperty key
+            new_item[key] = old_item[key]
+        # add the new folderitem
+        new_folderitems.push new_item
+
+    # updated the state with the new folderitems
+    @setState
+      folderitems: new_folderitems
 
   ###*
     * EVENT HANDLERS
