@@ -659,53 +659,6 @@ class AjaxListingView(BrowserView):
     @set_application_json_header
     @returns_safe_json
     @inject_runtime
-    def ajax_set(self):
-        """Set a value of an editable field
-
-        The POST Payload needs to provide the following data:
-
-        :uid: UID of the object changed
-        :name: Column name as provided by the self.columns key
-        :value: The value to save
-        :item: The folderitem containing the data
-        """
-
-        # Get the HTTP POST JSON Payload
-        payload = self.get_json()
-
-        required = ["uid", "name", "value"]
-        if not all(map(lambda k: k in payload, required)):
-            return self.error("Payload needs to provide the keys {}"
-                              .format(", ".join(required)), status=400)
-
-        uid = payload.get("uid")
-        name = payload.get("name")
-        value = payload.get("value")
-
-        # get the object
-        obj = api.get_object_by_uid(uid)
-
-        # set the field
-        updated_objects = self.set_field(obj, name, value)
-
-        if not updated_objects:
-            return self.error("Failed to set field '{}'".format(name), 500)
-
-        # get the folderitems
-        self.contentFilter["UID"] = map(api.get_uid, updated_objects)
-        folderitems = self.get_folderitems()
-
-        # prepare the response object
-        data = {
-            "count": len(folderitems),
-            "folderitems": folderitems,
-        }
-
-        return data
-
-    @set_application_json_header
-    @returns_safe_json
-    @inject_runtime
     def ajax_set_fields(self):
         """Set multiple fields
 

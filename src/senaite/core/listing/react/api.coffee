@@ -52,16 +52,6 @@ class ListingAPI
     return fetch(request).then (response) ->
       return response.json()
 
-  set: (data) ->
-    ###
-     * Set value of an editable field to the server
-     * @returns {Promise}
-    ###
-    options =
-      data: data or {}
-      method: "POST"
-    return @get_json "set", options
-
   set_fields: (data) ->
     ###
      * Set values of multiple fields
