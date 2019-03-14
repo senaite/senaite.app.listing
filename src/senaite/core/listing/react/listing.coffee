@@ -161,11 +161,6 @@ class ListingController extends React.Component
     # initial fetch of the folderitems
     @fetch_folderitems()
 
-  componentDidUpdate: ->
-    ###
-     * ReactJS event handler when the component did update
-    ###
-
   toggleContextMenu: (x, y, toggle) ->
     ###
      * Toggle the context menu
