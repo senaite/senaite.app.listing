@@ -690,12 +690,16 @@ class AjaxListingView(BrowserView):
             return self.error("Failed to set field of save queue '{}'"
                               .format(save_queue), 500)
 
-        # UIDs of updated objects
+        # get the updated folderitems
         updated_uids = map(api.get_uid, updated_objects)
+        self.contentFilter["UID"] = updated_uids
+        folderitems = self.get_folderitems()
 
         # prepare the response object
         data = {
+            "count": len(folderitems),
             "uids": updated_uids,
+            "folderitems": folderitems,
         }
 
         return data
