@@ -663,9 +663,11 @@ class ListingController extends React.Component
         # turn loader off
         me.toggle_loader off
 
-  fetch_folderitems: (items_only=no) ->
+  fetch_folderitems: ->
     ###
-     * Fetch the folderitems
+     * Fetch folderitems from the server
+     *
+     * @param uids {array} List of UIDs to fetch (all if omitted)
     ###
 
     # turn loader on
@@ -679,7 +681,11 @@ class ListingController extends React.Component
       console.debug "ListingController::fetch_folderitems: GOT RESPONSE=", data
 
       # N.B. Always keep selected folderitems, because otherwise modified fields
-      #      won't get send to the server on form submit
+      #      won't get send to the server on form submit.
+      #
+      # This is needed e.g. in "Manage Analyses" when the users searches for
+      # analyses to add. Keeping only the UID is there not sufficient, because
+      #      we would lose the Mix/Max values.
       #
       # TODO refactor this logic
       # -------------------------------8<--------------------------------------
@@ -705,7 +711,7 @@ class ListingController extends React.Component
           category = folderitem.category
           if category and category not in new_categories
             new_categories.push category
-            # unfortunately any sortKey sorting of the category get lost here
+            # XXX unfortunately any sortKey sorting of the category get lost here
             new_categories.sort()
 
       # write back new categories
@@ -714,8 +720,6 @@ class ListingController extends React.Component
       data.folderitems = Object.values new_folderitems
       # -------------------------------->8-------------------------------------
 
-      if items_only
-        data = {"folderitems": data.folderitems}
       me.setState data, ->
         # calculate the new expanded categories and the internal folderitems mapping
         me.setState
