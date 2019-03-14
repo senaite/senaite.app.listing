@@ -413,7 +413,7 @@ class ListingController extends React.Component
       # when the deselect all button was clicked
       if uid == "all"
         # Keep readonly items
-        by_uid = @get_folderitems_by_uid()
+        by_uid = @group_by_uid @state.folderitems
         selected_uids = selected_uids.filter (uid) ->
           item = by_uid[uid]
           return item.readonly
@@ -484,7 +484,6 @@ class ListingController extends React.Component
         # fetch all possible transitions
         if me.state.fetch_transitions_on_select
           me.fetch_transitions()
-
 
   is_uid_selected: (uid) ->
     ###
@@ -606,7 +605,7 @@ class ListingController extends React.Component
 
     return []
 
-  get_folderitems_by_uid: (folderitems) ->
+  group_by_uid: (folderitems) ->
     ###
      * Create a mapping of UID -> folderitem
     ###
@@ -685,9 +684,9 @@ class ListingController extends React.Component
       # TODO refactor this logic
       # -------------------------------8<--------------------------------------
       # existing folderitems from the state as a UID -> folderitem mapping
-      existing_folderitems = me.get_folderitems_by_uid me.state.folderitems
+      existing_folderitems = me.group_by_uid me.state.folderitems
       # new folderitems from the server as a UID -> folderitem mapping
-      new_folderitems = me.get_folderitems_by_uid data.folderitems
+      new_folderitems = me.group_by_uid data.folderitems
       # new categories from the server
       new_categories = data.categories or []
 
@@ -738,7 +737,7 @@ class ListingController extends React.Component
 
     # lookup child_uids from the folderitem
     if not child_uids
-      by_uid = @get_folderitems_by_uid()
+      by_uid = @group_by_uid()
       folderitem = by_uid[parent_uid]
       if not folderitem
         throw "No folderitem could be found for UID #{uid}"
@@ -892,7 +891,6 @@ class ListingController extends React.Component
             review_states={@state.review_states}
             folderitems={@state.folderitems}
             children={@state.children}
-            folderitems_by_uid={@get_folderitems_by_uid()}
             selected_uids={@state.selected_uids}
             select_checkbox_name={@state.select_checkbox_name}
             show_select_column={@state.show_select_column}
