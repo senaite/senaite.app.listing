@@ -103,11 +103,15 @@ class AjaxListingView(BrowserView):
 
         return json.loads(body, object_hook=encode_hook)
 
-    def error(self, message, status=500, **kw):
-        """Set a JSON error object and a status to the response
+    def json_message(self, message, status=500, level="error", **kw):
+        """Set a JSON message object and a status to the response
         """
         self.request.response.setStatus(status)
-        result = {"success": False, "message": message, "status": status}
+        result = {
+            "message": message,
+            "status": status,
+            "level": level,
+        }
         result.update(kw)
         return result
 
@@ -635,8 +639,8 @@ class AjaxListingView(BrowserView):
         # sanity check
         for key, value in query.iteritems():
             if key not in valid_catalog_indexes:
-                return self.error(
-                    "{} is not a valid catalog index".format(key))
+                return self.json_message(
+                    "{} is not a valid catalog index".format(key), 400)
 
         # set the content filter
         self.contentFilter = query
@@ -668,8 +672,8 @@ class AjaxListingView(BrowserView):
 
         required = ["save_queue"]
         if not all(map(lambda k: k in payload, required)):
-            return self.error("Payload needs to provide the keys {}"
-                              .format(", ".join(required)), status=400)
+            return self.json_message("Payload needs to provide the keys {}"
+                                     .format(", ".join(required)), status=400)
 
         save_queue = payload.get("save_queue")
 
@@ -683,8 +687,8 @@ class AjaxListingView(BrowserView):
                 updated_objects.update(self.set_field(obj, name, value))
 
         if not updated_objects:
-            return self.error("Failed to set field of save queue '{}'"
-                              .format(save_queue), 500)
+            return self.json_message("Failed to set field of save queue '{}'"
+                                     .format(save_queue), 500)
 
         # get the updated folderitems
         updated_uids = map(api.get_uid, updated_objects)
