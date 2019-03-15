@@ -4,6 +4,7 @@
 import React from "react"
 import ReactDOM from "react-dom"
 
+import Messages from "./components/Messages.coffee"
 import ButtonBar from "./components/ButtonBar.coffee"
 import FilterBar from "./components/FilterBar.coffee"
 import ListingAPI from "./api.coffee"
@@ -38,6 +39,7 @@ class ListingController extends React.Component
     super(props)
 
     # bind callbacks
+    @dismissMessage = @dismissMessage.bind @
     @filterByState = @filterByState.bind @
     @filterBySearchterm = @filterBySearchterm.bind @
     @sortBy = @sortBy.bind @
@@ -68,6 +70,8 @@ class ListingController extends React.Component
       api_url: @api_url
 
     @state =
+      # alert messages
+      messages: []
       # loading indicator
       loading: yes
       # context menu visibility and coordinates
@@ -136,6 +140,38 @@ class ListingController extends React.Component
       show_ajax_save: no
       show_table_footer: no
       fetch_transitions_on_select: yes
+
+
+  dismissMessage: (index=null) ->
+    ###
+     * Dismiss a message by its message index
+    ###
+    if index is null
+      return @setState messages: []
+    messages = [].concat @state.messages
+    messages.splice index, 1
+    return @setState messages: messages
+
+  addMessage: (title, text, traceback, level="info") ->
+    ###*
+     * Add a message
+    ###
+    if typeof title is "object"
+      props = Object.assign title
+      title = props.title
+      text = props.text
+      traceback = props.traceback
+      level = props.level
+
+    messages = [].concat @state.messages
+    messages.push({
+      title: title,
+      text: text
+      traceback: traceback,
+      level: level,
+    })
+    @setState messages: messages
+
 
   getRequestOptions: ->
     ###
