@@ -107,7 +107,7 @@ class AjaxListingView(BrowserView):
         """Set a JSON error object and a status to the response
         """
         self.request.response.setStatus(status)
-        result = {"success": False, "errors": message, "status": status}
+        result = {"success": False, "message": message, "status": status}
         result.update(kw)
         return result
 

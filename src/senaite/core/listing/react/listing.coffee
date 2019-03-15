@@ -54,6 +54,7 @@ class ListingController extends React.Component
     @saveAjaxQueue = @saveAjaxQueue.bind @
     @toggleRemarks = @toggleRemarks.bind @
     @on_select_checkbox_checked = @on_select_checkbox_checked.bind @
+    @on_api_error = @on_api_error.bind @
 
     # root element
     @root_el = @props.root_el
@@ -68,6 +69,7 @@ class ListingController extends React.Component
     # the API is responsible for async calls and knows about the endpoints
     @api = new ListingAPI
       api_url: @api_url
+      on_api_error: @on_api_error
 
     @state =
       # alert messages
@@ -912,6 +914,19 @@ class ListingController extends React.Component
         # fetch all possible transitions
         me.fetch_transitions()
 
+  on_api_error: (response) ->
+    ###
+     * API Error handler
+     * This method stops the loader animation and adds a status message
+    ###
+    @toggle_loader off
+    console.debug "°°° ListingController::on_api_error: GOT AN ERROR RESPONSE: ", response
+
+    me = this
+    response.json().then (data) ->
+      title = _("Oops, an error occured! 🙈")
+      message = _("The server responded with the status #{data.status}: #{data.message}")
+      me.addMessage title, message, data.traceback, level="danger"
 
   ###*
     * VIEW
@@ -922,6 +937,7 @@ class ListingController extends React.Component
      * Listing Table
     ###
     <div className="listing-container">
+      <Messages on_dismiss_message={@dismissMessage} id="messages" className="messages" messages={@state.messages} />
       {@state.loading and <div id="table-overlay"/>}
       {not @render_toolbar_top() and @state.loading and <Loader loading={@state.loading} />}
       {@render_toolbar_top() and

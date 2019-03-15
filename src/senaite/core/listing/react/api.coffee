@@ -7,6 +7,7 @@ class ListingAPI
   constructor: (props) ->
     console.debug "ListingAPI::constructor"
     @api_url = props.api_url
+    @on_api_error = props.on_api_error or (response) ->
     return @
 
   get_api_url: (endpoint) ->
@@ -39,6 +40,7 @@ class ListingAPI
 
     method = options.method or "POST"
     data = JSON.stringify(options.data) or "{}"
+    on_api_error = @on_api_error
 
     url = @get_api_url endpoint
     init =
@@ -49,8 +51,16 @@ class ListingAPI
       credentials: "include"
     console.info "ListingAPI::fetch:endpoint=#{endpoint} init=",init
     request = new Request(url, init)
-    return fetch(request).then (response) ->
+    fetch(request)
+    .then (response) ->
+      if not response.ok
+        return Promise.reject response
+      return response
+    .then (response) ->
       return response.json()
+    .catch (response) ->
+      on_api_error response
+      return response
 
   set_fields: (data) ->
     ###
