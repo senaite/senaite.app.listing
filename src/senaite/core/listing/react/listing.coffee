@@ -4,6 +4,7 @@
 import React from "react"
 import ReactDOM from "react-dom"
 
+import Messages from "./components/Messages.coffee"
 import ButtonBar from "./components/ButtonBar.coffee"
 import FilterBar from "./components/FilterBar.coffee"
 import ListingAPI from "./api.coffee"
@@ -38,6 +39,7 @@ class ListingController extends React.Component
     super(props)
 
     # bind callbacks
+    @dismissMessage = @dismissMessage.bind @
     @filterByState = @filterByState.bind @
     @filterBySearchterm = @filterBySearchterm.bind @
     @sortBy = @sortBy.bind @
@@ -52,6 +54,7 @@ class ListingController extends React.Component
     @saveAjaxQueue = @saveAjaxQueue.bind @
     @toggleRemarks = @toggleRemarks.bind @
     @on_select_checkbox_checked = @on_select_checkbox_checked.bind @
+    @on_api_error = @on_api_error.bind @
 
     # root element
     @root_el = @props.root_el
@@ -66,8 +69,11 @@ class ListingController extends React.Component
     # the API is responsible for async calls and knows about the endpoints
     @api = new ListingAPI
       api_url: @api_url
+      on_api_error: @on_api_error
 
     @state =
+      # alert messages
+      messages: []
       # loading indicator
       loading: yes
       # context menu visibility and coordinates
@@ -137,6 +143,38 @@ class ListingController extends React.Component
       show_table_footer: no
       fetch_transitions_on_select: yes
 
+
+  dismissMessage: (index=null) ->
+    ###
+     * Dismiss a message by its message index
+    ###
+    if index is null
+      return @setState messages: []
+    messages = [].concat @state.messages
+    messages.splice index, 1
+    return @setState messages: messages
+
+  addMessage: (title, text, traceback, level="info") ->
+    ###*
+     * Add a message
+    ###
+    if typeof title is "object"
+      props = Object.assign title
+      title = props.title
+      text = props.text
+      traceback = props.traceback
+      level = props.level
+
+    messages = [].concat @state.messages
+    messages.push({
+      title: title,
+      text: text
+      traceback: traceback,
+      level: level,
+    })
+    @setState messages: messages
+
+
   getRequestOptions: ->
     ###
      * Only these state values should be sent to the server
@@ -160,11 +198,6 @@ class ListingController extends React.Component
 
     # initial fetch of the folderitems
     @fetch_folderitems()
-
-  componentDidUpdate: ->
-    ###
-     * ReactJS event handler when the component did update
-    ###
 
   toggleContextMenu: (x, y, toggle) ->
     ###
@@ -418,7 +451,7 @@ class ListingController extends React.Component
       # when the deselect all button was clicked
       if uid == "all"
         # Keep readonly items
-        by_uid = @get_folderitems_by_uid()
+        by_uid = @group_by_uid @state.folderitems
         selected_uids = selected_uids.filter (uid) ->
           item = by_uid[uid]
           return item.readonly
@@ -489,7 +522,6 @@ class ListingController extends React.Component
         # fetch all possible transitions
         if me.state.fetch_transitions_on_select
           me.fetch_transitions()
-
 
   is_uid_selected: (uid) ->
     ###
@@ -611,15 +643,15 @@ class ListingController extends React.Component
 
     return []
 
-  get_folderitems_by_uid: (folderitems) ->
+  group_by_uid: (folderitems) ->
     ###
      * Create a mapping of UID -> folderitem
     ###
     folderitems ?= @state.folderitems
     mapping = {}
     folderitems.map (item, index) ->
-      # transposed cells do not have an uid, so we use the index instead
-      uid = item.uid or index
+      # transposed cells have no uid, but a column_key
+      uid = item.uid or item.column_key or index
       mapping[uid] = item
     return mapping
 
@@ -669,9 +701,11 @@ class ListingController extends React.Component
         # turn loader off
         me.toggle_loader off
 
-  fetch_folderitems: (items_only=no) ->
+  fetch_folderitems: ->
     ###
-     * Fetch the folderitems
+     * Fetch folderitems from the server
+     *
+     * @param uids {array} List of UIDs to fetch (all if omitted)
     ###
 
     # turn loader on
@@ -685,14 +719,18 @@ class ListingController extends React.Component
       console.debug "ListingController::fetch_folderitems: GOT RESPONSE=", data
 
       # N.B. Always keep selected folderitems, because otherwise modified fields
-      #      won't get send to the server on form submit
+      #      won't get send to the server on form submit.
+      #
+      # This is needed e.g. in "Manage Analyses" when the users searches for
+      # analyses to add. Keeping only the UID is there not sufficient, because
+      #      we would lose the Mix/Max values.
       #
       # TODO refactor this logic
       # -------------------------------8<--------------------------------------
       # existing folderitems from the state as a UID -> folderitem mapping
-      existing_folderitems = me.get_folderitems_by_uid me.state.folderitems
+      existing_folderitems = me.group_by_uid me.state.folderitems
       # new folderitems from the server as a UID -> folderitem mapping
-      new_folderitems = me.get_folderitems_by_uid data.folderitems
+      new_folderitems = me.group_by_uid data.folderitems
       # new categories from the server
       new_categories = data.categories or []
 
@@ -711,7 +749,7 @@ class ListingController extends React.Component
           category = folderitem.category
           if category and category not in new_categories
             new_categories.push category
-            # unfortunately any sortKey sorting of the category get lost here
+            # XXX unfortunately any sortKey sorting of the category get lost here
             new_categories.sort()
 
       # write back new categories
@@ -720,8 +758,6 @@ class ListingController extends React.Component
       data.folderitems = Object.values new_folderitems
       # -------------------------------->8-------------------------------------
 
-      if items_only
-        data = {"folderitems": data.folderitems}
       me.setState data, ->
         # calculate the new expanded categories and the internal folderitems mapping
         me.setState
@@ -743,7 +779,7 @@ class ListingController extends React.Component
 
     # lookup child_uids from the folderitem
     if not child_uids
-      by_uid = @get_folderitems_by_uid()
+      by_uid = @group_by_uid()
       folderitem = by_uid[parent_uid]
       if not folderitem
         throw "No folderitem could be found for UID #{uid}"
@@ -774,11 +810,11 @@ class ListingController extends React.Component
       return yes
     return no
 
-  ajax_save: (reload=yes) ->
+  ajax_save: ->
     ###
-     * Save the items of the ajax_save_queue
+     * Save the items of the `ajax_save_queue`
     ###
-    console.debug "ListingController::ajax_save"
+    console.debug "ListingController::ajax_save:ajax_save_queue=", @state.ajax_save_queue
 
     # turn loader on
     @toggle_loader on
@@ -789,23 +825,72 @@ class ListingController extends React.Component
     me = this
     promise.then (data) ->
       console.debug "ListingController::ajax_save: GOT DATA=", data
+
       # uids of the updated objects
       uids = data.uids or []
-      # make sure all updated UIDs are selected
-      uids.map (uid) -> me.selectUID uid, yes
-      # empty the ajax save queue
+
+      # ensure that all updated UIDs are also selected
+      uids.map (uid, index) -> me.selectUID uid, yes
+
+      # folderitems of the updated objects and their dependencies
+      folderitems = data.folderitems or []
+
+      # update the existing folderitems
+      me.update_existing_folderitems_with folderitems
+
+      # fetch all possible transitions
+      if me.state.fetch_transitions_on_select
+        me.fetch_transitions()
+
+      # empty the ajax save queue and hide the save button
       me.setState
         show_ajax_save: no
         ajax_save_queue: {}
-      # reload the folderitems
-      if reload and uids.length > 0
-        me.fetch_folderitems yes
-        # fetch all possible transitions
-        if me.state.fetch_transitions_on_select
-          me.fetch_transitions()
+
       # toggle loader off
       me.toggle_loader off
 
+  update_existing_folderitems_with: (folderitems) ->
+    ###
+     * Update existing folderitems
+    ###
+    console.log "ListingController::update_existing_folderitems_with: ", folderitems
+
+    # These folderitems get set to the state
+    new_folderitems = []
+
+    # The updated items from the server
+    updated_folderitems = @group_by_uid folderitems
+
+    # The current folderitems in our @state
+    existing_folderitems = @group_by_uid @state.folderitems
+
+    # We iterate through the existing folderitems and check if the items was updated.
+    for uid, folderitem of existing_folderitems
+
+      # shallow copy of the existing folderitem in @state.folderitems
+      old_item = Object.assign {}, folderitem
+
+      if uid not of updated_folderitems
+        # nothing changed -> keep the old folderitem
+        new_folderitems.push old_item
+      else
+        # shallow copy of the updated folderitem from the server
+        new_item = Object.assign {}, updated_folderitems[uid]
+        # keep non-updated properties
+        for key, value of old_item
+          # XXX Workaround for Worksheet classic/transposed views
+          # -> Always keep those values from the original folderitem
+          if key in ["rowspan", "colspan", "skip"]
+            new_item[key] = old_item[key]
+          if not new_item.hasOwnProperty key
+            new_item[key] = old_item[key]
+        # add the new folderitem
+        new_folderitems.push new_item
+
+    # updated the state with the new folderitems
+    @setState
+      folderitems: new_folderitems
 
   ###*
     * EVENT HANDLERS
@@ -829,6 +914,19 @@ class ListingController extends React.Component
         # fetch all possible transitions
         me.fetch_transitions()
 
+  on_api_error: (response) ->
+    ###
+     * API Error handler
+     * This method stops the loader animation and adds a status message
+    ###
+    @toggle_loader off
+    console.debug "°°° ListingController::on_api_error: GOT AN ERROR RESPONSE: ", response
+
+    me = this
+    response.json().then (data) ->
+      title = _("Oops, an error occured! 🙈")
+      message = _("The server responded with the status #{data.status}: #{data.message}")
+      me.addMessage title, message, data.traceback, level="danger"
 
   ###*
     * VIEW
@@ -839,6 +937,7 @@ class ListingController extends React.Component
      * Listing Table
     ###
     <div className="listing-container">
+      <Messages on_dismiss_message={@dismissMessage} id="messages" className="messages" messages={@state.messages} />
       {@state.loading and <div id="table-overlay"/>}
       {not @render_toolbar_top() and @state.loading and <Loader loading={@state.loading} />}
       {@render_toolbar_top() and
@@ -897,7 +996,6 @@ class ListingController extends React.Component
             review_states={@state.review_states}
             folderitems={@state.folderitems}
             children={@state.children}
-            folderitems_by_uid={@get_folderitems_by_uid()}
             selected_uids={@state.selected_uids}
             select_checkbox_name={@state.select_checkbox_name}
             show_select_column={@state.show_select_column}

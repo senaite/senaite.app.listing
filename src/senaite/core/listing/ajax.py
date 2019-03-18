@@ -103,11 +103,15 @@ class AjaxListingView(BrowserView):
 
         return json.loads(body, object_hook=encode_hook)
 
-    def error(self, message, status=500, **kw):
-        """Set a JSON error object and a status to the response
+    def json_message(self, message, status=500, level="error", **kw):
+        """Set a JSON message object and a status to the response
         """
         self.request.response.setStatus(status)
-        result = {"success": False, "errors": message, "status": status}
+        result = {
+            "message": message,
+            "status": status,
+            "level": level,
+        }
         result.update(kw)
         return result
 
@@ -438,14 +442,10 @@ class AjaxListingView(BrowserView):
         # check if the object is an analysis and has an interim
         if self.is_analysis(obj):
 
-            # check the permission of the interims field
-            if not self.is_field_writeable(obj, "InterimFields"):
-                logger.error("Field 'InterimFields' not writeable!")
-                return []
-
             interims = obj.getInterimFields()
             interim_keys = map(lambda i: i.get("keyword"), interims)
-            if name in interim_keys:
+            interims_writable = self.is_field_writeable(obj, "InterimFields")
+            if name in interim_keys and interims_writable:
                 for interim in interims:
                     if interim.get("keyword") == name:
                         interim["value"] = value
@@ -639,60 +639,13 @@ class AjaxListingView(BrowserView):
         # sanity check
         for key, value in query.iteritems():
             if key not in valid_catalog_indexes:
-                return self.error(
-                    "{} is not a valid catalog index".format(key))
+                return self.json_message(
+                    "{} is not a valid catalog index".format(key), 400)
 
         # set the content filter
         self.contentFilter = query
 
         # get the folderitems
-        folderitems = self.get_folderitems()
-
-        # prepare the response object
-        data = {
-            "count": len(folderitems),
-            "folderitems": folderitems,
-        }
-
-        return data
-
-    @set_application_json_header
-    @returns_safe_json
-    @inject_runtime
-    def ajax_set(self):
-        """Set a value of an editable field
-
-        The POST Payload needs to provide the following data:
-
-        :uid: UID of the object changed
-        :name: Column name as provided by the self.columns key
-        :value: The value to save
-        :item: The folderitem containing the data
-        """
-
-        # Get the HTTP POST JSON Payload
-        payload = self.get_json()
-
-        required = ["uid", "name", "value"]
-        if not all(map(lambda k: k in payload, required)):
-            return self.error("Payload needs to provide the keys {}"
-                              .format(", ".join(required)), status=400)
-
-        uid = payload.get("uid")
-        name = payload.get("name")
-        value = payload.get("value")
-
-        # get the object
-        obj = api.get_object_by_uid(uid)
-
-        # set the field
-        updated_objects = self.set_field(obj, name, value)
-
-        if not updated_objects:
-            return self.error("Failed to set field '{}'".format(name), 500)
-
-        # get the folderitems
-        self.contentFilter["UID"] = map(api.get_uid, updated_objects)
         folderitems = self.get_folderitems()
 
         # prepare the response object
@@ -719,8 +672,8 @@ class AjaxListingView(BrowserView):
 
         required = ["save_queue"]
         if not all(map(lambda k: k in payload, required)):
-            return self.error("Payload needs to provide the keys {}"
-                              .format(", ".join(required)), status=400)
+            return self.json_message("Payload needs to provide the keys {}"
+                                     .format(", ".join(required)), status=400)
 
         save_queue = payload.get("save_queue")
 
@@ -734,15 +687,19 @@ class AjaxListingView(BrowserView):
                 updated_objects.update(self.set_field(obj, name, value))
 
         if not updated_objects:
-            return self.error("Failed to set field of save queue '{}'"
-                              .format(save_queue), 500)
+            return self.json_message("Failed to set field of save queue '{}'"
+                                     .format(save_queue), 500)
 
-        # UIDs of updated objects
+        # get the updated folderitems
         updated_uids = map(api.get_uid, updated_objects)
+        self.contentFilter["UID"] = updated_uids
+        folderitems = self.get_folderitems()
 
         # prepare the response object
         data = {
+            "count": len(folderitems),
             "uids": updated_uids,
+            "folderitems": folderitems,
         }
 
         return data
