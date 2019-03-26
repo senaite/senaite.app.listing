@@ -1,6 +1,7 @@
 1.0.1 (unreleased)
 ------------------
 
+- #10 Improved replace_url column handler
 - #9 Show status messages on API errors
 - #9 Only fetch affected folderitems by UID after a field was updated
 - #7 Hide comment toggle in transposed cell when remarks are disabled
