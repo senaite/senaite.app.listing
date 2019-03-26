@@ -14,6 +14,7 @@ from bika.lims import bikaMessageFactory as _
 from bika.lims import deprecated
 from bika.lims import logger
 from bika.lims.interfaces import IFieldIcons
+from bika.lims.utils import get_link
 from bika.lims.utils import getFromString
 from bika.lims.utils import t
 from bika.lims.utils import to_utf8
@@ -22,7 +23,8 @@ from Products.CMFCore.utils import getToolByName
 from Products.CMFPlone.utils import safe_unicode
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from senaite.core.listing.ajax import AjaxListingView
-from senaite.core.listing.interfaces import IListingView, IListingViewAdapter
+from senaite.core.listing.interfaces import IListingView
+from senaite.core.listing.interfaces import IListingViewAdapter
 from zope.component import getAdapters
 from zope.component import getMultiAdapter
 from zope.component import subscribers
@@ -861,13 +863,16 @@ class ListingView(AjaxListingView):
                         attrobj = getFromString(obj, vattr)
                         value = attrobj if attrobj else value
                     results_dict[key] = value
+
                 # Replace with an url?
-                replace_url = self.columns[key].get('replace_url', None)
-                if replace_url:
-                    attrobj = getFromString(obj, replace_url)
-                    if attrobj:
-                        results_dict['replace'][key] = \
-                            '<a href="%s">%s</a>' % (attrobj, value)
+                attr_key = self.columns[key].get("replace_url", None)
+                if attr_key is not None:
+                    url = getFromString(obj, attr_key)
+                    if url:
+                        # transform to absolute URL
+                        if url.startswith("/"):
+                            url = "{}{}".format(api.get_url(self.portal), url)
+                        results_dict["replace"][key] = get_link(url, value)
             # The item basics filled. Delegate additional actions to folderitem
             # service. folderitem service is frequently overriden by child
             # objects
