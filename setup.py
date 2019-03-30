@@ -16,7 +16,7 @@ with open("docs/Changelog.rst", "r") as fh:
 setup(
     name="senaite.core.listing",
     version=version,
-    description="ReactJS powered listing tables for SENAITE",
+    description="ReactJS powered listing tables for SENAITE LIMS",
     long_description=long_description,
     # Get more strings from
     # http://pypi.python.org/pypi?:action=list_classifiers

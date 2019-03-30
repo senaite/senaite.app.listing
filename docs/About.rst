@@ -1,10 +1,12 @@
 .. image:: https://raw.githubusercontent.com/senaite/senaite.core.listing/master/static/logo_pypi.png
    :target: https://github.com/senaite/senaite.core.listing
-   :align: center
    :alt: senaite.core.listing
    :height: 128px
+   :scale: 0.5
 
-- **SENAITE.CORE.LISTING**: *ReactJS powered listing tables for SENAITE LIMS*
+
+*ReactJS powered listing tables for SENAITE LIMS*
+=================================================
 
 .. image:: https://img.shields.io/pypi/v/senaite.core.listing.svg?style=flat-square
    :target: https://pypi.python.org/pypi/senaite.core.listing
