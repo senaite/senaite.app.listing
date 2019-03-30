@@ -1,4 +1,4 @@
-1.0.1 (unreleased)
+1.1.0 (unreleased)
 ------------------
 
 - #9 Show status messages on API errors

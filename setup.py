@@ -2,7 +2,7 @@
 
 from setuptools import setup, find_packages
 
-version = "1.0.1"
+version = "1.1.0"
 
 with open("docs/About.rst", "r") as fh:
     long_description = fh.read()
@@ -16,7 +16,7 @@ with open("docs/Changelog.rst", "r") as fh:
 setup(
     name="senaite.core.listing",
     version=version,
-    description="ReactJS powered listing component for SENAITE",
+    description="ReactJS powered table listings for SENAITE",
     long_description=long_description,
     # Get more strings from
     # http://pypi.python.org/pypi?:action=list_classifiers
@@ -37,8 +37,7 @@ setup(
     zip_safe=False,
     install_requires=[
         "setuptools",
-        "senaite.core",
-        "senaite.lims",
+        "senaite.lims>=1.3.0",
     ],
     extras_require={
         "test": [

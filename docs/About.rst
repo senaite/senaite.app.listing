@@ -28,7 +28,7 @@
 About
 =====
 
-This package provides a ReactJS based listing component for SENAITE.
+This package provides a ReactJS based listing tables for SENAITE LIMS.
 
 
 Installation
@@ -38,8 +38,7 @@ Please follow the installations instructions for `Plone 4`_ and
 `senaite.lims`_.
 
 To install SENAITE.CORE.LISTING, you have to add `senaite.core.listing` into the
-`eggs` list inside the `[buildout]` section of your
-`buildout.cfg`::
+`eggs` list inside the `[buildout]` section of your `buildout.cfg`::
 
    [buildout]
    parts =
@@ -53,14 +52,13 @@ To install SENAITE.CORE.LISTING, you have to add `senaite.core.listing` into the
        Plone
        Pillow
        senaite.lims
-       senaite.core.listing
    zcml =
    eggs-directory = ${buildout:directory}/eggs
 
    [instance]
    recipe = plone.recipe.zope2instance
    user = admin:admin
-   http-address = 0.0.0.0:8080
+   http-address = 127.0.0.1:8080
    eggs =
        ${buildout:eggs}
    zcml =
@@ -95,8 +93,7 @@ Installation Requirements
 The following versions are required for SENAITE.CORE.LISTING:
 
 -  Plone 4.3.18
--  senaite.core >= 1.3.0
--  senaite.lims >= 1.2.3
+-  senaite.lims >= 1.3.0
 
 
 .. _Plone 4: https://docs.plone.org/4/en/manage/installing/index.html
