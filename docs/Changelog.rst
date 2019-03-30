@@ -1,4 +1,4 @@
-1.1.0 (unreleased)
+1.1.0 (2019-03-30)
 ------------------
 
 - #9 Show status messages on API errors
