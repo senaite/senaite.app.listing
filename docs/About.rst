@@ -2,7 +2,6 @@
    :target: https://github.com/senaite/senaite.core.listing
    :alt: senaite.core.listing
    :height: 128px
-   :scale: 0.5
 
 
 *ReactJS powered listing tables for SENAITE LIMS*
@@ -19,6 +18,12 @@
 
 .. image:: https://img.shields.io/badge/README-GitHub-blue.svg?style=flat-square
    :target: https://github.com/senaite/senaite.core.listing#readme
+
+.. image:: https://img.shields.io/badge/Built%20with-%E2%9D%A4-red.svg
+   :target: https://github.com/senaite/senaite.core.listing
+
+.. image:: https://img.shields.io/badge/Made%20for%20SENAITE-%E2%AC%A1-lightgrey.svg
+   :target: https://www.senaite.com
 
 
 About
