@@ -1,16 +1,10 @@
-.. raw:: html
+.. image:: https://raw.githubusercontent.com/senaite/senaite.core.listing/master/static/logo_pypi.png
+   :target: https://github.com/senaite/senaite.core.listing
+   :align: center
+   :alt: senaite.core.listing
+   :height: 128px
 
-  <div align="center">
-    <h1>
-      <a href="https://github.com/senaite/senaite.core.listing">
-        <div>
-          <img src="https://raw.githubusercontent.com/senaite/senaite.core.listing/master/static/logo.png" alt="senaite.core.listing" height="128" />
-        </div>
-      </a>
-    </h1>
-  </div>
-
-- **SENAITE.CORE.LISTING**: *ReactJS powered listings for SENAITE*
+- **SENAITE.CORE.LISTING**: *ReactJS powered listing tables for SENAITE LIMS*
 
 .. image:: https://img.shields.io/pypi/v/senaite.core.listing.svg?style=flat-square
    :target: https://pypi.python.org/pypi/senaite.core.listing
@@ -102,6 +96,6 @@ The following versions are required for SENAITE.CORE.LISTING:
 
 .. _Plone 4: https://docs.plone.org/4/en/manage/installing/index.html
 .. _senaite.lims: https://github.com/senaite/senaite.lims#installation
-.. _ReactJS: https://reactjs.org/
+.. _ReactJS: https://reactjs.org
 .. _Facebook: https://github.com/facebook/react
 .. _MIT: https://github.com/facebook/react/blob/master/LICENSE
