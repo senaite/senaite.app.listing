@@ -30,6 +30,10 @@ About
 
 This package provides a ReactJS based listing tables for SENAITE LIMS.
 
+`ReactJS`_ is a declarative, efficient, and flexible JavaScript library for
+building user interfaces built by `Facebook`_ and is licensed under the `MIT`_
+License.
+
 
 Installation
 ============
@@ -98,3 +102,6 @@ The following versions are required for SENAITE.CORE.LISTING:
 
 .. _Plone 4: https://docs.plone.org/4/en/manage/installing/index.html
 .. _senaite.lims: https://github.com/senaite/senaite.lims#installation
+.. _ReactJS: https://reactjs.org/
+.. _Facebook: https://github.com/facebook/react
+.. _MIT: https://github.com/facebook/react/blob/master/LICENSE

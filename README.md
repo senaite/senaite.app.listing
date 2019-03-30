@@ -31,7 +31,13 @@
 
 ## About
 
-This package provides a ReactJS based listing tables for SENAITE LIMS.
+This package provides a [ReactJS](https://reactjs.org) based
+listing tables for [SENAITE LIMS](https://www.senaite.com).
+
+[ReactJS](https://reactjs.org/) is a declarative, efficient, and flexible
+JavaScript library for building user interfaces built by
+[Facebook](https://github.com/facebook/react) and is licensed under the [MIT
+License](https://github.com/facebook/react/blob/master/LICENSE)
 
 
 ## Screenshots
