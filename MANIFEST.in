@@ -6,3 +6,4 @@ recursive-include src/senaite/core/listing *
 recursive-exclude src/senaite/core/listing *.pyc
 recursive-exclude src/senaite/core/listing/tests *
 recursive-exclude src/senaite/core/listing/react *
+recursive-exclude node_modules *
