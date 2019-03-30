@@ -7,7 +7,6 @@ develop-eggs
 eggs
 node_modules
 parts
-src/senaite.core
-yarn.lock
+src/senaite.*
 *.egg-info
 *.pyc
