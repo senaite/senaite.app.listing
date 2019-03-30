@@ -28,7 +28,7 @@ senaiteMessageFactory = MessageFactory("senaite.core.listing")
 logger = logging.getLogger("senaite.core.listing")
 
 # convenience import
-from senaite.core.listing.view import ListingView
+from senaite.core.listing.view import ListingView  # noqa
 
 
 def initialize(context):
