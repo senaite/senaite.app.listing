@@ -1,7 +1,7 @@
 1.2.0 (unreleased)
 ------------------
 
-- no changes yet
+- #11 Notify edited event on set fields
 
 
 1.1.0 (2019-03-30)

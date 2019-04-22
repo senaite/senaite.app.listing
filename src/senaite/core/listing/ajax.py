@@ -27,6 +27,7 @@ from bika.lims import logger
 from bika.lims.browser import BrowserView
 from bika.lims.interfaces import IReferenceAnalysis
 from bika.lims.interfaces import IRoutineAnalysis
+from Products.Archetypes.event import ObjectEditedEvent
 from Products.Archetypes.utils import mapply
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from senaite.core.listing.decorators import inject_runtime
@@ -34,6 +35,7 @@ from senaite.core.listing.decorators import returns_safe_json
 from senaite.core.listing.decorators import set_application_json_header
 from senaite.core.listing.decorators import translate
 from senaite.core.listing.interfaces import IAjaxListingView
+from zope import event
 from zope.interface import implements
 from zope.lifecycleevent import modified
 from zope.publisher.interfaces import IPublishTraverse
@@ -708,6 +710,9 @@ class AjaxListingView(BrowserView):
             return self.json_message("Failed to set field of save queue '{}'"
                                      .format(save_queue), 500)
 
+        # notify object edited
+        map(self.notify_edited, updated_objects)
+
         # get the updated folderitems
         updated_uids = map(api.get_uid, updated_objects)
         self.contentFilter["UID"] = updated_uids
@@ -721,3 +726,8 @@ class AjaxListingView(BrowserView):
         }
 
         return data
+
+    def notify_edited(self, obj):
+        """Notify object edited event
+        """
+        event.notify(ObjectEditedEvent(obj))
