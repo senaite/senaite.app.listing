@@ -559,7 +559,7 @@ class ListingView(AjaxListingView):
 
         # Skip all further processing if explicit UIDs are requested.
         # This is required to render child-nodes properly.
-        # https://github.com/senaite/senaite.impress/issues/70
+        # https://github.com/senaite/senaite.core.listing/issues/12
         if "UID" in query:
             return query
 
