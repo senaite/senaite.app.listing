@@ -557,6 +557,12 @@ class ListingView(AjaxListingView):
         # avoid to change the original content filter
         query = copy.deepcopy(self.contentFilter)
 
+        # Skip all further processing if explicit UIDs are requested.
+        # This is required to render child-nodes properly.
+        # https://github.com/senaite/senaite.core.listing/issues/12
+        if "UID" in query:
+            return query
+
         # contentFilter is allowed in every self.review_state.
         for k, v in self.review_state.get("contentFilter", {}).items():
             query[k] = v
