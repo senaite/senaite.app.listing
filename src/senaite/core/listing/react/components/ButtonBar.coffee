@@ -109,6 +109,7 @@ class ButtonBar extends React.Component
         buttons.push(
           <li key="clear">
             <button className="btn btn-default btn-sm"
+                    title={_("Clear selection")}
                     onClick={@on_transition_button_click}
                     id="clear_selection">
               <span className="glyphicon glyphicon-ban-circle"></span>
