@@ -1,6 +1,7 @@
 1.2.0 (unreleased)
 ------------------
 
+- #15 Allow custom button CSS definition in transition object
 - #11 Notify edited event on set fields
 
 
