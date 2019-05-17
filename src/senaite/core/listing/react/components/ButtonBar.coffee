@@ -132,6 +132,7 @@ class ButtonBar extends React.Component
       id = transition.id
       url = transition.url
       title = _(transition.title)
+      help = _(transition.help)
       cls = @get_button_css id
       btn_id = "#{id}_transition"
 
@@ -154,6 +155,7 @@ class ButtonBar extends React.Component
           <Button
             id={btn_id}
             title={title}
+            help={help}
             url={url}
             className={cls}
             badge={@props.selected_uids.length}
