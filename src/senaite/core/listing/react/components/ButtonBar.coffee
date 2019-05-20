@@ -109,6 +109,7 @@ class ButtonBar extends React.Component
         buttons.push(
           <li key="clear">
             <button className="btn btn-default btn-sm"
+                    title={_("Clear selection")}
                     onClick={@on_transition_button_click}
                     id="clear_selection">
               <span className="glyphicon glyphicon-ban-circle"></span>
@@ -132,8 +133,13 @@ class ButtonBar extends React.Component
       id = transition.id
       url = transition.url
       title = _(transition.title)
+      help = _(transition.help)
       cls = @get_button_css id
       btn_id = "#{id}_transition"
+
+      # append custom css class
+      if transition.css_class
+        cls += " #{transition.css_class}"
 
       # each review_state item may also define a list of confirm transitions
       review_state_confirm_transitions = @props.review_state.confirm_transitions or []
@@ -150,6 +156,7 @@ class ButtonBar extends React.Component
           <Button
             id={btn_id}
             title={title}
+            help={help}
             url={url}
             className={cls}
             badge={@props.selected_uids.length}

@@ -1,6 +1,7 @@
 1.2.0 (unreleased)
 ------------------
 
+- #15 Allow custom button CSS definition in transition object
 - #14 Convert URLs/Paths to absolute URLs
 - #11 Notify edited event on set fields
 

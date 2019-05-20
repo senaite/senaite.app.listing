@@ -11,6 +11,7 @@ class Button extends React.Component
      * Render the Button component
     ###
     <button id={@props.id}
+            title={@props.help or @props.title}
             name={@props.name}
             url={@props.url}
             onClick={@props.onClick}
