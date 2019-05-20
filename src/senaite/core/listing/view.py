@@ -890,8 +890,9 @@ class ListingView(AjaxListingView):
                 if replace_url:
                     attrobj = getFromString(obj, replace_url)
                     if attrobj:
+                        url = self.url_or_path_to_url(attrobj)
                         results_dict['replace'][key] = \
-                            '<a href="%s">%s</a>' % (attrobj, value)
+                            '<a href="%s">%s</a>' % (url, value)
             # The item basics filled. Delegate additional actions to folderitem
             # service. folderitem service is frequently overriden by child
             # objects
@@ -1093,8 +1094,9 @@ class ListingView(AjaxListingView):
                 if replace_url:
                     attrobj = getFromString(obj, replace_url)
                     if attrobj:
+                        url = self.url_or_path_to_url(attrobj)
                         results_dict['replace'][key] = \
-                            '<a href="%s">%s</a>' % (attrobj, value)
+                            '<a href="%s">%s</a>' % (url, value)
 
             # The item basics filled. Delegate additional actions to folderitem
             # service. folderitem service is frequently overriden by child
@@ -1110,3 +1112,28 @@ class ListingView(AjaxListingView):
                 idx += 1
 
         return results
+
+    @view.memoize
+    def url_or_path_to_url(self, url_or_path):
+        """Convert a given URL or path to an absolute URL
+
+        N.B. This method might receive paths from brain metadata.
+        These paths might or might not be rooted at the portal path.
+
+        :param url_or_path: Absolute URL, physical path or relative path
+        :returns: Absolute URL
+        """
+        portal_path = api.get_path(self.portal)
+        portal_url = api.get_url(self.portal)
+
+        # remove the portal_url from the url_or_path
+        if url_or_path.startswith(portal_url):
+            url_or_path = url_or_path.replace(portal_url, "", 1)
+        # remove the portal_path from the url_or_path
+        if url_or_path.startswith(portal_path):
+            url_or_path = url_or_path.replace(portal_path, "", 1)
+        # remove leading "/"
+        if url_or_path.startswith("/"):
+            url_or_path = url_or_path.replace("/", "", 1)
+
+        return "/".join([portal_url, url_or_path])

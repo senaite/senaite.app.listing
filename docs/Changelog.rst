@@ -1,6 +1,7 @@
 1.2.0 (unreleased)
 ------------------
 
+- #14 Convert URLs/Paths to absolute URLs
 - #11 Notify edited event on set fields
 
 
