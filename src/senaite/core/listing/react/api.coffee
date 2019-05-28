@@ -16,7 +16,7 @@ class ListingAPI
      * @param {string} endpoint
      * @returns {string}
     ###
-    return "#{@api_url}/#{endpoint}"
+    return "#{@api_url}/#{endpoint}#{location.search}"
 
   get_url_parameter: (name) ->
     ###
