@@ -84,7 +84,7 @@ class StringField extends React.Component
     <span className="form-group">
       {@props.before and <span className="before_field" dangerouslySetInnerHTML={{__html: @props.before}}></span>}
       <input type="text"
-             size={@props.size or 5}
+             size={@props.size or 20}
              uid={@props.uid}
              name={@props.name}
              value={@state.value}
