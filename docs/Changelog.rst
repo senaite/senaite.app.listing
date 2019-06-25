@@ -1,6 +1,8 @@
 1.2.0 (unreleased)
 ------------------
 
+- #18 Support for string fields (added StringField react component)
+- #17 Send the original query string with API calls
 - #15 Allow custom button CSS definition in transition object
 - #14 Convert URLs/Paths to absolute URLs
 - #11 Notify edited event on set fields
