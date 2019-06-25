@@ -18,7 +18,6 @@ class StringField extends React.Component
       value: props.defaultValue
 
     # bind event handler to the current context
-    @on_blur = @on_blur.bind @
     @on_change = @on_change.bind @
 
   ###*
@@ -29,29 +28,6 @@ class StringField extends React.Component
   componentDidUpdate: (prevProps) ->
     if @props.defaultValue != prevProps.defaultValue
       @setState value: @props.defaultValue
-
-  ###*
-   * Event handler when the mouse left the numeric field
-   * @param event {object} ReactJS event object
-  ###
-  on_blur: (event) ->
-    el = event.currentTarget
-    # Extract the UID attribute
-    uid = el.getAttribute("uid")
-    # Extract the column_key attribute
-    name = el.getAttribute("column_key") or el.name
-    # Extract the value of the string field
-    value = el.value
-    # Remove any trailing dots
-    value = value.replace(/\.*$/, "")
-    # Set the sanitized value back to the field
-    el.value = value
-
-    console.debug "StringField::on_blur: value=#{value}"
-
-    # Call the *save* field handler with the UID, name, value
-    if @props.save_editable_field
-      @props.save_editable_field uid, name, value, @props.item
 
   ###*
    * Event handler when the value changed of the string field
@@ -65,10 +41,6 @@ class StringField extends React.Component
     name = el.getAttribute("column_key") or el.name
     # Extract the value of the string field
     value = el.value
-    # Remove leading and trailing whitespaces
-    value = value.replace(/^\s+|\s+$/g, "")
-    # Set the string value back to the field
-    el.value = value
 
     # store the new value
     @setState
@@ -94,7 +66,6 @@ class StringField extends React.Component
              required={@props.required}
              className={@props.className}
              placeholder={@props.placeholder}
-             onBlur={@props.onBlur or @on_blur}
              onChange={@props.onChange or @on_change}
              {...@props.attrs}/>
       {@props.after and <span className="after_field" dangerouslySetInnerHTML={{__html: @props.after}}></span>}
