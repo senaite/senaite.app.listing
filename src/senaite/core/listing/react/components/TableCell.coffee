@@ -7,6 +7,7 @@ import NumericField from "./NumericField.coffee"
 import CalculatedField from "./CalculatedField.coffee"
 import ReadonlyField from "./ReadonlyField.coffee"
 import Select from "./Select.coffee"
+import StringField from "./StringField.coffee"
 
 
 class TableCell extends React.Component
@@ -22,6 +23,7 @@ class TableCell extends React.Component
       "multiselect": ":record:list"
       "multichoices": ":record:list"
       "numeric": ":records"
+      "string": ":records"
       "readonly": ""
       "default": ":records"
     }
@@ -364,6 +366,51 @@ class TableCell extends React.Component
         />)
 
   ###*
+   * Creates a string field component
+   * @param props {object} properties passed to the component
+   * @returns StringField component
+  ###
+  create_string_field: ({props}={}) ->
+    column_key = @get_column_key()
+    item = @get_item()
+    props ?= {}
+
+    name = @get_name()
+    value = @get_value()
+    formatted_value = @get_formatted_value()
+    unit = @get_formatted_unit()
+    uid = @get_uid()
+    converter = @ZPUBLISHER_CONVERTER["string"]
+    fieldname = name + converter
+    title = @props.column.title or column_key
+    selected = @is_selected()
+    disabled = @is_disabled()
+    required = @is_required()
+    css_class = "form-control input-sm"
+    if required then css_class += " required"
+
+    return (
+      <StringField
+        key={name}
+        uid={uid}
+        item={item}
+        name={fieldname}
+        defaultValue={value}
+        column_key={column_key}
+        title={title}
+        formatted_value={formatted_value}
+        placeholder={title}
+        selected={selected}
+        disabled={disabled}
+        required={required}
+        className={css_class}
+        after={unit}
+        update_editable_field={@props.update_editable_field}
+        save_editable_field={@props.save_editable_field}
+        {...props}
+        />)
+
+  ###*
    * Creates a select field component
    * @param props {object} properties passed to the component
    * @returns SelectField component
@@ -520,6 +567,8 @@ class TableCell extends React.Component
       field = field.concat @create_checkbox_field()
     else if type == "numeric"
       field = field.concat @create_numeric_field()
+    else if type == "string"
+      field = field.concat @create_string_field()
 
     return field
 
