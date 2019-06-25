@@ -223,6 +223,10 @@ class TableCell extends React.Component
     if @is_interimfield()
       return "interim"
 
+    # check if the field is a string field
+    if resultfield and item.string_result
+      return "string"
+
     # the default
     return "numeric"
 
