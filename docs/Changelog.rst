@@ -1,6 +1,7 @@
 1.2.0 (unreleased)
 ------------------
 
+- #19 Omit disabled items when "select all" checkbox is selected
 - #17 Send the original query string with API calls
 - #15 Allow custom button CSS definition in transition object
 - #14 Convert URLs/Paths to absolute URLs
