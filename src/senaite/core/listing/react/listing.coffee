@@ -430,14 +430,18 @@ class ListingController extends React.Component
 
     # copy the selected UIDs from the state
     #
-    # N.B. We use [].concat(@state.selecte_uids) to get a copy, otherwise it
+    # N.B. We use [].concat(@state.selected_uids) to get a copy, otherwise it
     #      would be a reference of the state value!
     selected_uids = [].concat @state.selected_uids
 
     if toggle is yes
       # handle the select all checkbox
       if uid == "all"
-        all_uids = @state.folderitems.map (item) -> item.uid
+        # Do not select disabled items
+        items = @state.folderitems.filter (item) ->
+          return not item.disabled
+        # Get all uids from enabled items
+        all_uids = items.map (item) -> item.uid
         # keep existing selected uids
         for uid in all_uids
           if uid not in selected_uids

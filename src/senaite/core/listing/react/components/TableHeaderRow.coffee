@@ -80,10 +80,10 @@ class TableHeaderRow extends React.Component
 
   all_selected: ->
     ###
-     * Checks if all visible items are selected
+     * Checks if all visible and enabled items are selected
     ###
     for item in @props.folderitems
-      if item.uid not in @props.selected_uids
+      if not item.disabled and item.uid not in @props.selected_uids
         return no
     return yes
 
