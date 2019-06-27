@@ -1,6 +1,7 @@
 1.2.0 (unreleased)
 ------------------
 
+- #19 Omit disabled items when "select all" checkbox is selected
 - #18 Support for string fields (added StringField react component)
 - #17 Send the original query string with API calls
 - #15 Allow custom button CSS definition in transition object
