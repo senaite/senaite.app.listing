@@ -1,4 +1,4 @@
-1.2.0 (unreleased)
+1.2.0 (2019-07-01)
 ------------------
 
 - #19 Omit disabled items when "select all" checkbox is selected
