@@ -1,3 +1,9 @@
+1.2.1 (unreleased)
+------------------
+
+- #20 Updated build system and JS package versions
+
+
 1.2.0 (2019-07-01)
 ------------------
 
