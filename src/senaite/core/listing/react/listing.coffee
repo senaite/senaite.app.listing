@@ -13,6 +13,7 @@ import Pagination from "./components/Pagination.coffee"
 import SearchBox from "./components/SearchBox.coffee"
 import Table from "./components/Table.coffee"
 import TableContextMenu from "./components/TableContextMenu.coffee"
+import TableConfig from "./components/TableConfig.coffee"
 
 import "./listing.css"
 
@@ -972,6 +973,22 @@ class ListingController extends React.Component
               on_search={@filterBySearchterm}
               filter={@state.filter}
               placeholder={_("Search")} />
+          </div>
+          <div className="col-sm-12 text-right">
+            <button
+              onClick={(event) -> event.preventDefault()}
+              className="btn btn-xs btn-default"
+              data-toggle="collapse"
+              data-target="#table-config">
+              <span className="glyphicon glyphicon-cog"></span>
+            </button>
+            <TableConfig
+              title={_("Table Configuration")}
+              columns={@state.columns}
+              visible_columns={@get_visible_columns()}
+              on_column_visibility_changed={@toggleColumn}
+              id="table-config"
+              className="collapse"/>
           </div>
         </div>
       }
