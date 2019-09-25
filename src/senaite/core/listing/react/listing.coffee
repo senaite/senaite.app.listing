@@ -973,22 +973,6 @@ class ListingController extends React.Component
               filter={@state.filter}
               placeholder={_("Search")} />
           </div>
-          <div className="col-sm-12 text-right">
-            <button
-              onClick={(event) -> event.preventDefault()}
-              className="btn btn-xs btn-default"
-              data-toggle="collapse"
-              data-target="#table-config">
-              <span className="glyphicon glyphicon-cog"></span>
-            </button>
-            <TableConfig
-              title={_("Table Configuration")}
-              columns={@state.columns}
-              visible_columns={@get_visible_columns()}
-              on_column_toggle={@toggleColumn}
-              id="table-config"
-              className="collapse"/>
-          </div>
         </div>
       }
       <div className="row">
@@ -1006,6 +990,22 @@ class ListingController extends React.Component
               on_column_toggle={@toggleColumn}
               on_context_menu={@toggleContextMenu}
               />}
+          {@state.show_column_toggles and
+            <a
+              href="#"
+              onClick={(event) -> event.preventDefault()}
+              className="pull-right"
+              data-toggle="collapse"
+              data-target="#table-config">
+              <span className="glyphicon glyphicon-option-horizontal"></span>
+            </a>}
+          <TableColumnConfig
+            title={_("Display Columns")}
+            columns={@state.columns}
+            visible_columns={@get_visible_columns()}
+            on_column_toggle={@toggleColumn}
+            id="table-config"
+            className="collapse"/>
           <Table
             className="contentstable table table-condensed table-hover small"
             allow_edit={@state.allow_edit}
