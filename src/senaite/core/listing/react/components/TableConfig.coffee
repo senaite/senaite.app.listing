@@ -1,7 +1,7 @@
 import React from "react"
 
 
-class TableConfig extends React.Component
+class TableColumnConfig extends React.Component
 
   constructor: (props) ->
     super(props)
@@ -95,4 +95,4 @@ class TableConfig extends React.Component
       </div>
     </div>
 
-export default TableConfig
+export default TableColumnConfig

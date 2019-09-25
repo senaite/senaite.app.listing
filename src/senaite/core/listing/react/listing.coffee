@@ -13,7 +13,7 @@ import Pagination from "./components/Pagination.coffee"
 import SearchBox from "./components/SearchBox.coffee"
 import Table from "./components/Table.coffee"
 import TableContextMenu from "./components/TableContextMenu.coffee"
-import TableConfig from "./components/TableConfig.coffee"
+import TableColumnConfig from "./components/TableColumnConfig.coffee"
 
 import "./listing.css"
 
