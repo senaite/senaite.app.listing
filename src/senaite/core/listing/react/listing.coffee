@@ -599,7 +599,6 @@ class ListingController extends React.Component
       key = location.pathname
     return "listing-columns-#{@listing_portal_type}"
 
-
   set_column_toggles: (columns) ->
     ###
      * Set the user defined column toggles to the local state and local storage
