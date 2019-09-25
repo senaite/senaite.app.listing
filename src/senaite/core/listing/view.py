@@ -245,7 +245,7 @@ class ListingView(AjaxListingView):
             subscriber.before_render()
 
     @view.memoize
-    def get_listing_portal_type(self, default="default"):
+    def get_listing_portal_type(self, default=None):
         """Return the portal type of the listed items
 
         This acts like a grouping key for similar listings to allow a better
@@ -266,7 +266,6 @@ class ListingView(AjaxListingView):
         portal_type = self.contentFilter.get("portal_type", None)
         if isinstance(portal_type, six.string_types):
             return portal_type
-        # return the default
         return default
 
     @view.memoize

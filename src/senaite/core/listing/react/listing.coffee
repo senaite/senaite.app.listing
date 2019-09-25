@@ -64,6 +64,7 @@ class ListingController extends React.Component
     @review_states = JSON.parse @root_el.dataset.review_states
     @form_id = @root_el.dataset.form_id
     @api_url = @root_el.dataset.api_url
+    @listing_portal_type = @root_el.dataset.listing_portal_type
     @pagesize = parseInt @root_el.dataset.pagesize
 
     # the API is responsible for async calls and knows about the endpoints
@@ -588,14 +589,23 @@ class ListingController extends React.Component
       columns.push key
     return columns
 
+  get_local_storage_key: ->
+    ###
+     * Return the key for the local storage
+    ###
+    key = @listing_portal_type
+    if @listing_portal_type is undefined
+      key = location.pathname
+    return "listing-columns-#{@listing_portal_type}"
+
+
   set_column_toggles: (columns) ->
     ###
      * Set the user defined column toggles to the local state and local storage
     ###
     console.debug "ListingController::set_column_toggles: columns=", columns
 
-    # set the columns to the local storage
-    key = location.pathname
+    key = @get_local_storage_key()
     storage = window.localStorage
     storage.setItem key, JSON.stringify(columns)
 
@@ -607,7 +617,7 @@ class ListingController extends React.Component
      * Return the current column toggles from the local storage
     ###
 
-    key = location.pathname
+    key = @get_local_storage_key()
     storage = window.localStorage
     columns = storage.getItem key
 
