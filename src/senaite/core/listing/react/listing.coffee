@@ -985,7 +985,7 @@ class ListingController extends React.Component
               title={_("Table Configuration")}
               columns={@state.columns}
               visible_columns={@get_visible_columns()}
-              on_column_visibility_changed={@toggleColumn}
+              on_column_toggle={@toggleColumn}
               id="table-config"
               className="collapse"/>
           </div>
