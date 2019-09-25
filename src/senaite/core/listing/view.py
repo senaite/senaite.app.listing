@@ -24,6 +24,8 @@ import json
 import re
 import time
 
+import six
+
 import DateTime
 import Missing
 from AccessControl import getSecurityManager
@@ -31,6 +33,9 @@ from bika.lims import api
 from bika.lims import bikaMessageFactory as _
 from bika.lims import deprecated
 from bika.lims import logger
+from bika.lims.catalog import CATALOG_ANALYSIS_LISTING
+from bika.lims.catalog import CATALOG_ANALYSIS_REQUEST_LISTING
+from bika.lims.catalog import CATALOG_WORKSHEET_LISTING
 from bika.lims.interfaces import IFieldIcons
 from bika.lims.utils import getFromString
 from bika.lims.utils import t
@@ -40,7 +45,8 @@ from Products.CMFCore.utils import getToolByName
 from Products.CMFPlone.utils import safe_unicode
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from senaite.core.listing.ajax import AjaxListingView
-from senaite.core.listing.interfaces import IListingView, IListingViewAdapter
+from senaite.core.listing.interfaces import IListingView
+from senaite.core.listing.interfaces import IListingViewAdapter
 from zope.component import getAdapters
 from zope.component import getMultiAdapter
 from zope.component import subscribers
@@ -173,6 +179,9 @@ class ListingView(AjaxListingView):
     # transition buttons.
     show_table_footer = True
 
+    # The portal_type of the listed item
+    listing_portal_type = None
+
     def __init__(self, context, request):
         super(ListingView, self).__init__(context, request)
         self.context = context
@@ -234,6 +243,31 @@ class ListingView(AjaxListingView):
             logger.info(u"ListingView::before_render::{}.{}".format(
                 subscriber.__module__, subscriber.__class__.__name__))
             subscriber.before_render()
+
+    @view.memoize
+    def get_listing_portal_type(self, default="default"):
+        """Return the portal type of the listed items
+
+        This acts like a grouping key for similar listings to allow a better
+        handling of default columns to be displayed.
+
+        Also see this issue for more details:
+        https://github.com/senaite/senaite.core.listing/issues/16
+        """
+        if isinstance(self.listing_portal_type, six.string_types):
+            return self.listing_portal_type
+        # Try to find out the portal_type of the listed contents
+        if self.catalog == CATALOG_ANALYSIS_REQUEST_LISTING:
+            return "AnalysisRequest"
+        elif self.catalog == CATALOG_ANALYSIS_LISTING:
+            return "Analysis"
+        elif self.catalog == CATALOG_WORKSHEET_LISTING:
+            return "Worksheet"
+        portal_type = self.contentFilter.get("portal_type", None)
+        if isinstance(portal_type, six.string_types):
+            return portal_type
+        # return the default
+        return default
 
     @view.memoize
     def get_listing_view_adapters(self):
