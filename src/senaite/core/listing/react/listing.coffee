@@ -565,6 +565,38 @@ class ListingController extends React.Component
 
     return current
 
+  ###*
+   * Get the allowed columns of the current review state.
+   *
+   * This is defined in the view config by tge review_states list, e.g.:
+   *
+   *  review_states = [
+   *      {
+   *          "id": "default",
+   *          "title": _("All"),
+   *          "contentFilter": {},
+   *          "transitions": [],
+   *          "custom_transitions": [],
+   *          "columns": ["Title", "Descritpion"],
+   *      }
+   *  ]
+   *
+   * Usually the columns are defined as `self.columns.keys()`, which means that
+   * they contain the same columns and order as defined in the `self.columns`
+   * ordered dictionary.
+   *
+   * @returns {array} columns of column keys
+  ###
+  get_display_columns: ->
+    # get the current active state filter, e.g. "default"
+    review_state = @state.review_state
+    # get the defined review state item from the config
+    review_state_item = @get_review_state_by_id review_state
+    columns = review_state_item.columns
+    if not columns
+      # return the keys of the columns object
+      Object.keys @state.columns
+    return columns
   get_column_order: ->
     ###
      * Get the column order defined in the current selected review_state item
