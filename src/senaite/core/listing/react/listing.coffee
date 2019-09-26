@@ -597,6 +597,23 @@ class ListingController extends React.Component
       # return the keys of the columns object
       Object.keys @state.columns
     return columns
+
+  ###*
+   * Get a list of ordered column objects
+   * @returns {array} columns of column objects
+  ###
+  get_columns: ->
+    columns = []
+
+    # We iterate over the defined columns of the revies_states item to only
+    # include columns in the order that is listed there.
+    for key in @get_display_columns()
+      column = @state.columns[key]
+      # TODO: check if the column is manually toggled on/off
+
+      # Add the column
+      columns.push column
+    return columns
   get_column_order: ->
     ###
      * Get the column order defined in the current selected review_state item
