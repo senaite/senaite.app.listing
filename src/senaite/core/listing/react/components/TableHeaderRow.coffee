@@ -118,7 +118,7 @@ class TableHeaderRow extends React.Component
       )
 
     # insert table columns in the right order
-    for key in @props.table_columns
+    for key in @props.visible_columns
 
       # get the column object
       column = @props.columns[key]

@@ -1060,7 +1060,7 @@ class ListingController extends React.Component
               reset_title={_("Reset")}
               columns={@state.columns}
               allowed_columns={@get_allowed_columns()}
-              table_columns={@get_visible_columns()}
+              visible_columns={@get_visible_columns()}
               on_column_toggle={@toggleColumn}
               on_context_menu={@toggleContextMenu}
               />}
@@ -1077,7 +1077,7 @@ class ListingController extends React.Component
             title={_("Configure Table Columns")}
             columns={@state.columns}
             ordered_columns={@get_local_column_order()}
-            table_columns={@get_visible_columns()}
+            visible_columns={@get_visible_columns()}
             on_column_toggle={@toggleColumn}
             set_column_order={@setColumnOrder}
             id="table-config"
@@ -1095,7 +1095,7 @@ class ListingController extends React.Component
             sortable_columns={@state.sortable_columns}
             columns={@state.columns}
             column_count={@get_column_count()}
-            table_columns={@get_visible_columns()}
+            visible_columns={@get_visible_columns()}
             review_state={@state.review_state}
             review_states={@state.review_states}
             folderitems={@state.folderitems}

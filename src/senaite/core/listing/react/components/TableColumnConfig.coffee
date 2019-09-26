@@ -54,7 +54,7 @@ class TableColumnConfig extends React.Component
     @props.on_column_toggle column
 
   is_visible: (key) ->
-    return key in @props.table_columns
+    return key in @props.visible_columns
 
   get_ordered_column_keys: ->
     if @props.ordered_columns.length > 0

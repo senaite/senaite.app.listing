@@ -30,7 +30,7 @@ class TableCells extends React.Component
     return item.uid
 
   get_table_columns: ->
-    return @props.table_columns or []
+    return @props.visible_columns or []
 
   get_colspan: (column_key, item) ->
     colspan = item.colspan or {}
