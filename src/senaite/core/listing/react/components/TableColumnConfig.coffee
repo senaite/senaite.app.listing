@@ -5,6 +5,7 @@ class TableColumnConfig extends React.Component
 
   constructor: (props) ->
     super(props)
+
     @on_drag_start = @on_drag_start.bind @
     @on_drag_end = @on_drag_end.bind @
     @on_drag_over = @on_drag_over.bind @
@@ -12,7 +13,7 @@ class TableColumnConfig extends React.Component
     @on_column_toggle_changed = @on_column_toggle_changed.bind @
 
     @state =
-      columns: @get_ordered_column_keys()
+      column_keys: @props.column_keys
 
   on_drag_start: (event) ->
     @dragged_item = event.currentTarget
@@ -27,45 +28,45 @@ class TableColumnConfig extends React.Component
     column1 = @dragged_item.getAttribute "column"
     column2 = li.getAttribute "column"
 
-    columns = @state.columns
+    column_keys = @state.column_keys
     # index of the second column
-    index = columns.indexOf column2
+    index = column_keys.indexOf column2
     # filter out the currently dragged item
-    columns = columns.filter (column) => column isnt column1
+    column_keys = column_keys.filter (column) => column isnt column1
     # add the dragged column after the dragged over column
-    columns.splice index, 0, column1
+    column_keys.splice index, 0, column1
+
     @setState
-      columns: columns
+      column_keys: column_keys
 
   on_drag_end: (event) ->
     @dragged_item = null
-    @props.set_column_order @state.columns
+    if @props.set_column_order
+      @props.set_column_order @state.column_keys
 
   on_column_toggle_click: (event) ->
     return if event.target.type is "checkbox"
     event.preventDefault()
     el = event.currentTarget
     column = el.getAttribute "column"
-    @props.on_column_toggle column
+    if @props.toggle_column
+      @props.toggle_column column
+    @setState
+      columns: @state.column_keys
 
   on_column_toggle_changed: (event) ->
     el = event.currentTarget
     column = el.getAttribute "column"
-    @props.on_column_toggle column
-
-  is_visible: (key) ->
-    return key in @props.visible_columns
-
-  get_ordered_column_keys: ->
-    if @props.ordered_columns.length > 0
-      return @props.ordered_columns
-    return Object.keys @props.columns
+    if @props.toggle_column
+      @props.toggle_column column
+    @setState
+      columns: @props.columns
 
   build_column_toggles: ->
     columns = []
-    for key in @state.columns
+    for key in @state.column_keys
       column = @props.columns[key]
-      checked = @is_visible key
+      checked = column.toggle
       columns.push(
         <li
           key={key}
