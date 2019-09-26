@@ -49,7 +49,6 @@ class ListingController extends React.Component
     @doAction = @doAction.bind @
     @toggleContextMenu = @toggleContextMenu.bind @
     @toggleColumn = @toggleColumn.bind @
-    @moveColumn = @moveColumn.bind @
     @toggleCategory = @toggleCategory.bind @
     @toggleRow = @toggleRow.bind @
     @saveEditableField = @saveEditableField.bind @
@@ -58,6 +57,7 @@ class ListingController extends React.Component
     @toggleRemarks = @toggleRemarks.bind @
     @on_select_checkbox_checked = @on_select_checkbox_checked.bind @
     @on_api_error = @on_api_error.bind @
+    @setColumnOrder = @setColumnOrder.bind @
 
     # root element
     @root_el = @props.root_el
@@ -128,6 +128,10 @@ class ListingController extends React.Component
       sortable_columns: []
       # ajax save queue: mapping of uid: name -> value mapping
       ajax_save_queue: {}
+      # local defined column visibility (localstorage)
+      local_column_visibility: []
+      # local defined column order (localstorage)
+      local_column_order: []
       # Listing specific configs
       content_filter: {}
       allow_edit: no
@@ -314,7 +318,7 @@ class ListingController extends React.Component
     # reset the default visible columns
     if key == "reset"
       columns = @get_default_columns()
-      @set_user_columns columns
+      @set_local_column_visibility columns
 
       return columns
 
@@ -331,20 +335,17 @@ class ListingController extends React.Component
       columns.push key
 
     # set the new column toggles
-    @set_user_columns columns
+    @set_local_column_visibility columns
+
+    @setState
+      local_column_visibility: columns
 
     return columns
 
-  ###*
-   * Move the column *behind* the other column.
-   *
-   * Used by the `TableColumnConfig` component to change the column sort order
-   *
-   * @param column {string} ID of the column to move
-   * @param other_column {string} ID of the target column
-  ###
-  moveColumn: (column, other_column) ->
-    console.debug "ListingController::moveColumn:#{column}->#{other_column}"
+  setColumnOrder: (columns) ->
+    @set_local_column_order columns
+    @setState
+      local_column_order: columns
 
   filterByState: (review_state="default") ->
     ###
@@ -603,13 +604,21 @@ class ListingController extends React.Component
   ###
   get_visible_columns: ->
     # get the current user defined column settings
-    user_columns = @get_user_columns()
 
-    if user_columns.length > 0
+    order = @get_local_column_order()
+    cmp = (a, b) ->
+      idx_a = order.indexOf a
+      idx_b = order.indexOf b
+      return idx_a - idx_b
+
+    toggled = @get_local_column_visibility()
+    if toggled.length > 0
       columns = []
       for key in @get_allowed_columns()
-        if key in user_columns
+        if key in toggled
           columns.push key
+      if order
+        columns.sort cmp
       return columns
 
     return @get_default_columns()
@@ -647,23 +656,46 @@ class ListingController extends React.Component
     return key
 
   ###*
-    * Set the user defined column order/visibility
+    * Set the local defined column visibility
   ###
-  set_user_columns: (columns) ->
-    console.debug "ListingController::set_user_columns: columns=", columns
+  set_local_column_visibility: (columns) ->
+    console.debug "ListingController::set_local_column_visibility: columns=", columns
 
-    key = @get_local_storage_key "columns-"
+    key = @get_local_storage_key "column-visibility-"
     storage = window.localStorage
     storage.setItem key, JSON.stringify(columns)
 
-    @setState
-      column_toggles: columns
+  ###*
+    * Returns the user defined column visibility
+  ###
+  get_local_column_visibility: ->
+    key = @get_local_storage_key "column-visibility-"
+    storage = window.localStorage
+    columns = storage.getItem key
+
+    if not columns
+      return []
+
+    try
+      return JSON.parse columns
+    catch
+      return []
 
   ###*
-    * Returns the user defined column order/visibility
+    * Set the local defined column order
   ###
-  get_user_columns: ->
-    key = @get_local_storage_key "columns-"
+  set_local_column_order: (columns) ->
+    console.debug "ListingController::set_local_column_order: columns=", columns
+
+    key = @get_local_storage_key "column-order-"
+    storage = window.localStorage
+    storage.setItem key, JSON.stringify(columns)
+
+  ###*
+    * Returns the local defined column order
+  ###
+  get_local_column_order: ->
+    key = @get_local_storage_key "column-order-"
     storage = window.localStorage
     columns = storage.getItem key
 
@@ -1044,9 +1076,10 @@ class ListingController extends React.Component
           <TableColumnConfig
             title={_("Configure Table Columns")}
             columns={@state.columns}
+            ordered_columns={@get_local_column_order()}
             table_columns={@get_visible_columns()}
             on_column_toggle={@toggleColumn}
-            on_column_move={@moveColumn}
+            set_column_order={@setColumnOrder}
             id="table-config"
             className="collapse show"/>
           <Table

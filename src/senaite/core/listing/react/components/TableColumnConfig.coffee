@@ -11,6 +11,9 @@ class TableColumnConfig extends React.Component
     @on_column_toggle_click = @on_column_toggle_click.bind @
     @on_column_toggle_changed = @on_column_toggle_changed.bind @
 
+    @state =
+      columns: @get_ordered_column_keys()
+
   on_drag_start: (event) ->
     @dragged_item = event.currentTarget
     event.dataTransfer.effectAllowed = "move";
@@ -21,15 +24,22 @@ class TableColumnConfig extends React.Component
     li = event.currentTarget
     return unless li isnt @dragged_item
 
-    column = @dragged_item.getAttribute "column"
-    other_column = li.getAttribute "column"
+    column1 = @dragged_item.getAttribute "column"
+    column2 = li.getAttribute "column"
 
-    # call the parent event handler to save
-    if @props.on_column_move
-      @props.on_column_move column, other_column
+    columns = @state.columns
+    # index of the second column
+    index = columns.indexOf column2
+    # filter out the currently dragged item
+    columns = columns.filter (column) => column isnt column1
+    # add the dragged column after the dragged over column
+    columns.splice index, 0, column1
+    @setState
+      columns: columns
 
   on_drag_end: (event) ->
     @dragged_item = null
+    @props.set_column_order @state.columns
 
   on_column_toggle_click: (event) ->
     return if event.target.type is "checkbox"
@@ -46,9 +56,15 @@ class TableColumnConfig extends React.Component
   is_visible: (key) ->
     return key in @props.table_columns
 
+  get_ordered_column_keys: ->
+    if @props.ordered_columns.length > 0
+      return @props.ordered_columns
+    return Object.keys @props.columns
+
   build_column_toggles: ->
     columns = []
-    for key, column of @props.columns
+    for key in @state.columns
+      column = @props.columns[key]
       checked = @is_visible key
       columns.push(
         <li
