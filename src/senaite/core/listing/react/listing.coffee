@@ -614,12 +614,12 @@ class ListingController extends React.Component
       # Add the column
       columns.push column
     return columns
+
+  ###*
+   * Get the column_order
+  ###
   get_column_order: ->
-    ###
-     * Get the column order defined in the current selected review_state item
-    ###
-    review_state_item = @get_review_state_by_id @state.review_state
-    return review_state_item.columns or []
+    return @get_display_columns()
 
   get_visible_columns: ->
     ###
