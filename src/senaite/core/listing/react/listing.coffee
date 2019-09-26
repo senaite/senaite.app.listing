@@ -337,15 +337,30 @@ class ListingController extends React.Component
     # set the new column toggles
     @set_local_column_visibility columns
 
-    @setState
-      local_column_visibility: columns
-
     return columns
 
-  setColumnOrder: (columns) ->
-    @set_local_column_order columns
+  setColumnOrder: (order) ->
+    console.debug "ListingController::setColumnOrder: order=#{order}"
+    ordered_columns = {}
+
+    # get the keys of all columns (visible or not)
+    keys = Object.keys @state.columns
+
+    # sort the keys according to the passed in column order
+    keys.sort (a, b) ->
+      return order.indexOf(a) - order.indexOf(b)
+
+    # rebuild an object with the new property order
+    for key in keys
+      column = @state.columns[key]
+      ordered_columns[key] = column
+
+    # update the columns of the current state
     @setState
-      local_column_order: columns
+      columns: ordered_columns
+
+    # store the new order in the local storage
+    @set_local_column_order keys
 
   filterByState: (review_state="default") ->
     ###
@@ -604,6 +619,7 @@ class ListingController extends React.Component
   ###
   get_visible_columns: ->
     # get the current user defined column settings
+    console.debug "ListingController::get_visible_columns"
 
     order = @get_local_column_order()
     cmp = (a, b) ->
