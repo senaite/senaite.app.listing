@@ -654,14 +654,23 @@ class ListingController extends React.Component
       columns.push key
     return columns
 
-  get_local_storage_key: ->
-    ###
-     * Return the key for the local storage
-    ###
+  ###*
+    * Calculate a common local storage key for this listing view.
+    *
+    * Note: The browser view initially calculates the `listing_portal_type`
+    *       which is basically the portal_type of the listed items.
+    *
+    * @returns key {string} with optional prefix and postfix
+  ###
+  get_local_storage_key: (prefix, postfix) ->
     key = @listing_portal_type
     if @listing_portal_type is undefined
       key = location.pathname
-    return "listing-columns-#{@listing_portal_type}"
+    if prefix isnt undefined
+      key = prefix + key
+    if postfix isnt undefined
+      key = key + postfix
+    return key
 
   set_column_toggles: (columns) ->
     ###
@@ -669,7 +678,7 @@ class ListingController extends React.Component
     ###
     console.debug "ListingController::set_column_toggles: columns=", columns
 
-    key = @get_local_storage_key()
+    key = @get_local_storage_key "listing-columns-"
     storage = window.localStorage
     storage.setItem key, JSON.stringify(columns)
 
@@ -681,7 +690,7 @@ class ListingController extends React.Component
      * Return the current column toggles from the local storage
     ###
 
-    key = @get_local_storage_key()
+    key = @get_local_storage_key "listing-columns-"
     storage = window.localStorage
     columns = storage.getItem key
 
