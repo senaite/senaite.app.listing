@@ -44,7 +44,7 @@ class TableColumnConfig extends React.Component
     @props.on_column_toggle column
 
   is_visible: (key) ->
-    if key in @props.visible_columns
+    if key in @props.table_columns
       return yes
     return no
 

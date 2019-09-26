@@ -1015,7 +1015,7 @@ class ListingController extends React.Component
           <TableColumnConfig
             title={_("Configure Table Columns")}
             columns={@state.columns}
-            visible_columns={@get_visible_columns()}
+            table_columns={@get_visible_columns()}
             on_column_toggle={@toggleColumn}
             on_column_move={@moveColumn}
             id="table-config"
@@ -1034,7 +1034,6 @@ class ListingController extends React.Component
             columns={@state.columns}
             column_toggles={@state.column_toggles}
             column_count={@get_column_count()}
-            column_order={@get_column_order()}
             table_columns={@get_visible_columns()}
             review_state={@state.review_state}
             review_states={@state.review_states}
