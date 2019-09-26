@@ -609,7 +609,9 @@ class ListingController extends React.Component
     # include columns in the order that is listed there.
     for key in @get_display_columns()
       column = @state.columns[key]
-      # TODO: check if the column is manually toggled on/off
+      # convert unset toggles to true
+      if column.toggle is undefined
+        column.toggle = on
 
       # Add the column
       columns.push column
@@ -1063,8 +1065,7 @@ class ListingController extends React.Component
             </a>}
           <TableColumnConfig
             title={_("Configure Table Columns")}
-            columns={@state.columns}
-            table_columns={@get_visible_columns()}
+            columns={@get_columns()}
             on_column_toggle={@toggleColumn}
             on_column_move={@moveColumn}
             id="table-config"

@@ -43,15 +43,9 @@ class TableColumnConfig extends React.Component
     column = el.getAttribute "column"
     @props.on_column_toggle column
 
-  is_visible: (key) ->
-    if key in @props.table_columns
-      return yes
-    return no
-
   build_column_toggles: ->
     columns = []
     for key, column of @props.columns
-      visible = @is_visible(key)
       columns.push(
         <li
           key={key}
@@ -73,7 +67,7 @@ class TableColumnConfig extends React.Component
                 type="checkbox"
                 column={key}
                 onChange={@on_column_toggle_changed}
-                checked={visible}/>
+                checked={column.toggle}/>
               &nbsp;<span className="glyphicon glyphicon-menu-hamburger"></span>
               &nbsp;<span>{column.title or key}</span>
             </button>
