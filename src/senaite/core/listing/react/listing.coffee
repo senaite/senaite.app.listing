@@ -1,5 +1,6 @@
-###
- * ReactJS controlled component
+###* ReactJS controlled component
+ *
+ * Please use JSDoc comments: https://jsdoc.app
 ###
 import React from "react"
 import ReactDOM from "react-dom"
