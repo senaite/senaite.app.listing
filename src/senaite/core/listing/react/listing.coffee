@@ -305,14 +305,17 @@ class ListingController extends React.Component
       @setState
         expanded_rows: expanded
 
-  toggleColumn: (column) ->
-    ###
-     * Toggle the column on or off
-    ###
-    console.debug "ListingController::toggleColumn: column=#{column}"
+  ###*
+    * Toggle the visibility of a column by its column key.
+    *
+    * This method also stores the visibility and order of the column in the
+    * browser's localstorage.
+  ###
+  toggleColumn: (key) ->
+    console.debug "ListingController::toggleColumn: key=#{key}"
 
     # reset the default visible columns
-    if column == "reset"
+    if key == "reset"
       columns = @get_default_columns()
       @set_column_toggles columns
 
@@ -321,7 +324,7 @@ class ListingController extends React.Component
     # get the current displayed columns
     columns = @get_visible_columns()
     # check if the current column is displayed
-    index = columns.indexOf column
+    index = columns.indexOf key
 
     if index > -1
       # remove the column
