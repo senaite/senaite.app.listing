@@ -331,7 +331,7 @@ class ListingController extends React.Component
       columns.splice index, 1
     else
       # add the column
-      columns.push column
+      columns.push key
 
     # set the new column toggles
     @set_column_toggles columns
@@ -994,13 +994,9 @@ class ListingController extends React.Component
       me.addMessage title, message, data.traceback, level="danger"
 
   ###*
-    * VIEW
+    * Renders the listing table
   ###
-
   render: ->
-    ###
-     * Listing Table
-    ###
     <div className="listing-container">
       <Messages on_dismiss_message={@dismissMessage} id="messages" className="messages" messages={@state.messages} />
       {@state.loading and <div id="table-overlay"/>}
@@ -1053,6 +1049,7 @@ class ListingController extends React.Component
           <TableColumnConfig
             title={_("Configure Table Columns")}
             columns={@state.columns}
+            table_columns={@get_visible_columns()}
             on_column_toggle={@toggleColumn}
             on_column_move={@moveColumn}
             id="table-config"
