@@ -12,10 +12,7 @@ class TableColumnConfig extends React.Component
     @on_column_toggle_changed = @on_column_toggle_changed.bind @
 
   on_drag_start: (event) ->
-    ###
-     * Event handler when the drag begins
-    ###
-    @dragged_item = event.currentTarget.parentNode
+    @dragged_item = event.currentTarget
     event.dataTransfer.effectAllowed = "move";
     event.dataTransfer.setData("text/html", @dragged_item)
     event.dataTransfer.setDragImage(@dragged_item, 50, 0)
@@ -24,13 +21,17 @@ class TableColumnConfig extends React.Component
     li = event.currentTarget
     return unless li isnt @dragged_item
 
+    column = @dragged_item.getAttribute "column"
+    other_column = li.getAttribute "column"
+
+    # call the parent event handler to save
+    if @props.on_column_move
+      @props.on_column_move column, other_column
+
   on_drag_end: (event) ->
     @dragged_item = null
 
   on_column_toggle_click: (event) ->
-    ###
-     * Event handler when a column checkbox was clicked
-    ###
     return if event.target.type is "checkbox"
     event.preventDefault()
     el = event.currentTarget
@@ -38,9 +39,6 @@ class TableColumnConfig extends React.Component
     @props.on_column_toggle column
 
   on_column_toggle_changed: (event) ->
-    ###
-     * Event handler when a column checkbox was clicked
-    ###
     el = event.currentTarget
     column = el.getAttribute "column"
     @props.on_column_toggle column
@@ -57,14 +55,16 @@ class TableColumnConfig extends React.Component
       columns.push(
         <li
           key={key}
+          column={key}
           style={{padding: "0 5px 5px 0"}}
-          className="column-toggle"
+          className="column"
           onDragOver={@on_drag_over}>
-          <div id={key}
-               className="drag"
-               onDragStart={@on_drag_start}
-               onDragEnd={@on_drag_end}
-               draggable={true}>
+          <div
+            column={key}
+            className="draggable-column"
+            onDragStart={@on_drag_start}
+            onDragEnd={@on_drag_end}
+            draggable={true}>
             <button
               column={key}
               onClick={@on_column_toggle_click}

@@ -49,6 +49,7 @@ class ListingController extends React.Component
     @doAction = @doAction.bind @
     @toggleContextMenu = @toggleContextMenu.bind @
     @toggleColumn = @toggleColumn.bind @
+    @moveColumn = @moveColumn.bind @
     @toggleCategory = @toggleCategory.bind @
     @toggleRow = @toggleRow.bind @
     @saveEditableField = @saveEditableField.bind @
@@ -333,6 +334,17 @@ class ListingController extends React.Component
     @set_column_toggles columns
 
     return columns
+
+  ###*
+   * Move the column behind the other column.
+   *
+   * Used by the `TableColumnConfig` component to change the column sort order
+   *
+   * @param column {string} ID of the column to move
+   * @param other_column {string} ID of the target column
+  ###
+  moveColumn: (column, other_column) ->
+    console.debug "ListingController::moveColumn:#{column}->#{other_column}"
 
   filterByState: (review_state="default") ->
     ###
@@ -1001,10 +1013,11 @@ class ListingController extends React.Component
               <span className="glyphicon glyphicon-option-horizontal"></span>
             </a>}
           <TableColumnConfig
-            title={_("Display Columns")}
+            title={_("Configure Table Columns")}
             columns={@state.columns}
             visible_columns={@get_visible_columns()}
             on_column_toggle={@toggleColumn}
+            on_column_move={@moveColumn}
             id="table-config"
             className="collapse"/>
           <Table
