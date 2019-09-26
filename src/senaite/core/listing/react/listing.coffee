@@ -93,8 +93,6 @@ class ListingController extends React.Component
       review_state: @api.get_url_parameter("#{@form_id}_review_state") or "default"
       # The query string is computed on the server and allows to bookmark listings
       query_string: ""
-      # The column toggles define the visible columns per user setting
-      column_toggles: []
       # The API URL to call
       api_url: ""
       # form_id, columns and review_states are defined in the listing view and
@@ -177,7 +175,6 @@ class ListingController extends React.Component
       level: level,
     })
     @setState messages: messages
-
 
   getRequestOptions: ->
     ###
@@ -317,7 +314,7 @@ class ListingController extends React.Component
     # reset the default visible columns
     if key == "reset"
       columns = @get_default_columns()
-      @set_column_toggles columns
+      @set_user_columns columns
 
       return columns
 
@@ -334,7 +331,7 @@ class ListingController extends React.Component
       columns.push key
 
     # set the new column toggles
-    @set_column_toggles columns
+    @set_user_columns columns
 
     return columns
 
@@ -605,13 +602,13 @@ class ListingController extends React.Component
     * Get the visible columns according to the user settings
   ###
   get_visible_columns: ->
-    # get the current user defined column toggles
-    column_toggles = @get_column_toggles()
+    # get the current user defined column settings
+    user_columns = @get_user_columns()
 
-    if column_toggles.length > 0
+    if user_columns.length > 0
       columns = []
       for key in @get_allowed_columns()
-        if key in column_toggles
+        if key in user_columns
           columns.push key
       return columns
 
@@ -652,10 +649,10 @@ class ListingController extends React.Component
   ###*
     * Set the user defined column order/visibility
   ###
-  set_column_toggles: (columns) ->
-    console.debug "ListingController::set_column_toggles: columns=", columns
+  set_user_columns: (columns) ->
+    console.debug "ListingController::set_user_columns: columns=", columns
 
-    key = @get_local_storage_key "listing-columns-"
+    key = @get_local_storage_key "columns-"
     storage = window.localStorage
     storage.setItem key, JSON.stringify(columns)
 
@@ -665,18 +662,18 @@ class ListingController extends React.Component
   ###*
     * Returns the user defined column order/visibility
   ###
-  get_column_toggles: ->
-    key = @get_local_storage_key "listing-columns-"
+  get_user_columns: ->
+    key = @get_local_storage_key "columns-"
     storage = window.localStorage
     columns = storage.getItem key
 
     if not columns
-      return @state.column_toggles
+      return []
 
     try
       return JSON.parse columns
     catch
-      return @state.column_toggles
+      return []
 
   get_column_count: ->
     ###
@@ -1064,7 +1061,6 @@ class ListingController extends React.Component
             catalog_columns={@state.catalog_columns}
             sortable_columns={@state.sortable_columns}
             columns={@state.columns}
-            column_toggles={@state.column_toggles}
             column_count={@get_column_count()}
             table_columns={@get_visible_columns()}
             review_state={@state.review_state}
