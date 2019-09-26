@@ -256,6 +256,10 @@ class ListingView(AjaxListingView):
         """
         if isinstance(self.listing_portal_type, six.string_types):
             return self.listing_portal_type
+        # Handle the global Samples listing different, because the columns do
+        # not match with the listings in Clients
+        if api.get_portal_type(self.context) == "AnalysisRequestsFolder":
+            return "AnalysisRequestsListing"
         # Try to find out the portal_type of the listed contents
         if self.catalog == CATALOG_ANALYSIS_REQUEST_LISTING:
             return "AnalysisRequest"
