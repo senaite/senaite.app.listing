@@ -128,10 +128,6 @@ class ListingController extends React.Component
       sortable_columns: []
       # ajax save queue: mapping of uid: name -> value mapping
       ajax_save_queue: {}
-      # local defined column visibility (localstorage)
-      local_column_visibility: []
-      # local defined column order (localstorage)
-      local_column_order: []
       # Listing specific configs
       content_filter: {}
       allow_edit: no
