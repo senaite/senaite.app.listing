@@ -308,8 +308,8 @@ class ListingController extends React.Component
   ###*
     * Toggle the visibility of a column by its column key.
     *
-    * This method also stores the visibility and order of the column in the
-    * browser's localstorage.
+    * This method also stores the visibility of the column in the browser's
+    * localstorage.
   ###
   toggleColumn: (key) ->
     console.debug "ListingController::toggleColumn: key=#{key}"
@@ -601,11 +601,10 @@ class ListingController extends React.Component
       Object.keys @state.columns
     return columns
 
+  ###
+    * Get the visible columns according to the user settings
+  ###
   get_visible_columns: ->
-    ###
-     * Get the visible columns according to the user settings
-    ###
-
     # get the current user defined column toggles
     column_toggles = @get_column_toggles()
 
@@ -650,10 +649,10 @@ class ListingController extends React.Component
       key = key + postfix
     return key
 
+  ###*
+    * Set the user defined column order/visibility
+  ###
   set_column_toggles: (columns) ->
-    ###
-     * Set the user defined column toggles to the local state and local storage
-    ###
     console.debug "ListingController::set_column_toggles: columns=", columns
 
     key = @get_local_storage_key "listing-columns-"
@@ -663,11 +662,10 @@ class ListingController extends React.Component
     @setState
       column_toggles: columns
 
+  ###*
+    * Returns the user defined column order/visibility
+  ###
   get_column_toggles: ->
-    ###
-     * Return the current column toggles from the local storage
-    ###
-
     key = @get_local_storage_key "listing-columns-"
     storage = window.localStorage
     columns = storage.getItem key
