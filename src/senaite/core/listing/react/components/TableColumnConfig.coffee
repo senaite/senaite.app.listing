@@ -11,9 +11,15 @@ class TableColumnConfig extends React.Component
     @on_drag_over = @on_drag_over.bind @
     @on_column_toggle_click = @on_column_toggle_click.bind @
     @on_column_toggle_changed = @on_column_toggle_changed.bind @
+    @on_reset_click = @on_reset_click.bind @
 
     @state =
       column_keys: @props.column_keys
+
+  on_reset_click: (event) ->
+    event.preventDefault()
+    if @props.toggle_column
+      @props.toggle_column "reset"
 
   on_drag_start: (event) ->
     @dragged_item = event.currentTarget
@@ -105,6 +111,14 @@ class TableColumnConfig extends React.Component
           <h5>{@props.title}</h5>
           <ul className="list-inline">
             {@build_column_toggles()}
+
+            <li
+              key="reset"
+              style={{padding: "0 5px 5px 0"}}>
+              <button onClick={@on_reset_click} className="btn btn-warning btn-xs">
+                {_("Reset Columns")}
+              </button>
+            </li>
           </ul>
         </div>
       </div>

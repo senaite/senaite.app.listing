@@ -292,6 +292,12 @@ class ListingController extends React.Component
   toggleColumn: (key) ->
     console.debug "ListingController::toggleColumn: key=#{key}"
 
+    if key is "reset"
+      @set_local_columns []
+      @setState
+        columns: @columns
+      return
+
     # get the columns from the state
     columns = @state.columns
 
