@@ -601,31 +601,6 @@ class ListingController extends React.Component
       Object.keys @state.columns
     return columns
 
-  ###*
-   * Get a list of ordered column objects
-   * @returns {array} columns of column objects
-  ###
-  get_columns: ->
-    columns = []
-
-    # We iterate over the defined columns of the revies_states item to only
-    # include columns in the order that is listed there.
-    for key in @get_allowed_columns()
-      column = @state.columns[key]
-      # convert unset toggles to true
-      if column.toggle is undefined
-        column.toggle = on
-
-      # Add the column
-      columns.push column
-    return columns
-
-  ###*
-   * Get the column_order
-  ###
-  get_column_order: ->
-    return @get_allowed_columns()
-
   get_visible_columns: ->
     ###
      * Get the visible columns according to the user settings
@@ -636,7 +611,7 @@ class ListingController extends React.Component
 
     if column_toggles.length > 0
       columns = []
-      for key in @get_column_order()
+      for key in @get_allowed_columns()
         if key in column_toggles
           columns.push key
       return columns
@@ -649,7 +624,7 @@ class ListingController extends React.Component
     ###
 
     columns = []
-    for key in @get_column_order()
+    for key in @get_allowed_columns()
       column = @state.columns[key]
       # only skip columns explicitly set to false
       if column.toggle is no
@@ -1061,7 +1036,7 @@ class ListingController extends React.Component
               title={_("Display Columns")}
               reset_title={_("Reset")}
               columns={@state.columns}
-              column_order={@get_column_order()}
+              allowed_columns={@get_allowed_columns()}
               table_columns={@get_visible_columns()}
               on_column_toggle={@toggleColumn}
               on_context_menu={@toggleContextMenu}
@@ -1077,11 +1052,11 @@ class ListingController extends React.Component
             </a>}
           <TableColumnConfig
             title={_("Configure Table Columns")}
-            columns={@get_columns()}
+            columns={@state.columns}
             on_column_toggle={@toggleColumn}
             on_column_move={@moveColumn}
             id="table-config"
-            className="collapse"/>
+            className="collapse show"/>
           <Table
             className="contentstable table table-condensed table-hover small"
             allow_edit={@state.allow_edit}

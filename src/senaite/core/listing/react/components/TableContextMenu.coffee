@@ -51,7 +51,7 @@ class TableContextMenu extends React.Component
     ###
     toggle_columns = []
 
-    for key in @props.column_order
+    for key in @props.allowed_columns
       toggle = key in @props.table_columns
       column = @props.columns[key]
       title = column.title or key
