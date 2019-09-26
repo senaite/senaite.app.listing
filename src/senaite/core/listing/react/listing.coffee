@@ -336,7 +336,7 @@ class ListingController extends React.Component
     return columns
 
   ###*
-   * Move the column behind the other column.
+   * Move the column *behind* the other column.
    *
    * Used by the `TableColumnConfig` component to change the column sort order
    *
@@ -587,7 +587,7 @@ class ListingController extends React.Component
    *
    * @returns {array} columns of column keys
   ###
-  get_display_columns: ->
+  get_allowed_columns: ->
     # get the current active state filter, e.g. "default"
     review_state = @state.review_state
     # get the defined review state item from the config
@@ -607,7 +607,7 @@ class ListingController extends React.Component
 
     # We iterate over the defined columns of the revies_states item to only
     # include columns in the order that is listed there.
-    for key in @get_display_columns()
+    for key in @get_allowed_columns()
       column = @state.columns[key]
       # convert unset toggles to true
       if column.toggle is undefined
@@ -621,7 +621,7 @@ class ListingController extends React.Component
    * Get the column_order
   ###
   get_column_order: ->
-    return @get_display_columns()
+    return @get_allowed_columns()
 
   get_visible_columns: ->
     ###
