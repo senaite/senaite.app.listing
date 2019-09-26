@@ -339,6 +339,12 @@ class ListingController extends React.Component
 
     return columns
 
+  ###*
+    * Update the order of all columns
+    *
+    * This method also stores the order of the columns in the browser's
+    * localstorage.
+  ###
   setColumnOrder: (order) ->
     console.debug "ListingController::setColumnOrder: order=#{order}"
     ordered_columns = {}
@@ -355,12 +361,12 @@ class ListingController extends React.Component
       column = @state.columns[key]
       ordered_columns[key] = column
 
+    # store the new order in the local storage
+    @set_local_column_order keys
+
     # update the columns of the current state
     @setState
       columns: ordered_columns
-
-    # store the new order in the local storage
-    @set_local_column_order keys
 
   filterByState: (review_state="default") ->
     ###
