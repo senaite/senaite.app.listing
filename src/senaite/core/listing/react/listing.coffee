@@ -13,7 +13,6 @@ import Loader from "./components/Loader.coffee"
 import Pagination from "./components/Pagination.coffee"
 import SearchBox from "./components/SearchBox.coffee"
 import Table from "./components/Table.coffee"
-import TableContextMenu from "./components/TableContextMenu.coffee"
 import TableColumnConfig from "./components/TableColumnConfig.coffee"
 
 import "./listing.css"
@@ -47,7 +46,6 @@ class ListingController extends React.Component
     @sortBy = @sortBy.bind @
     @showMore = @showMore.bind @
     @doAction = @doAction.bind @
-    @toggleContextMenu = @toggleContextMenu.bind @
     @toggleColumn = @toggleColumn.bind @
     @toggleCategory = @toggleCategory.bind @
     @toggleRow = @toggleRow.bind @
@@ -80,10 +78,6 @@ class ListingController extends React.Component
       messages: []
       # loading indicator
       loading: yes
-      # context menu visibility and coordinates
-      contextmenu_show: no
-      contextmenu_x: 0
-      contextmenu_y: 0
       # filter, pagesize, sort_on, sort_order and review_state are initially set
       # from the request to allow bookmarks to specific searches
       filter: @api.get_url_parameter("#{@form_id}_filter")
@@ -199,19 +193,6 @@ class ListingController extends React.Component
 
     # initial fetch of the folderitems
     @fetch_folderitems()
-
-  toggleContextMenu: (x, y, toggle) ->
-    ###
-     * Toggle the context menu
-    ###
-    console.debug "ListingController::toggleContextMenu: x=#{x} y=#{y}"
-
-    toggle ?= not @state.contextmenu_show
-
-    @setState
-      contextmenu_show: toggle
-      contextmenu_x: x
-      contextmenu_y: y
 
   toggleCategory: (category) ->
     ###
@@ -1070,19 +1051,6 @@ class ListingController extends React.Component
       <div className="row">
         <div className="col-sm-12 table-responsive">
           {@state.show_column_toggles and
-            <TableContextMenu
-              show={@state.contextmenu_show}
-              x={@state.contextmenu_x}
-              y={@state.contextmenu_y}
-              title={_("Display Columns")}
-              reset_title={_("Reset")}
-              columns={@state.columns}
-              allowed_columns={@get_allowed_columns()}
-              visible_columns={@get_visible_columns()}
-              on_column_toggle={@toggleColumn}
-              on_context_menu={@toggleContextMenu}
-              />}
-          {@state.show_column_toggles and
             <a
               href="#"
               onClick={(event) -> event.preventDefault()}
@@ -1105,7 +1073,6 @@ class ListingController extends React.Component
             allow_edit={@state.allow_edit}
             on_header_column_click={@sortBy}
             on_select_checkbox_checked={@on_select_checkbox_checked}
-            on_context_menu={@toggleContextMenu}
             sort_on={@state.sort_on}
             sort_order={@state.sort_order}
             catalog_indexes={@state.catalog_indexes}

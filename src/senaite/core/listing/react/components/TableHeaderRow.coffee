@@ -51,7 +51,8 @@ class TableHeaderRow extends React.Component
 
     console.debug "TableHeaderRow::on_context_menu: x=#{x} y=#{y}"
 
-    @props.on_context_menu x, y
+    if @props.on_context_menu
+      @props.on_context_menu x, y
 
   is_required_column: (key) ->
     ###
