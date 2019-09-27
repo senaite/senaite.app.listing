@@ -453,11 +453,15 @@ class ListingController extends React.Component
   ###
   get_columns: ->
     columns = {}
+    visibility = @get_columns_visibility()
     for key in @get_columns_order()
       column = @state.columns[key]
       if column is undefined
         console.warn "Skipping nonexisting column '#{key}'."
         continue
+      toggle = visibility[key]
+      if toggle isnt undefined
+        column["toggle"] = toggle
       columns[key] = column
     return columns
 
