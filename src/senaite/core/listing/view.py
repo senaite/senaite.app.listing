@@ -245,7 +245,7 @@ class ListingView(AjaxListingView):
             subscriber.before_render()
 
     @view.memoize
-    def get_listing_portal_type(self, default=None):
+    def get_listing_portal_type(self):
         """Return the portal type of the listed items
 
         This acts like a grouping key for similar listings to allow a better
@@ -256,21 +256,22 @@ class ListingView(AjaxListingView):
         """
         if isinstance(self.listing_portal_type, six.string_types):
             return self.listing_portal_type
+
+        listing_type = ""
+        portal_type = self.contentFilter.get("portal_type", None)
         # Handle the global Samples listing different, because the columns do
         # not match with the listings in Clients
         if api.get_portal_type(self.context) == "AnalysisRequestsFolder":
-            return "AnalysisRequestsListing"
-        # Try to find out the portal_type of the listed contents
-        if self.catalog == CATALOG_ANALYSIS_REQUEST_LISTING:
-            return "AnalysisRequest"
+            listing_type = "AnalysisRequestsListing"
+        elif isinstance(portal_type, six.string_types):
+            listing_type = portal_type
+        elif self.catalog == CATALOG_ANALYSIS_REQUEST_LISTING:
+            listing_type = "AnalysisRequest"
         elif self.catalog == CATALOG_ANALYSIS_LISTING:
-            return "Analysis"
+            listing_type = "Analysis"
         elif self.catalog == CATALOG_WORKSHEET_LISTING:
-            return "Worksheet"
-        portal_type = self.contentFilter.get("portal_type", None)
-        if isinstance(portal_type, six.string_types):
-            return portal_type
-        return default
+            listing_type = "Worksheet"
+        return "-".join([listing_type, self.__name__])
 
     @view.memoize
     def get_listing_view_adapters(self):
