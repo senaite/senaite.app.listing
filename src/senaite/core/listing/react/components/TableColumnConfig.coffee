@@ -96,7 +96,7 @@ class TableColumnConfig extends React.Component
                 onChange={@on_column_toggle_changed}
                 checked={checked}/>
               &nbsp;<span className="glyphicon glyphicon-menu-hamburger"></span>
-              &nbsp;<span>{column.title or key}</span>
+              &nbsp;<span dangerouslySetInnerHTML={{__html: column.title or key}}></span>
             </button>
           </div>
         </li>
