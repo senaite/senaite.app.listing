@@ -223,6 +223,14 @@ class ListingController extends React.Component
     @fetch_folderitems()
 
   ###*
+   * componentDidUpdate(prevProps, prevState, snapshot)
+   *
+   * This is invoked immediately after updating occurs.
+   * This method is not called for the initial render.
+  ###
+  componentDidUpdate: (prevProps, prevState, snapshot) ->
+
+  ###*
    * Expand/Collapse a listing category row by adding the category ID to the
    * state `expanded_categories`
    *
