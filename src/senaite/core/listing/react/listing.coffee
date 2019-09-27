@@ -416,16 +416,17 @@ class ListingController extends React.Component
    *
    * @returns columns {array} Array of ordered and visible columns
   ###
-  get_visible_column_keys: ->
+  get_visible_columns: ->
     keys = []
-    columns = @state.columns
     allowed_keys = @get_allowed_column_keys()
-    for key, column of columns
+    visible = @get_columns_visibility()
+    for key in @get_columns_order()
       # skip non-allowed keys
       if key not in allowed_keys
         continue
-      # skip columns which are explicitly toggled off
-      if column.toggle is no
+      toggle = visible[key]
+      # skip columns which are not visible
+      if toggle is no
         continue
       # remember the key
       keys.push key
@@ -444,36 +445,73 @@ class ListingController extends React.Component
   ###*
    * Get columns in the right order and visibility
    *
-   * This method takes the local column settings into consideration
-   * to set the visibility and order of the final columns object.
+   * This method takes the local column settings into consideration to set the
+   * visibility and order of the final columns object.
    *
-   * @returns columns {object} Object of column definitions
+   * @returns columns {object} new columns object
   ###
   get_columns: ->
-    updated_columns = {}
-    columns = @state.columns
-    allowed_column_keys = @get_allowed_column_keys()
-    local_columns = @get_local_columns()
+    columns = {}
+    for key in @get_columns_order()
+      column = @state.columns[key]
+      if column is undefined
+        console.warn "Skipping nonexisting column '#{key}'."
+        continue
+      columns[key] =
+    return columns
 
-    if local_columns.length == 0
-      # return the columns sorted by the keys of the current review_state item
-      for key in allowed_column_keys
-        updated_columns[key] = columns[key]
+  ###*
+   * Extract all keys from the curent columns
+   *
+   * @returns keys {array} Current colum keys
+  ###
+  get_columns_keys: ->
+    return Object.keys @state.columns
+
+  ###*
+   * Return the order of all columns
+   *
+   * This method takes also the local column config into consideration
+   *
+   * @returns keys {array} Current colum keys
+  ###
+  get_columns_order: ->
+    keys = []
+    column_keys = @get_columns_keys()
+    local_config = @get_local_column_config()
+
+    if local_config.length > 0
+      # extract the column keys in the user selected order
+      keys = local_config.map (item, index) ->
+        return item.key
     else
-      # preparecolumns according to the order/visibility of the user settings
-      for record in local_columns
-        key = record.key
-        toggle = record.toggle
-        column = columns[key]
-        if key not in allowed_column_keys
-          console.warn "Skipping column #{key}: Not in review_state columns"
-          continue
-        if column is undefined
-          console.warn "Skipping local column #{key}: Not in current columns set"
-          continue
-        column["toggle"] = toggle
-        updated_columns[key] = column
-    return updated_columns
+      # sort column keys by the current columns settings
+      allowed_keys = @get_allowed_column_keys()
+      keys = allowed_keys.concat column_keys.filter (k) ->
+        # only append keys which are not yet defined in the columns
+        return allowed_keys.indexOf(k) == -1
+
+    return keys
+
+  ###*
+   * Return the set visibility of all columns
+   *
+   * This method takes also the local column config into consideration
+   *
+   * @returns visibility {object} of column key -> visibility
+  ###
+  get_columns_visibility: ->
+    visibility = {}
+    local_config = @get_local_column_config()
+    for {key, toggle} in local_config
+      if toggle is undefined then toggle = yes
+      visibility[key] = toggle
+    if local_config.length == 0
+      for key, column of @state.columns
+        toggle = column.toggle
+        if toggle is undefined then toggle = yes
+        visibility[key] = toggle
+    return visibility
 
   ###*
    * Filter the results by the given state
@@ -848,7 +886,7 @@ class ListingController extends React.Component
   ###
   get_column_count: ->
     # get the current visible columns
-    visible_columns = @get_visible_column_keys()
+    visible_columns = @get_visible_columns()
 
     count = visible_columns.length
     # add 1 if the select column is rendered
@@ -1243,7 +1281,7 @@ class ListingController extends React.Component
             columns={@get_columns()}
             column_count={@get_column_count()}
             review_state={@state.review_state}
-            visible_columns={@get_visible_column_keys()}
+            visible_columns={@get_visible_columns()}
             review_states={@state.review_states}
             folderitems={@state.folderitems}
             children={@state.children}
