@@ -768,9 +768,6 @@ class ListingController extends React.Component
    * they contain the same columns and order as defined in the `self.columns`
    * ordered dictionary.
    *
-   * These columns define the standard order of the columns (see `get_columns`) and
-   * the order of the column-toggles (see the `TableColumnConfig` component).
-   *
    * @returns {array} columns of column keys
   ###
   get_allowed_column_keys: ->
