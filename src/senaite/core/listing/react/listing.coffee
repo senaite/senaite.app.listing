@@ -8,11 +8,11 @@
 import React from "react"
 import ReactDOM from "react-dom"
 
-import Messages from "./components/Messages.coffee"
 import ButtonBar from "./components/ButtonBar.coffee"
 import FilterBar from "./components/FilterBar.coffee"
 import ListingAPI from "./api.coffee"
 import Loader from "./components/Loader.coffee"
+import Messages from "./components/Messages.coffee"
 import Pagination from "./components/Pagination.coffee"
 import SearchBox from "./components/SearchBox.coffee"
 import Table from "./components/Table.coffee"
@@ -51,33 +51,33 @@ class ListingController extends React.Component
 
     # bind callbacks
     @dismissMessage = @dismissMessage.bind @
-    @filterByState = @filterByState.bind @
-    @filterBySearchterm = @filterBySearchterm.bind @
-    @sortBy = @sortBy.bind @
-    @showMore = @showMore.bind @
     @doAction = @doAction.bind @
-    @toggleColumn = @toggleColumn.bind @
-    @setColumnOrder = @setColumnOrder.bind @
-    @toggleCategory = @toggleCategory.bind @
-    @toggleRow = @toggleRow.bind @
-    @saveEditableField = @saveEditableField.bind @
-    @updateEditableField = @updateEditableField.bind @
-    @saveAjaxQueue = @saveAjaxQueue.bind @
-    @toggleRemarks = @toggleRemarks.bind @
+    @filterBySearchterm = @filterBySearchterm.bind @
+    @filterByState = @filterByState.bind @
+    @on_api_error = @on_api_error.bind @
     @on_column_config_click = @on_column_config_click.bind @
     @on_select_checkbox_checked = @on_select_checkbox_checked.bind @
-    @on_api_error = @on_api_error.bind @
+    @saveAjaxQueue = @saveAjaxQueue.bind @
+    @saveEditableField = @saveEditableField.bind @
+    @setColumnOrder = @setColumnOrder.bind @
+    @showMore = @showMore.bind @
+    @sortBy = @sortBy.bind @
+    @toggleCategory = @toggleCategory.bind @
+    @toggleColumn = @toggleColumn.bind @
+    @toggleRemarks = @toggleRemarks.bind @
+    @toggleRow = @toggleRow.bind @
+    @updateEditableField = @updateEditableField.bind @
 
     # root element
     @root_el = @props.root_el
 
     # get initial configuration data from the HTML attribute
-    @columns = JSON.parse @root_el.dataset.columns
-    @review_states = JSON.parse @root_el.dataset.review_states
-    @form_id = @root_el.dataset.form_id
     @api_url = @root_el.dataset.api_url
+    @columns = JSON.parse @root_el.dataset.columns
+    @form_id = @root_el.dataset.form_id
     @listing_portal_type = @root_el.dataset.listing_portal_type
     @pagesize = parseInt @root_el.dataset.pagesize
+    @review_states = JSON.parse @root_el.dataset.review_states
 
     # the API is responsible for async calls and knows about the endpoints
     @api = new ListingAPI
