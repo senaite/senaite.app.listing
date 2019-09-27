@@ -153,20 +153,30 @@ class ListingController extends React.Component
       fetch_transitions_on_select: yes
 
 
+  ###*
+    * Dismisses a message by its message index
+  ###
   dismissMessage: (index=null) ->
-    ###
-     * Dismiss a message by its message index
-    ###
+    # dismiss all messages
     if index is null
-      return @setState messages: []
-    messages = [].concat @state.messages
-    messages.splice index, 1
-    return @setState messages: messages
+      @setState {messages: []}
+    else
+      # dismiss message by index
+      messages = [].concat @state.messages
+      messages.splice index, 1
+      @setState {messages: messages}
+    return true
 
+  ###*
+    * Display a new bootstrap alert message above the table
+    * @param title {string} Title to be displayed in the alert box
+    *              {object} Config object for all parameters
+    * @param text {string} The message text
+    * @param traceback {string} Preformatted traceback
+    * @param level {string} info, success, warning, danger
+    * @returns {bool} true
+  ###
   addMessage: (title, text, traceback, level="info") ->
-    ###*
-     * Add a message
-    ###
     if typeof title is "object"
       props = Object.assign title
       title = props.title
@@ -181,12 +191,14 @@ class ListingController extends React.Component
       traceback: traceback,
       level: level,
     })
-    @setState messages: messages
+    @setState {messages: messages}
+    return true
 
+  ###*
+    * Parameters to be sent in each Ajax POST request
+    * @returns {object} current state values
+  ###
   getRequestOptions: ->
-    ###
-     * Only these state values should be sent to the server
-    ###
     options =
       "review_state": @state.review_state
       "filter": @state.filter
@@ -199,18 +211,21 @@ class ListingController extends React.Component
     console.debug("Request Options=", options)
     return options
 
+  ###*
+    * ReactJS event handler when the component did mount
+    * Fetches the initial folderitems
+  ###
   componentDidMount: ->
-    ###
-     * ReactJS event handler when the component did mount
-    ###
-
-    # initial fetch of the folderitems
     @fetch_folderitems()
 
+  ###*
+    * Expand/Collapse a listing category row by adding the category ID to the
+    * state `expanded_categories`
+    *
+    * @param category {string} Title of the category
+    * @returns {bool} true if the category was expanded, otherwise false
+  ###
   toggleCategory: (category) ->
-    ###
-     * Expand/Collapse the category
-    ###
     console.debug "ListingController::toggleCategory: column=#{category}"
 
     # get the current expanded categories
@@ -226,17 +241,20 @@ class ListingController extends React.Component
       expanded.push category
 
     # set the new expanded categories
-    @setState
-      expanded_categories: expanded
+    @setState {expanded_categories: expanded}
+    return expanded.length > 0
 
+  ###*
+    * Expand/Collapse remarks
+    *
+    * @param uid {string} UID of the item
+    * @returns {bool} true if the remarks were expanded, otherwise false
+  ###
   toggleRemarks: (uid) ->
-    ###
-     * Expand/Collapse remarks
-    ###
     console.debug "ListingController::toggleRemarks: uid=#{uid}"
 
     # skip if no uid is given
-    return unless uid
+    return false unless uid
 
     # get the current expanded remarks
     expanded = @state.expanded_remarks
@@ -252,17 +270,20 @@ class ListingController extends React.Component
       expanded.push uid
 
     # set the new expanded remarks
-    @setState
-      expanded_remarks: expanded
+    @setState {expanded_remarks: expanded}
+    return expanded.length > 0
 
+  ###
+    * Expand/Collapse the row
+    *
+    * @param uid {string} UID of the item
+    * @returns {bool} true if the row was expanded, otherwise false
+  ###
   toggleRow: (uid) ->
-    ###
-     * Expand/Collapse the row
-    ###
     console.debug "ListingController::toggleRow: uid=#{uid}"
 
     # skip if no uid is given
-    return unless uid
+    return false unless uid
 
     # get the current expanded rows
     expanded = @state.expanded_rows
@@ -293,34 +314,33 @@ class ListingController extends React.Component
           expanded_rows: expanded
     else
       # set the new expanded categories
-      @setState
-        expanded_rows: expanded
+      @setState {expanded_rows: expanded}
+
+    return expanded.length > 0
 
   ###*
     * Toggle the visibility of a column by its column key.
     *
     * This method also stores the visibility of the column in the browser's
     * localstorage.
+    *
+    * @param key {string} The ID of the column
+    * @returns {bool} true if the column was expanded, otherwise false
   ###
   toggleColumn: (key) ->
     console.debug "ListingController::toggleColumn: key=#{key}"
 
     if key is "reset"
       @set_local_columns []
-      @setState
-        columns: @columns
-      return
+      @setState {columns: @columns}
+      return true
 
     # get the columns from the state
     columns = @state.columns
 
-    # reset the default visible columns
-    if key == "reset"
-      @set_local_columns @columns
-      return columns
-
     # Toggle the visibility of the column
-    columns[key]["toggle"] = not columns[key]["toggle"]
+    toggle = not columns[key]["toggle"]
+    columns[key]["toggle"] = toggle
 
     local_columns = []
     for key, column of columns
@@ -331,14 +351,18 @@ class ListingController extends React.Component
     @set_local_columns local_columns
 
     # update the columns of the current state
-    @setState
-      columns: columns
+    @setState {columns: columns}
+
+    return toggle
 
   ###*
     * Update the order of all columns
     *
     * This method also stores the order of the columns in the browser's
     * localstorage.
+    *
+    * @param order {array} Array of column IDs to be used as new order
+    * @returns {object} New ordered columns object
   ###
   setColumnOrder: (order) ->
     console.debug "ListingController::setColumnOrder: order=#{order}"
@@ -369,13 +393,13 @@ class ListingController extends React.Component
     @set_local_columns local_columns
 
     # update the columns of the current state
-    @setState
-      columns: ordered_columns
+    @setState {columns: ordered_columns}
+    return ordered_columns
 
   ###*
     * Returns all column keys where the visibility toggle is true
     *
-    * @returns columns {array} of visible columns
+    * @returns columns {array} Array of ordered and visible columns
   ###
   get_visible_column_keys: ->
     keys = []
@@ -387,7 +411,10 @@ class ListingController extends React.Component
   ###*
     * Get columns in the right order and visibility
     *
-    * @returns columns {object} of key->column mappings
+    * This method takes the local column settings into consideration
+    * to set the visibility and order of the final columns object.
+    *
+    * @returns columns {object} Object of column definitions
   ###
   get_columns: ->
     columns = @state.columns
@@ -410,7 +437,7 @@ class ListingController extends React.Component
   ###*
     * Returns all column keys
     *
-    * @returns columns {array} of all columns
+    * @returns columns {array} Ordered array of of all column IDs
   ###
   get_column_keys: ->
     keys = []
@@ -418,44 +445,68 @@ class ListingController extends React.Component
       keys.push key
     return keys
 
+  ###*
+    * Filter the results by the given state
+    *
+    * This method executes an Ajax request to the server.
+    *
+    * @param review_state {string} The state to filter, e.g. verified, published
+    * @returns {bool} true
+  ###
   filterByState: (review_state="default") ->
-    ###
-     * Filter the results by the given state
-    ###
     console.debug "ListingController::filterByState: review_state=#{review_state}"
-
     @set_state
       review_state: review_state
       pagesize: @pagesize  # reset to the initial pagesize on state change
       limit_from: 0
+    return true
 
+  ###*
+    * Filter the results by the given searchterm
+    *
+    * This method executes an Ajax request to the server.
+    *
+    * @param filter {string} An arbitrary search string
+    * @returns {bool} true
+  ###
   filterBySearchterm: (filter="") ->
-    ###
-     * Filter the results by the given sarchterm
-    ###
     console.debug "ListingController::filterBySearchter: filter=#{filter}"
-
     @set_state
       filter: filter
       pagesize: @pagesize  # reset to the initial pagesize on search
       limit_from: 0
+    return true
 
+  ###*
+    * Sort a column with a specific order
+    *
+    * This method executes an Ajax request to the server.
+    *
+    * @param sort_on {string} Sort index, e.g. getId, created
+    * @param sort_order {string} Sort order, e.g. ascending, descending
+    * @returns {bool} true
+  ###
   sortBy: (sort_on, sort_order) ->
     ###
      * Sort the results by the given sort_on index with the given sort_order
     ###
     console.debug "sort_on=#{sort_on} sort_order=#{sort_order}"
-
     @set_state
       sort_on: sort_on
       sort_order: sort_order
       pagesize: @get_item_count() # keep the current number of items on sort
       limit_from: 0
+    return true
 
+  ###*
+    * Show more results
+    *
+    * This method executes an Ajax request to the server.
+    *
+    * @param pagesize {int} The amount of additional items to request
+    * @returns {bool} true
+  ###
   showMore: (pagesize) ->
-    ###
-     * Show more items
-    ###
     console.debug "ListingController::showMore: pagesize=#{pagesize}"
 
     # the existing folderitems
@@ -478,7 +529,17 @@ class ListingController extends React.Component
           new_folderitems = folderitems.concat data.folderitems
           me.setState
             folderitems: new_folderitems
+    return true
 
+  ###*
+    * Submit form
+    *
+    * This method executes an HTTP POST form submission
+    *
+    * @param id {string} The workflow action id
+    * @param url {string} The form action URL
+    * @returns form submission
+  ###
   doAction: (id, url) ->
     ###
      * Perform an action coming from the WF Action Buttons
@@ -510,11 +571,16 @@ class ListingController extends React.Component
 
     return form.submit()
 
+  ###*
+    * Select a row checkbox by UID
+    *
+    * This method executes an Ajax request to the server.
+    *
+    * @param uid {string} The UID of the row
+    * @param toggle {bool} true for select, false for deselect
+    * @returns {Promise} which is resolved when the state was sucessfully set
+  ###
   selectUID: (uid, toggle) ->
-    ###
-     * select/deselect the UID
-    ###
-
     # copy the selected UIDs from the state
     #
     # N.B. We use [].concat(@state.selected_uids) to get a copy, otherwise it
