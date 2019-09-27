@@ -54,6 +54,7 @@ class ListingController extends React.Component
     @updateEditableField = @updateEditableField.bind @
     @saveAjaxQueue = @saveAjaxQueue.bind @
     @toggleRemarks = @toggleRemarks.bind @
+    @on_column_config_click = @on_column_config_click.bind @
     @on_select_checkbox_checked = @on_select_checkbox_checked.bind @
     @on_api_error = @on_api_error.bind @
 
@@ -78,6 +79,8 @@ class ListingController extends React.Component
       messages: []
       # loading indicator
       loading: yes
+      # show column config toggle
+      show_column_config: no
       # filter, pagesize, sort_on, sort_order and review_state are initially set
       # from the request to allow bookmarks to specific searches
       filter: @api.get_url_parameter("#{@form_id}_filter")
@@ -991,6 +994,12 @@ class ListingController extends React.Component
     *      https://reactjs.org/docs/handling-events.html
   ###
 
+  on_column_config_click: (event) ->
+    event.preventDefault()
+    toggle = not @state.show_column_config
+    @setState
+      show_column_config: toggle
+
   on_select_checkbox_checked: (event) ->
     ###
      * Event handler when a folderitem (row) was selected
@@ -1054,20 +1063,17 @@ class ListingController extends React.Component
           {@state.show_column_toggles and
             <a
               href="#"
-              onClick={(event) -> event.preventDefault()}
-              className="pull-right"
-              data-toggle="collapse"
-              data-target="#table-config">
+              onClick={@on_column_config_click}
+              className="pull-right">
               <span className="glyphicon glyphicon-option-horizontal"></span>
             </a>}
-          <TableColumnConfig
-            title={_("Configure Table Columns")}
-            columns={@get_columns()}
-            column_keys={@get_column_keys()}
-            toggle_column={@toggleColumn}
-            set_column_order={@setColumnOrder}
-            id="table-config"
-            className="collapse"/>
+          {@state.show_column_config and
+            <TableColumnConfig
+              title={_("Configure Table Columns")}
+              columns={@get_columns()}
+              column_keys={@get_column_keys()}
+              toggle_column={@toggleColumn}
+              set_column_order={@setColumnOrder}/>}
           <Table
             className="contentstable table table-condensed table-hover small"
             allow_edit={@state.allow_edit}
