@@ -457,7 +457,7 @@ class ListingController extends React.Component
       if column is undefined
         console.warn "Skipping nonexisting column '#{key}'."
         continue
-      columns[key] =
+      columns[key] = column
     return columns
 
   ###*
