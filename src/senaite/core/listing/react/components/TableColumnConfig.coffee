@@ -68,11 +68,14 @@ class TableColumnConfig extends React.Component
     @setState
       columns: @props.columns
 
+  is_column_visible: (column) ->
+    return column.toggle isnt off
+
   build_column_toggles: ->
     columns = []
     for key in @state.column_keys
       column = @props.columns[key]
-      checked = column.toggle
+      checked = @is_column_visible column
       columns.push(
         <li
           key={key}
