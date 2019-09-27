@@ -337,7 +337,7 @@ class ListingController extends React.Component
     # restore columns to the initial state and flush the local storage
     if key is "reset"
       @setState {columns: @get_default_columns()}
-      @set_local_columns []
+      @set_local_column_config []
       return true
 
     # get the columns from the state
@@ -347,13 +347,13 @@ class ListingController extends React.Component
     toggle = not columns[key]["toggle"]
     columns[key]["toggle"] = toggle
 
-    local_columns = []
+    column_config = []
     for key, column of columns
       # keep only a record of the column key and visibility in the local storage
-      local_columns.push {key: key, toggle: column.toggle}
+      column_config.push {key: key, toggle: column.toggle}
 
     # store the new order and visibility in the local storage
-    @set_local_columns local_columns
+    @set_local_column_config column_config
 
     # update the columns of the current state
     @setState {columns: columns}
@@ -378,7 +378,7 @@ class ListingController extends React.Component
     # Although the column properties seem to be sorted, we keep in the local
     # storage a list of column "visibility" objects to avoid any order issues
     # with the JSON serialization step.
-    local_columns = []
+    column_config = []
 
     # get the keys of all columns (visible or not)
     keys = Object.keys @state.columns
@@ -390,12 +390,14 @@ class ListingController extends React.Component
     # rebuild an object with the new property order
     for key in keys
       column = @state.columns[key]
+      toggle = column.toggle
+      if toggle is undefined then toggle = yes
       # keep only a record of the column key and visibility in the local storage
-      local_columns.push {key: key, toggle: column.toggle}
+      column_config.push {key: key, toggle: toggle}
       ordered_columns[key] = column
 
     # store the new order and visibility in the local storage
-    @set_local_columns local_columns
+    @set_local_column_config column_config
 
     # update the columns of the current state
     @setState {columns: ordered_columns}
@@ -408,11 +410,16 @@ class ListingController extends React.Component
   ###
   get_visible_column_keys: ->
     keys = []
-    for key, column of @get_columns()
-      # only skip the column if type is identical to `false`
-      # This means that `undefined` (omitted) toggles are displayed
+    columns = @state.columns
+    allowed_keys = @get_allowed_column_keys()
+    for key, column of columns
+      # skip non-allowed keys
+      if key not in allowed_keys
+        continue
+      # skip columns which are explicitly toggled off
       if column.toggle is no
         continue
+      # remember the key
       keys.push key
     return keys
 
@@ -801,8 +808,8 @@ class ListingController extends React.Component
    * @param columns {array} Array of {"key":key, "toggle":toggle} records
    * @returns {bool} true
   ###
-  set_local_columns: (columns) ->
-    console.debug "ListingController::set_local_columns: columns=", columns
+  set_local_column_config: (columns) ->
+    console.debug "ListingController::set_local_column_config: columns=", columns
 
     key = @get_local_storage_key "columns-"
     storage = window.localStorage
@@ -814,7 +821,7 @@ class ListingController extends React.Component
    *
    * @returns columns {array} of {"key":key, "toggle":toggle} records
   ###
-  get_local_columns: ->
+  get_local_column_config: ->
     key = @get_local_storage_key "columns-"
     storage = window.localStorage
     columns = storage.getItem key
