@@ -432,33 +432,30 @@ class ListingController extends React.Component
    * @returns columns {object} Object of column definitions
   ###
   get_columns: ->
-    columns = @state.columns
-
-    if @get_local_columns().length == 0
-      return columns
-
     updated_columns = {}
-    for record in @get_local_columns()
-      key = record.key
-      toggle = record.toggle
-      column = columns[key]
-      if column is undefined
-        console.warn "Skipping nonexisting local column #{key}"
-        continue
-      column["toggle"] = toggle
-      updated_columns[key] = column
-    return updated_columns
+    columns = @state.columns
+    allowed_column_keys = @get_allowed_column_keys()
+    local_columns = @get_local_columns()
 
-  ###*
-   * Returns all column keys
-   *
-   * @returns columns {array} Ordered array of of all column IDs
-  ###
-  get_column_keys: ->
-    keys = []
-    for key, column of @get_columns()
-      keys.push key
-    return keys
+    if local_columns.length == 0
+      # return the columns sorted by the keys of the current review_state item
+      for key in allowed_column_keys
+        updated_columns[key] = columns[key]
+    else
+      # preparecolumns according to the order/visibility of the user settings
+      for record in local_columns
+        key = record.key
+        toggle = record.toggle
+        column = columns[key]
+        if key not in allowed_column_keys
+          console.warn "Skipping column #{key}: Not in review_state columns"
+          continue
+        if column is undefined
+          console.warn "Skipping local column #{key}: Not in current columns set"
+          continue
+        column["toggle"] = toggle
+        updated_columns[key] = column
+    return updated_columns
 
   ###*
    * Filter the results by the given state
@@ -763,16 +760,16 @@ class ListingController extends React.Component
    *
    * @returns {array} columns of column keys
   ###
-  get_allowed_columns: ->
+  get_allowed_column_keys: ->
     # get the current active state filter, e.g. "default"
     review_state = @state.review_state
     # get the defined review state item from the config
     review_state_item = @get_review_state_by_id review_state
-    columns = review_state_item.columns
-    if not columns
+    keys = review_state_item.columns
+    if not keys
       # return the keys of the columns object
       Object.keys @state.columns
-    return columns
+    return keys
 
   ###*
    * Calculate a common local storage key for this listing view.
@@ -1211,7 +1208,7 @@ class ListingController extends React.Component
             <TableColumnConfig
               title={_("Configure Table Columns")}
               columns={@get_columns()}
-              column_keys={@get_column_keys()}
+              column_keys={@get_allowed_column_keys()}
               toggle_column={@toggleColumn}
               set_column_order={@setColumnOrder}/>}
           <Table
