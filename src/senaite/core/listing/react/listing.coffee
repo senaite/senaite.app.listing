@@ -331,8 +331,8 @@ class ListingController extends React.Component
     console.debug "ListingController::toggleColumn: key=#{key}"
 
     if key is "reset"
+      @setState {columns: @get_default_columns()}
       @set_local_columns []
-      @setState {columns: @columns}
       return true
 
     # get the columns from the state
@@ -407,6 +407,16 @@ class ListingController extends React.Component
       if column.toggle
         keys.push key
     return keys
+
+  ###*
+    * Get the default columns
+    *
+    * This method parses the JSON columns definitions from the DOM.
+    *
+    * @returns columns {object} Object of column definitions
+  ###
+  get_default_columns: ->
+    return JSON.parse @root_el.dataset.columns
 
   ###*
     * Get columns in the right order and visibility
