@@ -141,11 +141,6 @@ class AjaxListingView(BrowserView):
     def get_columns(self):
         """Returns the `columns` dictionary of the view
         """
-
-        # ensure the property item is set
-        for key, column in self.columns.items():
-            column["toggle"] = column.get("toggle", True)
-
         return self.columns
 
     @translate

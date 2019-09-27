@@ -409,8 +409,11 @@ class ListingController extends React.Component
   get_visible_column_keys: ->
     keys = []
     for key, column of @get_columns()
-      if column.toggle
-        keys.push key
+      # only skip the column if type is identical to `false`
+      # This means that `undefined` (omitted) toggles are displayed
+      if column.toggle is no
+        continue
+      keys.push key
     return keys
 
   ###*
