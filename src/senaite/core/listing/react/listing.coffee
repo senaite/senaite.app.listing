@@ -1,6 +1,9 @@
 ###* ReactJS controlled component
  *
  * Please use JSDoc comments: https://jsdoc.app
+ *
+ * Note: Each comment must start with a `/**` sequence in order to be recognized
+ *       by the JSDoc parser.
 ###
 import React from "react"
 import ReactDOM from "react-dom"
@@ -18,7 +21,7 @@ import TableColumnConfig from "./components/TableColumnConfig.coffee"
 import "./listing.css"
 
 
-# DOCUMENT READY ENTRY POINT
+###* DOCUMENT READY ENTRY POINT ###
 document.addEventListener "DOMContentLoaded", ->
   console.debug "*** SENAITE.CORE.LISTING::DOMContentLoaded: --> Loading ReactJS Controller"
 
@@ -31,11 +34,18 @@ document.addEventListener "DOMContentLoaded", ->
     window.listings[form_id] = controller
 
 
+###*
+  * Controller class for one listing table.
+  * The idea is to handle all API calls and logic here and pass the callback
+  * methods to the contained components.
+  * @class
+###
 class ListingController extends React.Component
-  ###
-   * Listing Table Controller
-  ###
 
+  ###*
+    * Bind all event handlers and define the state
+    * @constructor
+  ###
   constructor: (props) ->
     super(props)
 
@@ -996,6 +1006,7 @@ class ListingController extends React.Component
 
   on_column_config_click: (event) ->
     event.preventDefault()
+    return unless @state.show_column_toggles
     toggle = not @state.show_column_config
     @setState
       show_column_config: toggle
@@ -1079,6 +1090,7 @@ class ListingController extends React.Component
             allow_edit={@state.allow_edit}
             on_header_column_click={@sortBy}
             on_select_checkbox_checked={@on_select_checkbox_checked}
+            on_context_menu={@on_column_config_click}
             sort_on={@state.sort_on}
             sort_order={@state.sort_order}
             catalog_indexes={@state.catalog_indexes}
