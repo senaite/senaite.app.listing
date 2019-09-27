@@ -35,16 +35,16 @@ document.addEventListener "DOMContentLoaded", ->
 
 
 ###*
-  * Controller class for one listing table.
-  * The idea is to handle all API calls and logic here and pass the callback
-  * methods to the contained components.
-  * @class
+ * Controller class for one listing table.
+ * The idea is to handle all API calls and logic here and pass the callback
+ * methods to the contained components.
+ * @class
 ###
 class ListingController extends React.Component
 
   ###*
-    * Bind all event handlers and define the state
-    * @constructor
+   * Bind all event handlers and define the state
+   * @constructor
   ###
   constructor: (props) ->
     super(props)
@@ -154,7 +154,10 @@ class ListingController extends React.Component
 
 
   ###*
-    * Dismisses a message by its message index
+   * Dismisses a message by its message index
+   *
+   * @param index {int} Index of the message to dismiss
+   * @returns {bool} true
   ###
   dismissMessage: (index=null) ->
     # dismiss all messages
@@ -168,13 +171,14 @@ class ListingController extends React.Component
     return true
 
   ###*
-    * Display a new bootstrap alert message above the table
-    * @param title {string} Title to be displayed in the alert box
-    *              {object} Config object for all parameters
-    * @param text {string} The message text
-    * @param traceback {string} Preformatted traceback
-    * @param level {string} info, success, warning, danger
-    * @returns {bool} true
+   * Display a new bootstrap alert message above the table
+   *
+   * @param title {string} Title to be displayed in the alert box
+   *              {object} Config object for all parameters
+   * @param text {string} The message text
+   * @param traceback {string} Preformatted traceback
+   * @param level {string} info, success, warning, danger
+   * @returns {bool} true
   ###
   addMessage: (title, text, traceback, level="info") ->
     if typeof title is "object"
@@ -195,8 +199,8 @@ class ListingController extends React.Component
     return true
 
   ###*
-    * Parameters to be sent in each Ajax POST request
-    * @returns {object} current state values
+   * Parameters to be sent in each Ajax POST request
+   * @returns {object} current state values
   ###
   getRequestOptions: ->
     options =
@@ -212,18 +216,18 @@ class ListingController extends React.Component
     return options
 
   ###*
-    * ReactJS event handler when the component did mount
-    * Fetches the initial folderitems
+   * ReactJS event handler when the component did mount
+   * Fetches the initial folderitems
   ###
   componentDidMount: ->
     @fetch_folderitems()
 
   ###*
-    * Expand/Collapse a listing category row by adding the category ID to the
-    * state `expanded_categories`
-    *
-    * @param category {string} Title of the category
-    * @returns {bool} true if the category was expanded, otherwise false
+   * Expand/Collapse a listing category row by adding the category ID to the
+   * state `expanded_categories`
+   *
+   * @param category {string} Title of the category
+   * @returns {bool} true if the category was expanded, otherwise false
   ###
   toggleCategory: (category) ->
     console.debug "ListingController::toggleCategory: column=#{category}"
@@ -245,10 +249,10 @@ class ListingController extends React.Component
     return expanded.length > 0
 
   ###*
-    * Expand/Collapse remarks
-    *
-    * @param uid {string} UID of the item
-    * @returns {bool} true if the remarks were expanded, otherwise false
+   * Expand/Collapse remarks
+   *
+   * @param uid {string} UID of the item
+   * @returns {bool} true if the remarks were expanded, otherwise false
   ###
   toggleRemarks: (uid) ->
     console.debug "ListingController::toggleRemarks: uid=#{uid}"
@@ -274,10 +278,10 @@ class ListingController extends React.Component
     return expanded.length > 0
 
   ###
-    * Expand/Collapse the row
-    *
-    * @param uid {string} UID of the item
-    * @returns {bool} true if the row was expanded, otherwise false
+   * Expand/Collapse the row
+   *
+   * @param uid {string} UID of the item
+   * @returns {bool} true if the row was expanded, otherwise false
   ###
   toggleRow: (uid) ->
     console.debug "ListingController::toggleRow: uid=#{uid}"
@@ -319,17 +323,18 @@ class ListingController extends React.Component
     return expanded.length > 0
 
   ###*
-    * Toggle the visibility of a column by its column key.
-    *
-    * This method also stores the visibility of the column in the browser's
-    * localstorage.
-    *
-    * @param key {string} The ID of the column
-    * @returns {bool} true if the column was expanded, otherwise false
+   * Toggle the visibility of a column by its column key.
+   *
+   * This method also stores the visibility of the column in the browser's
+   * localstorage.
+   *
+   * @param key {string} The ID of the column, or "reset" to restore all columns
+   * @returns {bool} true if the column was expanded, otherwise false
   ###
   toggleColumn: (key) ->
     console.debug "ListingController::toggleColumn: key=#{key}"
 
+    # restore columns to the initial state and flush the local storage
     if key is "reset"
       @setState {columns: @get_default_columns()}
       @set_local_columns []
@@ -356,13 +361,13 @@ class ListingController extends React.Component
     return toggle
 
   ###*
-    * Update the order of all columns
-    *
-    * This method also stores the order of the columns in the browser's
-    * localstorage.
-    *
-    * @param order {array} Array of column IDs to be used as new order
-    * @returns {object} New ordered columns object
+   * Update the order of all columns
+   *
+   * This method also stores the order of the columns in the browser's
+   * localstorage.
+   *
+   * @param order {array} Array of column IDs to be used as new order
+   * @returns {object} New ordered columns object
   ###
   setColumnOrder: (order) ->
     console.debug "ListingController::setColumnOrder: order=#{order}"
@@ -397,9 +402,9 @@ class ListingController extends React.Component
     return ordered_columns
 
   ###*
-    * Returns all column keys where the visibility toggle is true
-    *
-    * @returns columns {array} Array of ordered and visible columns
+   * Returns all column keys where the visibility toggle is true
+   *
+   * @returns columns {array} Array of ordered and visible columns
   ###
   get_visible_column_keys: ->
     keys = []
@@ -409,22 +414,22 @@ class ListingController extends React.Component
     return keys
 
   ###*
-    * Get the default columns
-    *
-    * This method parses the JSON columns definitions from the DOM.
-    *
-    * @returns columns {object} Object of column definitions
+   * Get the default columns
+   *
+   * This method parses the JSON columns definitions from the DOM.
+   *
+   * @returns columns {object} Object of column definitions
   ###
   get_default_columns: ->
     return JSON.parse @root_el.dataset.columns
 
   ###*
-    * Get columns in the right order and visibility
-    *
-    * This method takes the local column settings into consideration
-    * to set the visibility and order of the final columns object.
-    *
-    * @returns columns {object} Object of column definitions
+   * Get columns in the right order and visibility
+   *
+   * This method takes the local column settings into consideration
+   * to set the visibility and order of the final columns object.
+   *
+   * @returns columns {object} Object of column definitions
   ###
   get_columns: ->
     columns = @state.columns
@@ -445,9 +450,9 @@ class ListingController extends React.Component
     return updated_columns
 
   ###*
-    * Returns all column keys
-    *
-    * @returns columns {array} Ordered array of of all column IDs
+   * Returns all column keys
+   *
+   * @returns columns {array} Ordered array of of all column IDs
   ###
   get_column_keys: ->
     keys = []
@@ -456,12 +461,12 @@ class ListingController extends React.Component
     return keys
 
   ###*
-    * Filter the results by the given state
-    *
-    * This method executes an Ajax request to the server.
-    *
-    * @param review_state {string} The state to filter, e.g. verified, published
-    * @returns {bool} true
+   * Filter the results by the given state
+   *
+   * This method executes an Ajax request to the server.
+   *
+   * @param review_state {string} The state to filter, e.g. verified, published
+   * @returns {bool} true
   ###
   filterByState: (review_state="default") ->
     console.debug "ListingController::filterByState: review_state=#{review_state}"
@@ -472,12 +477,12 @@ class ListingController extends React.Component
     return true
 
   ###*
-    * Filter the results by the given searchterm
-    *
-    * This method executes an Ajax request to the server.
-    *
-    * @param filter {string} An arbitrary search string
-    * @returns {bool} true
+   * Filter the results by the given searchterm
+   *
+   * This method executes an Ajax request to the server.
+   *
+   * @param filter {string} An arbitrary search string
+   * @returns {bool} true
   ###
   filterBySearchterm: (filter="") ->
     console.debug "ListingController::filterBySearchter: filter=#{filter}"
@@ -488,18 +493,15 @@ class ListingController extends React.Component
     return true
 
   ###*
-    * Sort a column with a specific order
-    *
-    * This method executes an Ajax request to the server.
-    *
-    * @param sort_on {string} Sort index, e.g. getId, created
-    * @param sort_order {string} Sort order, e.g. ascending, descending
-    * @returns {bool} true
+   * Sort a column with a specific order
+   *
+   * This method executes an Ajax request to the server.
+   *
+   * @param sort_on {string} Sort index, e.g. getId, created
+   * @param sort_order {string} Sort order, e.g. ascending, descending
+   * @returns {bool} true
   ###
   sortBy: (sort_on, sort_order) ->
-    ###
-     * Sort the results by the given sort_on index with the given sort_order
-    ###
     console.debug "sort_on=#{sort_on} sort_order=#{sort_order}"
     @set_state
       sort_on: sort_on
@@ -509,12 +511,12 @@ class ListingController extends React.Component
     return true
 
   ###*
-    * Show more results
-    *
-    * This method executes an Ajax request to the server.
-    *
-    * @param pagesize {int} The amount of additional items to request
-    * @returns {bool} true
+   * Show more results
+   *
+   * This method executes an Ajax request to the server.
+   *
+   * @param pagesize {int} The amount of additional items to request
+   * @returns {bool} true
   ###
   showMore: (pagesize) ->
     console.debug "ListingController::showMore: pagesize=#{pagesize}"
@@ -542,18 +544,15 @@ class ListingController extends React.Component
     return true
 
   ###*
-    * Submit form
-    *
-    * This method executes an HTTP POST form submission
-    *
-    * @param id {string} The workflow action id
-    * @param url {string} The form action URL
-    * @returns form submission
+   * Submit form
+   *
+   * This method executes an HTTP POST form submission
+   *
+   * @param id {string} The workflow action id
+   * @param url {string} The form action URL
+   * @returns form submission
   ###
   doAction: (id, url) ->
-    ###
-     * Perform an action coming from the WF Action Buttons
-    ###
 
     # handle clear button separate
     if id == "clear_selection"
@@ -582,13 +581,13 @@ class ListingController extends React.Component
     return form.submit()
 
   ###*
-    * Select a row checkbox by UID
-    *
-    * This method executes an Ajax request to the server.
-    *
-    * @param uid {string} The UID of the row
-    * @param toggle {bool} true for select, false for deselect
-    * @returns {Promise} which is resolved when the state was sucessfully set
+   * Select a row checkbox by UID
+   *
+   * This method executes an Ajax request to the server.
+   *
+   * @param uid {string} The UID of the row
+   * @param toggle {bool} true for select, false for deselect
+   * @returns {Promise} which is resolved when the state was sucessfully set
   ###
   selectUID: (uid, toggle) ->
     # copy the selected UIDs from the state
@@ -639,22 +638,33 @@ class ListingController extends React.Component
       @setState
         selected_uids: selected_uids, resolve
 
+  ###*
+   * Save the values of the state's `ajax_save_queue`
+   *
+   * This method executes an Ajax request to the server.
+   *
+   * @returns {Promise} of the Ajax Save Request
+  ###
   saveAjaxQueue: ->
-    ###
-     * Save the whole ajax queue
-    ###
     uids = Object.keys @state.ajax_save_queue
-    return unless uids.length > 0
-    promise = @ajax_save()
+    return false unless uids.length > 0
+    return @ajax_save()
 
+  ###*
+   * Save a named value by UID to the ajax_save_queue
+   *
+   * If the column has the `autosave` property set,
+   * the value will be send immediately to the server
+   *
+   * @param uid {string} UID of the object
+   * @param name {string} name of the field
+   * @param value {string} value to set
+   * @param item {object} additional server data
+   * @returns {bool} true
+  ###
   saveEditableField: (uid, name, value, item) ->
-    ###
-     * Save the editable field of a table cell
-    ###
-
     # Skip fields which are not editable
-    return unless name in item.allow_edit
-
+    return false unless name in item.allow_edit
     console.debug "ListingController::saveEditableField: uid=#{uid} name=#{name} value=#{value}"
 
     column = @state.columns[name] or {}
@@ -671,11 +681,20 @@ class ListingController extends React.Component
       , ->
         if column.autosave
           me.ajax_save()
+    return true
 
+  ###*
+   * Update a named value by UID
+   *
+   * Saves the value and selects the row.
+   *
+   * @param uid {string} UID of the object
+   * @param name {string} name of the field
+   * @param value {string} value to set
+   * @param item {object} additional server data
+   * @returns {bool} true
+  ###
   updateEditableField: (uid, name, value, item) ->
-    ###
-     * Update the editable field
-    ###
     console.debug "ListingController::updateEditableField: uid=#{uid} name=#{name} value=#{value}"
 
     # immediately fill the `ajax_save_queue` to show the "Save" button
@@ -689,17 +708,26 @@ class ListingController extends React.Component
         # fetch all possible transitions
         if me.state.fetch_transitions_on_select
           me.fetch_transitions()
+    return true
 
+  ###*
+   * Checks if the UID is selected.
+   *
+   * @param uid {string} UID of the object
+   * @returns {bool} true if the UID is selected or false
+  ###
   is_uid_selected: (uid) ->
-    ###
-     * Check if the UID is selected
-    ###
     return uid in @state.selected_uids
 
+  ###*
+   * Checks if the UID is selected.
+   *
+   * Throws an error if the ID was not found in the review_states list.
+   *
+   * @param id {string} ID of the review_state, e.g. "default" or "verified"
+   * @returns {object} review_states item
+  ###
   get_review_state_by_id: (id) ->
-    ###
-     * Fetch the current review_state item by id
-    ###
     current = null
 
     # review_states is the list of review_state items from the listing view
@@ -747,12 +775,12 @@ class ListingController extends React.Component
     return columns
 
   ###*
-    * Calculate a common local storage key for this listing view.
-    *
-    * Note: The browser view initially calculates the `listing_portal_type`
-    *       which is basically the portal_type of the listed items.
-    *
-    * @returns key {string} with optional prefix and postfix
+   * Calculate a common local storage key for this listing view.
+   *
+   * Note: The browser view initially calculates the `listing_portal_type`
+   *       which is basically the portal_type of the listed items.
+   *
+   * @returns key {string} with optional prefix and postfix
   ###
   get_local_storage_key: (prefix, postfix) ->
     key = @listing_portal_type
@@ -765,7 +793,10 @@ class ListingController extends React.Component
     return key
 
   ###*
-    * Set the local defined column visibility
+   * Set the columns definition to the local storage
+   *
+   * @param columns {array} Array of {"key":key, "toggle":toggle} records
+   * @returns {bool} true
   ###
   set_local_columns: (columns) ->
     console.debug "ListingController::set_local_columns: columns=", columns
@@ -773,11 +804,12 @@ class ListingController extends React.Component
     key = @get_local_storage_key "columns-"
     storage = window.localStorage
     storage.setItem key, JSON.stringify(columns)
+    return true
 
   ###*
-    * Returns the user defined column order and visibility
-    *
-    * @returns columns {array} of {"key": key, "toggle": toggle} records
+   * Returns column definitions of the local storage
+   *
+   * @returns columns {array} of {"key":key, "toggle":toggle} records
   ###
   get_local_columns: ->
     key = @get_local_storage_key "columns-"
@@ -793,11 +825,11 @@ class ListingController extends React.Component
       return []
 
   ###*
-    * Calculate the number of displayed columns
-    *
-    * This method also counts the selection column if present.
-    *
-    * @returns count {int} of displayed columns
+   * Calculate the number of displayed columns
+   *
+   * This method also counts the selection column if present.
+   *
+   * @returns count {int} of displayed columns
   ###
   get_column_count: ->
     # get the current visible columns
@@ -809,25 +841,27 @@ class ListingController extends React.Component
       count += 1
     return count
 
+  ###*
+   * Get the names of all expanded categories
+   *
+   * @returns {array} expanded category names
+  ###
   get_expanded_categories: ->
-    ###
-     * Get the expanded categories
-    ###
-
     # return all categories if the flag is on
     if @state.expand_all_categories
       return [].concat @state.categories
-
     # expand all categories for searches
     if @state.filter
       return [].concat @state.categories
-
     return []
 
+  ###*
+   * Create a mapping of UID -> folderitem
+   *
+   * @param folderitems {array} Array of folderitem records
+   * @returns {object} of {UID:folderitem}
+  ###
   group_by_uid: (folderitems) ->
-    ###
-     * Create a mapping of UID -> folderitem
-    ###
     folderitems ?= @state.folderitems
     mapping = {}
     folderitems.map (item, index) ->
@@ -836,36 +870,48 @@ class ListingController extends React.Component
       mapping[uid] = item
     return mapping
 
+  ###*
+   * Calculate the count of current folderitems
+   *
+   * @returns {int} Number of folderitems
+  ###
   get_item_count: ->
-    ###
-     * Return the current shown items
-    ###
     return @state.folderitems.length
 
+  ###*
+   * Toggles the loading animation on/off
+   *
+   * @param toggle {bool} true to show the loader, false otherwise
+   * @returns {bool} toggle state
+  ###
   toggle_loader: (toggle=off) ->
-    ###
-     * Toggle the loader on/off
-    ###
     @setState loading: toggle
+    return toggle
 
+  ###*
+   * Set the state with optional folderitems fetch
+   *
+   * @param data {object} data to set to the state
+   * @param fetch {bool} true to re-fetch the folderitems, false otherwise
+   * @returns {bool} true
+  ###
   set_state: (data, fetch=yes) ->
-    ###
-     * Helper to set the state and reload the folderitems
-    ###
     me = this
-
     @setState data, ->
       if fetch then me.fetch_folderitems()
+    return true
 
+  ###*
+   * Fetch the possible transitions of the selected UIDs
+   *
+   * @returns {Promise} for the API fetch transitions call
+  ###
   fetch_transitions: ->
-    ###
-     * Fetch the possible transitions
-    ###
     selected_uids = @state.selected_uids
 
     # empty the possible transitions if no UID is selected
     if selected_uids.length == 0
-      @setState transitions: []
+      @setState {transitions: []}
       return
 
     # turn loader on
@@ -881,13 +927,14 @@ class ListingController extends React.Component
         console.debug "ListingController::fetch_transitions: NEW STATE=", me.state
         # turn loader off
         me.toggle_loader off
+    return promise
 
+  ###
+   * Fetch folderitems from the server
+   *
+   * @returns {Promise} for the API fetch folderitems call
+  ###
   fetch_folderitems: ->
-    ###
-     * Fetch folderitems from the server
-     *
-     * @param uids {array} List of UIDs to fetch (all if omitted)
-    ###
 
     # turn loader on
     @toggle_loader on
@@ -950,11 +997,14 @@ class ListingController extends React.Component
 
     return promise
 
+  ###
+   * Fetch child-folderitems from the server
+   *
+   * @param {parent_uid} UID of the parent, e.g. the primary partition
+   * @param {child_uids} UIDs of the children (partitions) to load
+   * @returns {Promise} for the API fetch folderitems call
+  ###
   fetch_children: ({parent_uid, child_uids}={}) ->
-    ###
-     * Fetch the children of the parent by uid
-    ###
-
     # turn loader on
     @toggle_loader on
 
@@ -979,10 +1029,12 @@ class ListingController extends React.Component
 
     return promise
 
+  ###
+   * Checks if the top toolbar should be loaded or not.
+   *
+   * @returns {bool} true to render the top toolbar, false otherwise
+  ###
   render_toolbar_top: ->
-    ###
-     * Control if the top toolbar should be loaded
-    ###
     if @state.show_more
       return yes
     if @state.show_search
@@ -991,10 +1043,12 @@ class ListingController extends React.Component
       return yes
     return no
 
+  ###
+   * Send the `ajax_save_queue` to the server
+   *
+   * @returns {Promise} of the API set_fields call
+  ###
   ajax_save: ->
-    ###
-     * Save the items of the `ajax_save_queue`
-    ###
     console.debug "ListingController::ajax_save:ajax_save_queue=", @state.ajax_save_queue
 
     # turn loader on
@@ -1030,11 +1084,16 @@ class ListingController extends React.Component
 
       # toggle loader off
       me.toggle_loader off
+    return promise
 
+  ###*
+   * Update existing folderitems
+   *
+   * This is done for performance increase to avoid a complete re-rendering
+   *
+   * @param folderitems {array} Array of folderitems records from the view
+  ###
   update_existing_folderitems_with: (folderitems) ->
-    ###
-     * Update existing folderitems
-    ###
     console.log "ListingController::update_existing_folderitems_with: ", folderitems
 
     # These folderitems get set to the state
@@ -1074,10 +1133,10 @@ class ListingController extends React.Component
       folderitems: new_folderitems
 
   ###*
-    * EVENT HANDLERS
-    *
-    * N.B. All `event` objects are ReactJS events
-    *      https://reactjs.org/docs/handling-events.html
+   * EVENT HANDLERS
+   *
+   * N.B. All `event` objects are ReactJS events
+   *      https://reactjs.org/docs/handling-events.html
   ###
 
   on_column_config_click: (event) ->
@@ -1088,9 +1147,6 @@ class ListingController extends React.Component
       show_column_config: toggle
 
   on_select_checkbox_checked: (event) ->
-    ###
-     * Event handler when a folderitem (row) was selected
-    ###
     console.debug "°°° ListingController::on_select_checkbox_checked"
     me = this
     el = event.currentTarget
@@ -1103,10 +1159,6 @@ class ListingController extends React.Component
         me.fetch_transitions()
 
   on_api_error: (response) ->
-    ###
-     * API Error handler
-     * This method stops the loader animation and adds a status message
-    ###
     @toggle_loader off
     console.debug "°°° ListingController::on_api_error: GOT AN ERROR RESPONSE: ", response
 
@@ -1117,7 +1169,8 @@ class ListingController extends React.Component
       me.addMessage title, message, data.traceback, level="danger"
 
   ###*
-    * Renders the listing table
+   * Renders the listing table
+   * @returns {JSX}
   ###
   render: ->
     <div className="listing-container">
