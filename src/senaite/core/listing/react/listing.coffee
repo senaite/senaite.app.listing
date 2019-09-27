@@ -352,8 +352,9 @@ class ListingController extends React.Component
     columns = @state.columns
 
     # Toggle the visibility of the column
-    toggle = not columns[key]["toggle"]
-    columns[key]["toggle"] = toggle
+    toggle = columns[key]["toggle"]
+    if toggle is undefined then toggle = yes
+    columns[key]["toggle"] = !toggle
 
     column_config = []
     for key, column of columns
