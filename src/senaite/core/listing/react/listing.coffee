@@ -78,6 +78,7 @@ class ListingController extends React.Component
     @listing_identifier = @root_el.dataset.listing_identifier
     @pagesize = parseInt @root_el.dataset.pagesize
     @review_states = JSON.parse @root_el.dataset.review_states
+    @show_column_toggles = JSON.parse @root_el.dataset.show_column_toggles
 
     # the API is responsible for async calls and knows about the endpoints
     @api = new ListingAPI
@@ -140,7 +141,7 @@ class ListingController extends React.Component
       allow_edit: no
       show_select_all_checkbox: no
       show_select_column: no
-      show_column_toggles: no
+      show_column_toggles: @show_column_toggles
       select_checkbox_name: "uids"
       post_action: "workflow_action"
       show_categories: no

@@ -284,6 +284,12 @@ class AjaxListingView(BrowserView):
         """
         return self.get_columns()
 
+    @returns_safe_json
+    def ajax_show_column_toggles(self):
+        """Returns the boolean value of the show_column_toggles attribute
+        """
+        return self.show_column_toggles
+
     @translate
     def get_folderitems(self):
         """This method calls the folderitems method
