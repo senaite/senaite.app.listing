@@ -10,7 +10,6 @@ class TableColumnConfig extends React.Component
     @on_drag_end = @on_drag_end.bind @
     @on_drag_over = @on_drag_over.bind @
     @on_column_toggle_click = @on_column_toggle_click.bind @
-    @on_column_toggle_changed = @on_column_toggle_changed.bind @
     @on_reset_click = @on_reset_click.bind @
 
     @state =
@@ -71,13 +70,6 @@ class TableColumnConfig extends React.Component
     if @props.on_column_toggle_click
       @props.on_column_toggle_click column
 
-  on_column_toggle_changed: (event) ->
-    el = event.currentTarget
-    column = el.getAttribute "column"
-    # call the event handler of the controller to toggle the column
-    if @props.on_column_toggle_click
-      @props.on_column_toggle_click column
-
   is_column_visible: (column) ->
     return column.toggle isnt off
 
@@ -85,7 +77,7 @@ class TableColumnConfig extends React.Component
     columns = []
     for key in @state.columns_order
       column = @props.columns[key]
-      checked = @is_column_visible column
+      visible = @is_column_visible column
       columns.push(
         <li
           key={key}
@@ -103,12 +95,8 @@ class TableColumnConfig extends React.Component
               column={key}
               onClick={@on_column_toggle_click}
               className="btn btn-default btn-xs">
-              <input
-                type="checkbox"
-                column={key}
-                onChange={@on_column_toggle_changed}
-                checked={checked}/>
-              &nbsp;<span className="glyphicon glyphicon-menu-hamburger"></span>
+              {visible and <span className="glyphicon glyphicon-check"></span>}
+              {not visible and <span className="glyphicon glyphicon-unchecked"></span>}
               &nbsp;<span dangerouslySetInnerHTML={{__html: column.title or key}}></span>
             </button>
           </div>
