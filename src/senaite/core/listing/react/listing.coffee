@@ -900,7 +900,7 @@ class ListingController extends React.Component
    *
    * @returns count {int} of displayed columns
   ###
-  get_column_count: ->
+  get_columns_count: ->
     # get the current visible columns
     visible_columns = @get_visible_columns()
 
@@ -1247,7 +1247,7 @@ class ListingController extends React.Component
     # computed properties at render time
     columns = @get_columns()
     columns_order = @get_columns_order()
-    column_count = @get_column_count()
+    columns_count = @get_columns_count()
     visible_columns = @get_visible_columns()
     item_count = @get_item_count()
     render_toolbar_top = @render_toolbar_top()
@@ -1306,7 +1306,7 @@ class ListingController extends React.Component
               catalog_columns={@state.catalog_columns}
               sortable_columns={@state.sortable_columns}
               columns={columns}
-              column_count={column_count}
+              columns_count={columns_count}
               review_state={@state.review_state}
               visible_columns={visible_columns}
               review_states={@state.review_states}

@@ -32,7 +32,7 @@ class TableCategoryRow extends React.Component
     return (
       <td key="toggle"
           className={cls}
-          colSpan={@props.column_count}>
+          colSpan={@props.columns_count}>
         <span className={icon_cls}></span> {@props.category}
       </td>
     )

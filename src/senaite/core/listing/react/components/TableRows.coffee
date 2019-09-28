@@ -175,7 +175,7 @@ class TableRows extends React.Component
         column = @props.columns[column_key]
         # support rowspanning for WS header slot
         skip = item.skip or []
-        colspan = @props.column_count - skip.length
+        colspan = @props.columns_count - skip.length
         # get the remarks value
         value = item[column_key] or ""
         rows.push(
