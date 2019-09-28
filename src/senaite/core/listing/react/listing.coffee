@@ -422,7 +422,7 @@ class ListingController extends React.Component
     keys = []
     allowed_keys = @get_allowed_column_keys()
     visible = @get_columns_visibility()
-    for key in @get_column_order()
+    for key in @get_columns_order()
       # skip non-allowed keys
       if key not in allowed_keys
         continue
@@ -455,7 +455,7 @@ class ListingController extends React.Component
   get_columns: ->
     columns = {}
     visibility = @get_columns_visibility()
-    for key in @get_column_order()
+    for key in @get_columns_order()
       column = @state.columns[key]
       if column is undefined
         console.warn "Skipping nonexisting column '#{key}'."
@@ -481,7 +481,7 @@ class ListingController extends React.Component
    *
    * @returns keys {array} Current colum keys
   ###
-  get_column_order: ->
+  get_columns_order: ->
     keys = []
     column_keys = @get_column_keys()
     local_config = @get_local_column_config()
@@ -517,13 +517,13 @@ class ListingController extends React.Component
     if allowed and local_config.length > 0
       # get the user defined visibility
       for {key, toggle} in local_config
-        if toggle is undefined then toggle = yes
+        if toggle is undefined then toggle = true
         visibility[key] = toggle
     else
       # use the default visibility of the columns
       for key, column of @state.columns
         toggle = column.toggle
-        if toggle is undefined then toggle = yes
+        if toggle is undefined then toggle = true
         visibility[key] = toggle
 
     return visibility
@@ -1246,7 +1246,7 @@ class ListingController extends React.Component
 
     # computed properties at render time
     columns = @get_columns()
-    column_order = @get_column_order()
+    columns_order = @get_columns_order()
     column_count = @get_column_count()
     visible_columns = @get_visible_columns()
     item_count = @get_item_count()
@@ -1291,7 +1291,7 @@ class ListingController extends React.Component
               <TableColumnConfig
                 title={_("Configure Table Columns")}
                 columns={columns}
-                column_order={column_order}
+                columns_order={columns_order}
                 on_column_toggle_click={@toggleColumn}
                 on_column_order_change={@setColumnOrder}/>}
             <Table

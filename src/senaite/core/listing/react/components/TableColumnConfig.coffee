@@ -14,7 +14,7 @@ class TableColumnConfig extends React.Component
     @on_reset_click = @on_reset_click.bind @
 
     @state =
-      column_order: @props.column_order
+      columns_order: @props.columns_order
 
   ###*
    * componentDidUpdate(prevProps, prevState, snapshot)
@@ -24,8 +24,8 @@ class TableColumnConfig extends React.Component
   ###
   componentDidUpdate: (prevProps, prevState, snapshot) ->
     # update the column order from the listing
-    if @props.column_order != prevProps.column_order
-        @setState {column_order: @props.column_order}
+    if @props.columns_order != prevProps.columns_order
+        @setState {columns_order: @props.columns_order}
 
   on_reset_click: (event) ->
     event.preventDefault()
@@ -46,21 +46,21 @@ class TableColumnConfig extends React.Component
     column1 = @dragged_item.getAttribute "column"
     column2 = li.getAttribute "column"
 
-    column_order = @state.column_order
+    columns_order = @state.columns_order
     # index of the second column
-    index = column_order.indexOf column2
+    index = columns_order.indexOf column2
     # filter out the currently dragged item
-    column_order = column_order.filter (column) -> column isnt column1
+    columns_order = columns_order.filter (column) -> column isnt column1
     # add the dragged column after the dragged over column
-    column_order.splice index, 0, column1
+    columns_order.splice index, 0, column1
     # set the new columns order to the local state
-    @setState {column_order: column_order}
+    @setState {columns_order: columns_order}
 
   on_drag_end: (event) ->
     @dragged_item = null
     # call the event handler of the controller to change the column order
     if @props.on_column_order_change
-      @props.on_column_order_change @state.column_order
+      @props.on_column_order_change @state.columns_order
 
   on_column_toggle_click: (event) ->
     return if event.target.type is "checkbox"
@@ -83,7 +83,7 @@ class TableColumnConfig extends React.Component
 
   build_column_toggles: ->
     columns = []
-    for key in @state.column_order
+    for key in @state.columns_order
       column = @props.columns[key]
       checked = @is_column_visible column
       columns.push(
