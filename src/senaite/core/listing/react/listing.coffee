@@ -508,14 +508,21 @@ class ListingController extends React.Component
   get_columns_visibility: ->
     visibility = {}
     local_config = @get_local_column_config()
-    for {key, toggle} in local_config
-      if toggle is undefined then toggle = yes
-      visibility[key] = toggle
-    if local_config.length == 0
+    # Skip local settings if toggling is not allowed
+    allowed = @state.show_column_toggles
+
+    if allowed and local_config.length > 0
+      # get the user defined visibility
+      for {key, toggle} in local_config
+        if toggle is undefined then toggle = yes
+        visibility[key] = toggle
+    else
+      # use the default visibility of the columns
       for key, column of @state.columns
         toggle = column.toggle
         if toggle is undefined then toggle = yes
         visibility[key] = toggle
+
     return visibility
 
   ###*
