@@ -484,8 +484,10 @@ class ListingController extends React.Component
     keys = []
     column_keys = @get_columns_keys()
     local_config = @get_local_column_config()
+    # Skip local settings if toggling/ordering is not allowed
+    allowed = @state.show_column_toggles
 
-    if local_config.length > 0
+    if allowed and local_config.length > 0
       # extract the column keys in the user selected order
       keys = local_config.map (item, index) ->
         return item.key
@@ -493,7 +495,7 @@ class ListingController extends React.Component
       # sort column keys by the current columns settings
       allowed_keys = @get_allowed_column_keys()
       keys = allowed_keys.concat column_keys.filter (k) ->
-        # only append keys which are not yet defined in the columns
+        # only append column keys which are not yet in  allowed_keys
         return allowed_keys.indexOf(k) == -1
 
     return keys
@@ -508,7 +510,7 @@ class ListingController extends React.Component
   get_columns_visibility: ->
     visibility = {}
     local_config = @get_local_column_config()
-    # Skip local settings if toggling is not allowed
+    # Skip local settings if toggling/ordering is not allowed
     allowed = @state.show_column_toggles
 
     if allowed and local_config.length > 0
