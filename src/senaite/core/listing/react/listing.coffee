@@ -344,8 +344,8 @@ class ListingController extends React.Component
 
     # restore columns to the initial state and flush the local storage
     if key is "reset"
-      @setState {columns: @get_default_columns()}
       @set_local_column_config []
+      @setState {columns: @get_default_columns()}
       return true
 
     # get the columns from the state
