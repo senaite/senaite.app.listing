@@ -840,6 +840,9 @@ class ListingController extends React.Component
     if not keys
       # return the keys of the columns object
       Object.keys @state.columns
+    # filter out nonexisting fields
+    columns = @state.columns
+    keys = keys.filter (key) -> columns[key] isnt undefined
     return keys
 
   ###*
