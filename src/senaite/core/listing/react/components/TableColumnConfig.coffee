@@ -14,7 +14,18 @@ class TableColumnConfig extends React.Component
     @on_reset_click = @on_reset_click.bind @
 
     @state =
-      column_keys: @props.column_keys
+      column_order: @props.column_order
+
+  ###*
+   * componentDidUpdate(prevProps, prevState, snapshot)
+   *
+   * This is invoked immediately after updating occurs.
+   * This method is not called for the initial render.
+  ###
+  componentDidUpdate: (prevProps, prevState, snapshot) ->
+    # update the column order from the listing
+    if @props.column_order != prevProps.column_order
+        @setState {column_order: @props.column_order}
 
   on_reset_click: (event) ->
     event.preventDefault()
@@ -35,21 +46,21 @@ class TableColumnConfig extends React.Component
     column1 = @dragged_item.getAttribute "column"
     column2 = li.getAttribute "column"
 
-    column_keys = @state.column_keys
+    column_order = @state.column_order
     # index of the second column
-    index = column_keys.indexOf column2
+    index = column_order.indexOf column2
     # filter out the currently dragged item
-    column_keys = column_keys.filter (column) => column isnt column1
+    column_order = column_order.filter (column) -> column isnt column1
     # add the dragged column after the dragged over column
-    column_keys.splice index, 0, column1
-
-    @setState
-      column_keys: column_keys
+    column_order.splice index, 0, column1
+    # set the new columns order to the local state
+    @setState {column_order: column_order}
 
   on_drag_end: (event) ->
     @dragged_item = null
-    if @props.set_column_order
-      @props.set_column_order @state.column_keys
+    # call the parent event handler to set the new column order
+    if @props.on_column_order_change
+      @props.on_column_order_change @state.column_order
 
   on_column_toggle_click: (event) ->
     return if event.target.type is "checkbox"
@@ -58,23 +69,19 @@ class TableColumnConfig extends React.Component
     column = el.getAttribute "column"
     if @props.toggle_column
       @props.toggle_column column
-    @setState
-      columns: @state.column_keys
 
   on_column_toggle_changed: (event) ->
     el = event.currentTarget
     column = el.getAttribute "column"
     if @props.toggle_column
       @props.toggle_column column
-    @setState
-      columns: @props.columns
 
   is_column_visible: (column) ->
     return column.toggle isnt off
 
   build_column_toggles: ->
     columns = []
-    for key in @state.column_keys
+    for key in @state.column_order
       column = @props.columns[key]
       checked = @is_column_visible column
       columns.push(

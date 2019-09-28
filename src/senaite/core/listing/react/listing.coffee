@@ -106,7 +106,7 @@ class ListingController extends React.Component
       # passed in via a data attribute in the template, because they can be seen
       # as constant values
       form_id: @form_id
-      columns: @columns
+      columns: @get_default_columns()
       review_states: @review_states
       # The data from the folderitems view call
       folderitems: []
@@ -1241,8 +1241,9 @@ class ListingController extends React.Component
    * @returns {JSX}
   ###
   render: ->
+    console.debug "*** RENDER ***"
 
-    # calculated settings
+    # computed properties at render time
     columns = @get_columns()
     column_order = @get_column_order()
     column_count = @get_column_count()
@@ -1291,7 +1292,7 @@ class ListingController extends React.Component
                 columns={columns}
                 column_order={column_order}
                 toggle_column={@toggleColumn}
-                set_column_order={@setColumnOrder}/>}
+                on_column_order_change={@setColumnOrder}/>}
             <Table
               className="contentstable table table-condensed table-hover small"
               allow_edit={@state.allow_edit}
