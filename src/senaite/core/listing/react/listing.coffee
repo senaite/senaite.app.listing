@@ -75,7 +75,7 @@ class ListingController extends React.Component
     @api_url = @root_el.dataset.api_url
     @columns = JSON.parse @root_el.dataset.columns
     @form_id = @root_el.dataset.form_id
-    @listing_portal_type = @root_el.dataset.listing_portal_type
+    @listing_identifier = @root_el.dataset.listing_identifier
     @pagesize = parseInt @root_el.dataset.pagesize
     @review_states = JSON.parse @root_el.dataset.review_states
 
@@ -842,14 +842,15 @@ class ListingController extends React.Component
   ###*
    * Calculate a common local storage key for this listing view.
    *
-   * Note: The browser view initially calculates the `listing_portal_type`
-   *       which is basically the portal_type of the listed items.
+   * Note:
+   * The browser view initially calculates the `listing_identifier`, which is
+   * basically a concatenation of the listed items portal_type and view name.
    *
    * @returns key {string} with optional prefix and postfix
   ###
   get_local_storage_key: (prefix, postfix) ->
-    key = @listing_portal_type
-    if @listing_portal_type is undefined
+    key = @listing_identifier
+    if @listing_identifier is undefined
       key = location.pathname
     if prefix isnt undefined
       key = prefix + key

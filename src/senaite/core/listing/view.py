@@ -179,9 +179,6 @@ class ListingView(AjaxListingView):
     # transition buttons.
     show_table_footer = True
 
-    # The portal_type of the listed item
-    listing_portal_type = None
-
     def __init__(self, context, request):
         super(ListingView, self).__init__(context, request)
         self.context = context
@@ -244,34 +241,35 @@ class ListingView(AjaxListingView):
                 subscriber.__module__, subscriber.__class__.__name__))
             subscriber.before_render()
 
+    @property
     @view.memoize
-    def get_listing_portal_type(self):
-        """Return the portal type of the listed items
+    def listing_identifier(self):
+        """Identifier for similar listings
 
-        This acts like a grouping key for similar listings to allow a better
-        handling of default columns to be displayed.
+        This identifier is used as the local storage key for custom column
+        configuration.
 
         Also see this issue for more details:
         https://github.com/senaite/senaite.core.listing/issues/16
         """
-        if isinstance(self.listing_portal_type, six.string_types):
-            return self.listing_portal_type
-
-        listing_type = ""
+        key = None
+        view_name = self.__name__
         portal_type = self.contentFilter.get("portal_type", None)
         # Handle the global Samples listing different, because the columns do
         # not match with the listings in Clients
         if api.get_portal_type(self.context) == "AnalysisRequestsFolder":
-            listing_type = "AnalysisRequestsListing"
+            key = "AnalysisRequestsListing"
         elif isinstance(portal_type, six.string_types):
-            listing_type = portal_type
+            key = portal_type
         elif self.catalog == CATALOG_ANALYSIS_REQUEST_LISTING:
-            listing_type = "AnalysisRequest"
+            key = "AnalysisRequest"
         elif self.catalog == CATALOG_ANALYSIS_LISTING:
-            listing_type = "Analysis"
+            key = "Analysis"
         elif self.catalog == CATALOG_WORKSHEET_LISTING:
-            listing_type = "Worksheet"
-        return "-".join([listing_type, self.__name__])
+            key = "Worksheet"
+        else:
+            return view_name
+        return "-".join([key, view_name])
 
     @view.memoize
     def get_listing_view_adapters(self):
