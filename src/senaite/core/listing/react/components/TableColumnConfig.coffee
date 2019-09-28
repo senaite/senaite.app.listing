@@ -59,8 +59,8 @@ class TableColumnConfig extends React.Component
   on_drag_end: (event) ->
     @dragged_item = null
     # call the event handler of the controller to change the column order
-    if @props.on_column_order_change
-      @props.on_column_order_change @state.columns_order
+    if @props.on_columns_order_change
+      @props.on_columns_order_change @state.columns_order
 
   on_column_toggle_click: (event) ->
     return if event.target.type is "checkbox"

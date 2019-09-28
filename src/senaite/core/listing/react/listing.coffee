@@ -59,7 +59,7 @@ class ListingController extends React.Component
     @on_select_checkbox_checked = @on_select_checkbox_checked.bind @
     @saveAjaxQueue = @saveAjaxQueue.bind @
     @saveEditableField = @saveEditableField.bind @
-    @setColumnOrder = @setColumnOrder.bind @
+    @setColumnsOrder = @setColumnsOrder.bind @
     @showMore = @showMore.bind @
     @sortBy = @sortBy.bind @
     @toggleCategory = @toggleCategory.bind @
@@ -379,8 +379,8 @@ class ListingController extends React.Component
    * @param order {array} Array of column IDs to be used as new order
    * @returns {object} New ordered columns object
   ###
-  setColumnOrder: (order) ->
-    console.debug "ListingController::setColumnOrder: order=#{order}"
+  setColumnsOrder: (order) ->
+    console.debug "ListingController::setColumnsOrder: order=#{order}"
 
     # This object will hold the new ordered columns
     ordered_columns = {}
@@ -1293,7 +1293,7 @@ class ListingController extends React.Component
                 columns={columns}
                 columns_order={columns_order}
                 on_column_toggle_click={@toggleColumn}
-                on_column_order_change={@setColumnOrder}/>}
+                on_columns_order_change={@setColumnsOrder}/>}
             <Table
               className="contentstable table table-condensed table-hover small"
               allow_edit={@state.allow_edit}
