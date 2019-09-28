@@ -344,8 +344,8 @@ class ListingController extends React.Component
 
     # restore columns to the initial state and flush the local storage
     if key is "reset"
-      @set_local_column_config []
       @setState {columns: @get_default_columns()}
+      @set_local_column_config []
       return true
 
     # get the columns from the state
@@ -421,7 +421,7 @@ class ListingController extends React.Component
     keys = []
     allowed_keys = @get_allowed_column_keys()
     visible = @get_columns_visibility()
-    for key in @get_columns_order()
+    for key in @get_column_order()
       # skip non-allowed keys
       if key not in allowed_keys
         continue
@@ -454,7 +454,7 @@ class ListingController extends React.Component
   get_columns: ->
     columns = {}
     visibility = @get_columns_visibility()
-    for key in @get_columns_order()
+    for key in @get_column_order()
       column = @state.columns[key]
       if column is undefined
         console.warn "Skipping nonexisting column '#{key}'."
@@ -470,7 +470,7 @@ class ListingController extends React.Component
    *
    * @returns keys {array} Current colum keys
   ###
-  get_columns_keys: ->
+  get_column_keys: ->
     return Object.keys @state.columns
 
   ###*
@@ -480,9 +480,9 @@ class ListingController extends React.Component
    *
    * @returns keys {array} Current colum keys
   ###
-  get_columns_order: ->
+  get_column_order: ->
     keys = []
-    column_keys = @get_columns_keys()
+    column_keys = @get_column_keys()
     local_config = @get_local_column_config()
     # Skip local settings if toggling/ordering is not allowed
     allowed = @state.show_column_toggles
@@ -1241,112 +1241,123 @@ class ListingController extends React.Component
    * @returns {JSX}
   ###
   render: ->
-    <div className="listing-container">
-      <Messages on_dismiss_message={@dismissMessage} id="messages" className="messages" messages={@state.messages} />
-      {@state.loading and <div id="table-overlay"/>}
-      {not @render_toolbar_top() and @state.loading and <Loader loading={@state.loading} />}
-      {@render_toolbar_top() and
-        <div className="row top-toolbar">
-          <div className="col-sm-8">
-            <FilterBar
-              className="filterbar nav nav-pills"
-              on_filter_button_clicked={@filterByState}
-              review_state={@state.review_state}
-              review_states={@state.review_states}/>
+
+    # calculated settings
+    columns = @get_columns()
+    column_order = @get_column_order()
+    column_count = @get_column_count()
+    visible_columns = @get_visible_columns()
+    item_count = @get_item_count()
+    render_toolbar_top = @render_toolbar_top()
+
+    return (
+      <div className="listing-container">
+        <Messages on_dismiss_message={@dismissMessage} id="messages" className="messages" messages={@state.messages} />
+        {@state.loading and <div id="table-overlay"/>}
+        {not render_toolbar_top and @state.loading and <Loader loading={@state.loading} />}
+        {render_toolbar_top and
+          <div className="row top-toolbar">
+            <div className="col-sm-8">
+              <FilterBar
+                className="filterbar nav nav-pills"
+                on_filter_button_clicked={@filterByState}
+                review_state={@state.review_state}
+                review_states={@state.review_states}/>
+            </div>
+            <div className="col-sm-1 text-right">
+              <Loader loading={@state.loading} />
+            </div>
+            <div className="col-sm-3 text-right">
+              <SearchBox
+                show_search={@state.show_search}
+                on_search={@filterBySearchterm}
+                filter={@state.filter}
+                placeholder={_("Search")} />
+            </div>
           </div>
-          <div className="col-sm-1 text-right">
-            <Loader loading={@state.loading} />
-          </div>
-          <div className="col-sm-3 text-right">
-            <SearchBox
-              show_search={@state.show_search}
-              on_search={@filterBySearchterm}
-              filter={@state.filter}
-              placeholder={_("Search")} />
-          </div>
-        </div>
-      }
-      <div className="row">
-        <div className="col-sm-12 table-responsive">
-          {@state.show_column_toggles and
-            <a
-              href="#"
-              onClick={@on_column_config_click}
-              className="pull-right">
-              <span className="glyphicon glyphicon-option-horizontal"></span>
-            </a>}
-          {@state.show_column_config and
-            <TableColumnConfig
-              title={_("Configure Table Columns")}
-              columns={@get_columns()}
-              column_keys={@get_allowed_column_keys()}
-              toggle_column={@toggleColumn}
-              set_column_order={@setColumnOrder}/>}
-          <Table
-            className="contentstable table table-condensed table-hover small"
-            allow_edit={@state.allow_edit}
-            on_header_column_click={@sortBy}
-            on_select_checkbox_checked={@on_select_checkbox_checked}
-            on_context_menu={@on_column_config_click}
-            sort_on={@state.sort_on}
-            sort_order={@state.sort_order}
-            catalog_indexes={@state.catalog_indexes}
-            catalog_columns={@state.catalog_columns}
-            sortable_columns={@state.sortable_columns}
-            columns={@get_columns()}
-            column_count={@get_column_count()}
-            review_state={@state.review_state}
-            visible_columns={@get_visible_columns()}
-            review_states={@state.review_states}
-            folderitems={@state.folderitems}
-            children={@state.children}
-            selected_uids={@state.selected_uids}
-            select_checkbox_name={@state.select_checkbox_name}
-            show_select_column={@state.show_select_column}
-            show_select_all_checkbox={@state.show_select_all_checkbox}
-            categories={@state.categories}
-            expanded_categories={@state.expanded_categories}
-            expanded_rows={@state.expanded_rows}
-            expanded_remarks={@state.expanded_remarks}
-            show_categories={@state.show_categories}
-            on_category_click={@toggleCategory}
-            on_row_expand_click={@toggleRow}
-            on_remarks_expand_click={@toggleRemarks}
-            filter={@state.filter}
-            update_editable_field={@updateEditableField}
-            save_editable_field={@saveEditableField}
-            />
-        </div>
-      </div>
-      {@state.show_table_footer and
+        }
         <div className="row">
-          <div className="col-sm-8">
-            <ButtonBar
-              className="buttonbar nav nav-pills"
-              show_ajax_save={@state.show_ajax_save}
-              ajax_save_button_title={_("Save")}
-              on_transition_button_click={@doAction}
-              on_ajax_save_button_click={@saveAjaxQueue}
+          <div className="col-sm-12 table-responsive">
+            {@state.show_column_toggles and
+              <a
+                href="#"
+                onClick={@on_column_config_click}
+                className="pull-right">
+                <span className="glyphicon glyphicon-option-horizontal"></span>
+              </a>}
+            {@state.show_column_config and
+              <TableColumnConfig
+                title={_("Configure Table Columns")}
+                columns={columns}
+                column_order={column_order}
+                toggle_column={@toggleColumn}
+                set_column_order={@setColumnOrder}/>}
+            <Table
+              className="contentstable table table-condensed table-hover small"
+              allow_edit={@state.allow_edit}
+              on_header_column_click={@sortBy}
+              on_select_checkbox_checked={@on_select_checkbox_checked}
+              on_context_menu={@on_column_config_click}
+              sort_on={@state.sort_on}
+              sort_order={@state.sort_order}
+              catalog_indexes={@state.catalog_indexes}
+              catalog_columns={@state.catalog_columns}
+              sortable_columns={@state.sortable_columns}
+              columns={columns}
+              column_count={column_count}
+              review_state={@state.review_state}
+              visible_columns={visible_columns}
+              review_states={@state.review_states}
+              folderitems={@state.folderitems}
+              children={@state.children}
               selected_uids={@state.selected_uids}
+              select_checkbox_name={@state.select_checkbox_name}
               show_select_column={@state.show_select_column}
-              transitions={@state.transitions}
-              review_state={@get_review_state_by_id(@state.review_state)}
+              show_select_all_checkbox={@state.show_select_all_checkbox}
+              categories={@state.categories}
+              expanded_categories={@state.expanded_categories}
+              expanded_rows={@state.expanded_rows}
+              expanded_remarks={@state.expanded_remarks}
+              show_categories={@state.show_categories}
+              on_category_click={@toggleCategory}
+              on_row_expand_click={@toggleRow}
+              on_remarks_expand_click={@toggleRemarks}
+              filter={@state.filter}
+              update_editable_field={@updateEditableField}
+              save_editable_field={@saveEditableField}
               />
           </div>
-          <div className="col-sm-1 text-right">
-            <Loader loading={@state.loading} />
-          </div>
-          <div className="col-sm-3 text-right">
-            <Pagination
-              id="pagination"
-              className="pagination-controls"
-              total={@state.total}
-              show_more_button_title={_("Show more")}
-              onShowMore={@showMore}
-              show_more={@state.show_more}
-              count={@get_item_count()}
-              pagesize={@state.pagesize}/>
-          </div>
         </div>
-      }
-    </div>
+        {@state.show_table_footer and
+          <div className="row">
+            <div className="col-sm-8">
+              <ButtonBar
+                className="buttonbar nav nav-pills"
+                show_ajax_save={@state.show_ajax_save}
+                ajax_save_button_title={_("Save")}
+                on_transition_button_click={@doAction}
+                on_ajax_save_button_click={@saveAjaxQueue}
+                selected_uids={@state.selected_uids}
+                show_select_column={@state.show_select_column}
+                transitions={@state.transitions}
+                review_state={@get_review_state_by_id(@state.review_state)}
+                />
+            </div>
+            <div className="col-sm-1 text-right">
+              <Loader loading={@state.loading} />
+            </div>
+            <div className="col-sm-3 text-right">
+              <Pagination
+                id="pagination"
+                className="pagination-controls"
+                total={@state.total}
+                show_more_button_title={_("Show more")}
+                onShowMore={@showMore}
+                show_more={@state.show_more}
+                count={item_count}
+                pagesize={@state.pagesize}/>
+            </div>
+          </div>
+        }
+      </div>
+    )
