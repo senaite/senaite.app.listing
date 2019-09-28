@@ -18,6 +18,7 @@ class TableColumnConfig extends React.Component
 
   on_reset_click: (event) ->
     event.preventDefault()
+    # call the parent event handler
     if @props.toggle_column
       @props.toggle_column "reset"
 
