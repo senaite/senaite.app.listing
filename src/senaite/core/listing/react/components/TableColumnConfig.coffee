@@ -30,8 +30,8 @@ class TableColumnConfig extends React.Component
   on_reset_click: (event) ->
     event.preventDefault()
     # call the parent event handler
-    if @props.toggle_column
-      @props.toggle_column "reset"
+    if @props.on_column_toggle_click
+      @props.on_column_toggle_click "reset"
 
   on_drag_start: (event) ->
     @dragged_item = event.currentTarget
@@ -58,7 +58,7 @@ class TableColumnConfig extends React.Component
 
   on_drag_end: (event) ->
     @dragged_item = null
-    # call the parent event handler to set the new column order
+    # call the event handler of the controller to change the column order
     if @props.on_column_order_change
       @props.on_column_order_change @state.column_order
 
@@ -67,14 +67,16 @@ class TableColumnConfig extends React.Component
     event.preventDefault()
     el = event.currentTarget
     column = el.getAttribute "column"
-    if @props.toggle_column
-      @props.toggle_column column
+    # call the event handler of the controller to toggle the column
+    if @props.on_column_toggle_click
+      @props.on_column_toggle_click column
 
   on_column_toggle_changed: (event) ->
     el = event.currentTarget
     column = el.getAttribute "column"
-    if @props.toggle_column
-      @props.toggle_column column
+    # call the event handler of the controller to toggle the column
+    if @props.on_column_toggle_click
+      @props.on_column_toggle_click column
 
   is_column_visible: (column) ->
     return column.toggle isnt off

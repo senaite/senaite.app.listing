@@ -1291,7 +1291,7 @@ class ListingController extends React.Component
                 title={_("Configure Table Columns")}
                 columns={columns}
                 column_order={column_order}
-                toggle_column={@toggleColumn}
+                on_column_toggle_click={@toggleColumn}
                 on_column_order_change={@setColumnOrder}/>}
             <Table
               className="contentstable table table-condensed table-hover small"
