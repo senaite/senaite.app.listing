@@ -94,8 +94,8 @@ class TableColumnConfig extends React.Component
               column={key}
               onClick={@on_column_toggle_click}
               className="btn btn-default btn-xs">
-              {visible and <span className="glyphicon glyphicon-check"></span>}
-              {not visible and <span className="glyphicon glyphicon-unchecked"></span>}
+              {visible and <span className="text-primary glyphicon glyphicon-check"></span>}
+              {not visible and <span className="text-muted glyphicon glyphicon-unchecked"></span>}
               &nbsp;<span dangerouslySetInnerHTML={{__html: column.title or key}}></span>
             </button>
           </div>
