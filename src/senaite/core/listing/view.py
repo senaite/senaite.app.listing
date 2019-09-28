@@ -35,6 +35,7 @@ from bika.lims import deprecated
 from bika.lims import logger
 from bika.lims.catalog import CATALOG_ANALYSIS_LISTING
 from bika.lims.catalog import CATALOG_ANALYSIS_REQUEST_LISTING
+from bika.lims.catalog import CATALOG_AUDITLOG
 from bika.lims.catalog import CATALOG_WORKSHEET_LISTING
 from bika.lims.interfaces import IFieldIcons
 from bika.lims.utils import getFromString
@@ -267,6 +268,8 @@ class ListingView(AjaxListingView):
             key = "Analysis"
         elif self.catalog == CATALOG_WORKSHEET_LISTING:
             key = "Worksheet"
+        elif self.catalog == CATALOG_AUDITLOG:
+            key = "Auditlog"
         else:
             return view_name
         return "-".join([key, view_name])
