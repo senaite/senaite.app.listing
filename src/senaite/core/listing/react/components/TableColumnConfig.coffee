@@ -108,10 +108,10 @@ class TableColumnConfig extends React.Component
     <div id={@props.id} className={@props.className}>
       <div className="row">
         <div className="col-sm-12 text-left">
-          <h5>{@props.title}</h5>
+          <strong>{@props.title}</strong>
+          <div className="help-block">{@props.description}</div>
           <ul className="list-inline">
             {@build_column_toggles()}
-
             <li
               key="reset"
               style={{padding: "0 5px 5px 0"}}>
