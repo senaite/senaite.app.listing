@@ -1,6 +1,7 @@
 1.3.0 (unreleased)
 ------------------
 
+- #21 Custom Column Configuration
 - #20 Updated build system and JS package versions
 
 
