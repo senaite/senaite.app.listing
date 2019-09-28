@@ -62,7 +62,6 @@ class TableColumnConfig extends React.Component
       @props.on_columns_order_change @state.columns_order
 
   on_column_toggle_click: (event) ->
-    return if event.target.type is "checkbox"
     event.preventDefault()
     el = event.currentTarget
     column = el.getAttribute "column"
