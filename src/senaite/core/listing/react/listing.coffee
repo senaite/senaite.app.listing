@@ -1294,7 +1294,7 @@ class ListingController extends React.Component
             {@state.show_column_config and
               <TableColumnConfig
                 title={_("Configure Table Columns")}
-                description={_("Click to toggle the visibility and drag&drop to change the order")}
+                description={_("Click to toggle the visibility or drag&drop to change the order")}
                 columns={columns}
                 columns_order={columns_order}
                 on_column_toggle_click={@toggleColumn}
