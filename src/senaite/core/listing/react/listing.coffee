@@ -805,7 +805,9 @@ class ListingController extends React.Component
         break
 
     if not current
-      throw "No review_state definition found for ID #{id}"
+      console.warn "No review_state with ID '#{id}' found"
+      # return the default column keys
+      return {id: "default", columns: @get_columns_keys()}
 
     return current
 
@@ -1233,12 +1235,11 @@ class ListingController extends React.Component
   on_api_error: (response) ->
     @toggle_loader off
     console.debug "°°° ListingController::on_api_error: GOT AN ERROR RESPONSE: ", response
-
-    me = this
-    response.json().then (data) ->
+    response.text().then (data) =>
       title = _("Oops, an error occured! 🙈")
-      message = _("The server responded with the status #{data.status}: #{data.message}")
-      me.addMessage title, message, data.traceback, level="danger"
+      message = _("The server responded with the status #{response.status}: #{response.statusText}")
+      @addMessage title, message, null, level="danger"
+    return response
 
   ###*
    * Renders the listing table
