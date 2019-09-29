@@ -106,7 +106,7 @@ class ListingView(AjaxListingView):
             "contentFilter": {},
             "transitions": [],
             "custom_transitions": [],
-            "columns": ["Title", "Descritpion"],
+            "columns": [],
         }
     ]
 
