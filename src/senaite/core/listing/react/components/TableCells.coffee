@@ -29,9 +29,6 @@ class TableCells extends React.Component
     item = @get_item()
     return item.uid
 
-  get_table_columns: ->
-    return @props.table_columns or []
-
   get_colspan: (column_key, item) ->
     colspan = item.colspan or {}
     return colspan[column_key]
@@ -157,7 +154,7 @@ class TableCells extends React.Component
       cells.push @create_select_cell()
 
     # insert visible columns in the right order
-    for column_key, column_index in @get_table_columns()
+    for column_key, column_index in @props.visible_columns
 
       # Skip single cell rendering to support rowspans
       if @skip_cell_rendering column_key

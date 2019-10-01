@@ -21,7 +21,7 @@ class TableContextMenu extends React.Component
     event.preventDefault()
     el = event.currentTarget
     column_key = el.getAttribute "column"
-    column_toggle = column_key in @props.table_columns
+    column_toggle = column_key in @props.visible_columns
 
     console.log "TableContextMenu::on_toggle_click: column=#{column_key} column_toggle=#{column_toggle}"
     @props.on_column_toggle column_key
@@ -51,8 +51,8 @@ class TableContextMenu extends React.Component
     ###
     toggle_columns = []
 
-    for key in @props.column_order
-      toggle = key in @props.table_columns
+    for key in @props.allowed_columns
+      toggle = key in @props.visible_columns
       column = @props.columns[key]
       title = column.title or key
 

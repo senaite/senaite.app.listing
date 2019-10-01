@@ -24,6 +24,8 @@ import json
 import re
 import time
 
+import six
+
 import DateTime
 import Missing
 from AccessControl import getSecurityManager
@@ -31,6 +33,10 @@ from bika.lims import api
 from bika.lims import bikaMessageFactory as _
 from bika.lims import deprecated
 from bika.lims import logger
+from bika.lims.catalog import CATALOG_ANALYSIS_LISTING
+from bika.lims.catalog import CATALOG_ANALYSIS_REQUEST_LISTING
+from bika.lims.catalog import CATALOG_AUDITLOG
+from bika.lims.catalog import CATALOG_WORKSHEET_LISTING
 from bika.lims.interfaces import IFieldIcons
 from bika.lims.utils import getFromString
 from bika.lims.utils import t
@@ -40,7 +46,8 @@ from Products.CMFCore.utils import getToolByName
 from Products.CMFPlone.utils import safe_unicode
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from senaite.core.listing.ajax import AjaxListingView
-from senaite.core.listing.interfaces import IListingView, IListingViewAdapter
+from senaite.core.listing.interfaces import IListingView
+from senaite.core.listing.interfaces import IListingViewAdapter
 from zope.component import getAdapters
 from zope.component import getMultiAdapter
 from zope.component import subscribers
@@ -99,7 +106,7 @@ class ListingView(AjaxListingView):
             "contentFilter": {},
             "transitions": [],
             "custom_transitions": [],
-            "columns": ["Title", "Descritpion"],
+            "columns": [],
         }
     ]
 
@@ -234,6 +241,38 @@ class ListingView(AjaxListingView):
             logger.info(u"ListingView::before_render::{}.{}".format(
                 subscriber.__module__, subscriber.__class__.__name__))
             subscriber.before_render()
+
+    @property
+    @view.memoize
+    def listing_identifier(self):
+        """Identifier for similar listings
+
+        This identifier is used as the local storage key for custom column
+        configuration.
+
+        Also see this issue for more details:
+        https://github.com/senaite/senaite.core.listing/issues/16
+        """
+        key = None
+        view_name = self.__name__
+        portal_type = self.contentFilter.get("portal_type", None)
+        # Handle the global Samples listing different, because the columns do
+        # not match with the listings in Clients
+        if api.get_portal_type(self.context) == "AnalysisRequestsFolder":
+            key = "AnalysisRequestsListing"
+        elif isinstance(portal_type, six.string_types):
+            key = portal_type
+        elif self.catalog == CATALOG_ANALYSIS_REQUEST_LISTING:
+            key = "AnalysisRequest"
+        elif self.catalog == CATALOG_ANALYSIS_LISTING:
+            key = "Analysis"
+        elif self.catalog == CATALOG_WORKSHEET_LISTING:
+            key = "Worksheet"
+        elif self.catalog == CATALOG_AUDITLOG:
+            key = "Auditlog"
+        else:
+            return view_name
+        return "-".join([key, view_name])
 
     @view.memoize
     def get_listing_view_adapters(self):

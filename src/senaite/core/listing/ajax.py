@@ -27,6 +27,7 @@ from bika.lims import logger
 from bika.lims.browser import BrowserView
 from bika.lims.interfaces import IReferenceAnalysis
 from bika.lims.interfaces import IRoutineAnalysis
+from plone.memoize import view
 from Products.Archetypes.event import ObjectEditedEvent
 from Products.Archetypes.utils import mapply
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
@@ -135,6 +136,7 @@ class AjaxListingView(BrowserView):
         result.update(kw)
         return result
 
+    @view.memoize
     @translate
     def get_columns(self):
         """Returns the `columns` dictionary of the view
@@ -281,6 +283,12 @@ class AjaxListingView(BrowserView):
         """Returns the `columns` dictionary of the view as JSON
         """
         return self.get_columns()
+
+    @returns_safe_json
+    def ajax_show_column_toggles(self):
+        """Returns the boolean value of the show_column_toggles attribute
+        """
+        return self.show_column_toggles
 
     @translate
     def get_folderitems(self):

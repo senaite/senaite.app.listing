@@ -1,23 +1,27 @@
-###
- * ReactJS controlled component
+###* ReactJS controlled component
+ *
+ * Please use JSDoc comments: https://jsdoc.app
+ *
+ * Note: Each comment must start with a `/**` sequence in order to be recognized
+ *       by the JSDoc parser.
 ###
 import React from "react"
 import ReactDOM from "react-dom"
 
-import Messages from "./components/Messages.coffee"
 import ButtonBar from "./components/ButtonBar.coffee"
 import FilterBar from "./components/FilterBar.coffee"
 import ListingAPI from "./api.coffee"
 import Loader from "./components/Loader.coffee"
+import Messages from "./components/Messages.coffee"
 import Pagination from "./components/Pagination.coffee"
 import SearchBox from "./components/SearchBox.coffee"
 import Table from "./components/Table.coffee"
-import TableContextMenu from "./components/TableContextMenu.coffee"
+import TableColumnConfig from "./components/TableColumnConfig.coffee"
 
 import "./listing.css"
 
 
-# DOCUMENT READY ENTRY POINT
+###* DOCUMENT READY ENTRY POINT ###
 document.addEventListener "DOMContentLoaded", ->
   console.debug "*** SENAITE.CORE.LISTING::DOMContentLoaded: --> Loading ReactJS Controller"
 
@@ -30,41 +34,51 @@ document.addEventListener "DOMContentLoaded", ->
     window.listings[form_id] = controller
 
 
+###*
+ * Controller class for one listing table.
+ * The idea is to handle all API calls and logic here and pass the callback
+ * methods to the contained components.
+ * @class
+###
 class ListingController extends React.Component
-  ###
-   * Listing Table Controller
-  ###
 
+  ###*
+   * Bind all event handlers and define the state
+   * @constructor
+  ###
   constructor: (props) ->
     super(props)
 
     # bind callbacks
     @dismissMessage = @dismissMessage.bind @
-    @filterByState = @filterByState.bind @
-    @filterBySearchterm = @filterBySearchterm.bind @
-    @sortBy = @sortBy.bind @
-    @showMore = @showMore.bind @
     @doAction = @doAction.bind @
-    @toggleContextMenu = @toggleContextMenu.bind @
-    @toggleColumn = @toggleColumn.bind @
-    @toggleCategory = @toggleCategory.bind @
-    @toggleRow = @toggleRow.bind @
-    @saveEditableField = @saveEditableField.bind @
-    @updateEditableField = @updateEditableField.bind @
-    @saveAjaxQueue = @saveAjaxQueue.bind @
-    @toggleRemarks = @toggleRemarks.bind @
-    @on_select_checkbox_checked = @on_select_checkbox_checked.bind @
+    @filterBySearchterm = @filterBySearchterm.bind @
+    @filterByState = @filterByState.bind @
     @on_api_error = @on_api_error.bind @
+    @on_column_config_click = @on_column_config_click.bind @
+    @on_select_checkbox_checked = @on_select_checkbox_checked.bind @
+    @saveAjaxQueue = @saveAjaxQueue.bind @
+    @saveEditableField = @saveEditableField.bind @
+    @setColumnsOrder = @setColumnsOrder.bind @
+    @showMore = @showMore.bind @
+    @sortBy = @sortBy.bind @
+    @toggleCategory = @toggleCategory.bind @
+    @toggleColumn = @toggleColumn.bind @
+    @toggleRemarks = @toggleRemarks.bind @
+    @toggleRow = @toggleRow.bind @
+    @updateEditableField = @updateEditableField.bind @
 
     # root element
     @root_el = @props.root_el
 
     # get initial configuration data from the HTML attribute
-    @columns = JSON.parse @root_el.dataset.columns
-    @review_states = JSON.parse @root_el.dataset.review_states
-    @form_id = @root_el.dataset.form_id
     @api_url = @root_el.dataset.api_url
+    @columns = JSON.parse @root_el.dataset.columns
+    @form_id = @root_el.dataset.form_id
+    @listing_identifier = @root_el.dataset.listing_identifier
     @pagesize = parseInt @root_el.dataset.pagesize
+    @review_states = JSON.parse @root_el.dataset.review_states
+    @show_column_toggles = JSON.parse @root_el.dataset.show_column_toggles
 
     # the API is responsible for async calls and knows about the endpoints
     @api = new ListingAPI
@@ -76,10 +90,8 @@ class ListingController extends React.Component
       messages: []
       # loading indicator
       loading: yes
-      # context menu visibility and coordinates
-      contextmenu_show: no
-      contextmenu_x: 0
-      contextmenu_y: 0
+      # show column config toggle
+      show_column_config: no
       # filter, pagesize, sort_on, sort_order and review_state are initially set
       # from the request to allow bookmarks to specific searches
       filter: @api.get_url_parameter("#{@form_id}_filter")
@@ -89,15 +101,13 @@ class ListingController extends React.Component
       review_state: @api.get_url_parameter("#{@form_id}_review_state") or "default"
       # The query string is computed on the server and allows to bookmark listings
       query_string: ""
-      # The column toggles define the visible columns per user setting
-      column_toggles: []
       # The API URL to call
       api_url: ""
       # form_id, columns and review_states are defined in the listing view and
       # passed in via a data attribute in the template, because they can be seen
       # as constant values
       form_id: @form_id
-      columns: @columns
+      columns: @get_default_columns()
       review_states: @review_states
       # The data from the folderitems view call
       folderitems: []
@@ -131,7 +141,7 @@ class ListingController extends React.Component
       allow_edit: no
       show_select_all_checkbox: no
       show_select_column: no
-      show_column_toggles: no
+      show_column_toggles: @show_column_toggles
       select_checkbox_name: "uids"
       post_action: "workflow_action"
       show_categories: no
@@ -144,20 +154,34 @@ class ListingController extends React.Component
       fetch_transitions_on_select: yes
 
 
+  ###*
+   * Dismisses a message by its message index
+   *
+   * @param index {int} Index of the message to dismiss
+   * @returns {bool} true
+  ###
   dismissMessage: (index=null) ->
-    ###
-     * Dismiss a message by its message index
-    ###
+    # dismiss all messages
     if index is null
-      return @setState messages: []
-    messages = [].concat @state.messages
-    messages.splice index, 1
-    return @setState messages: messages
+      @setState {messages: []}
+    else
+      # dismiss message by index
+      messages = [].concat @state.messages
+      messages.splice index, 1
+      @setState {messages: messages}
+    return true
 
+  ###*
+   * Display a new bootstrap alert message above the table
+   *
+   * @param title {string} Title to be displayed in the alert box
+   *              {object} Config object for all parameters
+   * @param text {string} The message text
+   * @param traceback {string} Preformatted traceback
+   * @param level {string} info, success, warning, danger
+   * @returns {bool} true
+  ###
   addMessage: (title, text, traceback, level="info") ->
-    ###*
-     * Add a message
-    ###
     if typeof title is "object"
       props = Object.assign title
       title = props.title
@@ -172,13 +196,14 @@ class ListingController extends React.Component
       traceback: traceback,
       level: level,
     })
-    @setState messages: messages
+    @setState {messages: messages}
+    return true
 
-
+  ###*
+   * Parameters to be sent in each Ajax POST request
+   * @returns {object} current state values
+  ###
   getRequestOptions: ->
-    ###
-     * Only these state values should be sent to the server
-    ###
     options =
       "review_state": @state.review_state
       "filter": @state.filter
@@ -191,31 +216,29 @@ class ListingController extends React.Component
     console.debug("Request Options=", options)
     return options
 
+  ###*
+   * ReactJS event handler when the component did mount
+   * Fetches the initial folderitems
+  ###
   componentDidMount: ->
-    ###
-     * ReactJS event handler when the component did mount
-    ###
-
-    # initial fetch of the folderitems
     @fetch_folderitems()
 
-  toggleContextMenu: (x, y, toggle) ->
-    ###
-     * Toggle the context menu
-    ###
-    console.debug "ListingController::toggleContextMenu: x=#{x} y=#{y}"
+  ###*
+   * componentDidUpdate(prevProps, prevState, snapshot)
+   *
+   * This is invoked immediately after updating occurs.
+   * This method is not called for the initial render.
+  ###
+  componentDidUpdate: (prevProps, prevState, snapshot) ->
 
-    toggle ?= not @state.contextmenu_show
-
-    @setState
-      contextmenu_show: toggle
-      contextmenu_x: x
-      contextmenu_y: y
-
+  ###*
+   * Expand/Collapse a listing category row by adding the category ID to the
+   * state `expanded_categories`
+   *
+   * @param category {string} Title of the category
+   * @returns {bool} true if the category was expanded, otherwise false
+  ###
   toggleCategory: (category) ->
-    ###
-     * Expand/Collapse the category
-    ###
     console.debug "ListingController::toggleCategory: column=#{category}"
 
     # get the current expanded categories
@@ -231,17 +254,20 @@ class ListingController extends React.Component
       expanded.push category
 
     # set the new expanded categories
-    @setState
-      expanded_categories: expanded
+    @setState {expanded_categories: expanded}
+    return expanded.length > 0
 
+  ###*
+   * Expand/Collapse remarks
+   *
+   * @param uid {string} UID of the item
+   * @returns {bool} true if the remarks were expanded, otherwise false
+  ###
   toggleRemarks: (uid) ->
-    ###
-     * Expand/Collapse remarks
-    ###
     console.debug "ListingController::toggleRemarks: uid=#{uid}"
 
     # skip if no uid is given
-    return unless uid
+    return false unless uid
 
     # get the current expanded remarks
     expanded = @state.expanded_remarks
@@ -257,17 +283,20 @@ class ListingController extends React.Component
       expanded.push uid
 
     # set the new expanded remarks
-    @setState
-      expanded_remarks: expanded
+    @setState {expanded_remarks: expanded}
+    return expanded.length > 0
 
+  ###
+   * Expand/Collapse the row
+   *
+   * @param uid {string} UID of the item
+   * @returns {bool} true if the row was expanded, otherwise false
+  ###
   toggleRow: (uid) ->
-    ###
-     * Expand/Collapse the row
-    ###
     console.debug "ListingController::toggleRow: uid=#{uid}"
 
     # skip if no uid is given
-    return unless uid
+    return false unless uid
 
     # get the current expanded rows
     expanded = @state.expanded_rows
@@ -298,77 +327,266 @@ class ListingController extends React.Component
           expanded_rows: expanded
     else
       # set the new expanded categories
-      @setState
-        expanded_rows: expanded
+      @setState {expanded_rows: expanded}
 
-  toggleColumn: (column) ->
-    ###
-     * Toggle the column on or off
-    ###
-    console.debug "ListingController::toggleColumn: column=#{column}"
+    return expanded.length > 0
 
-    # reset the default visible columns
-    if column == "reset"
-      columns = @get_default_columns()
-      @set_column_toggles columns
+  ###*
+   * Toggle the visibility of a column by its column key.
+   *
+   * This method also stores the visibility of the column in the browser's
+   * localstorage.
+   *
+   * @param key {string} The ID of the column, or "reset" to restore all columns
+   * @returns {bool} true if the column was expanded, otherwise false
+  ###
+  toggleColumn: (key) ->
+    console.debug "ListingController::toggleColumn: key=#{key}"
 
-      return columns
+    # restore columns to the initial state and flush the local storage
+    if key is "reset"
+      @setState {columns: @get_default_columns()}
+      @set_local_column_config []
+      return true
 
-    # get the current displayed columns
-    columns = @get_visible_columns()
-    # check if the current column is displayed
-    index = columns.indexOf column
+    # get the columns from the state
+    columns = @state.columns
 
-    if index > -1
-      # remove the column
-      columns.splice index, 1
-    else
-      # add the column
-      columns.push column
+    # Toggle the visibility of the column
+    toggle = columns[key]["toggle"]
+    if toggle is undefined then toggle = yes
+    columns[key]["toggle"] = !toggle
 
-    # set the new column toggles
-    @set_column_toggles columns
+    column_config = []
+    for key, column of columns
+      # keep only a record of the column key and visibility in the local storage
+      column_config.push {key: key, toggle: column.toggle}
 
+    # store the new order and visibility in the local storage
+    @set_local_column_config column_config
+
+    # update the columns of the current state
+    @setState {columns: columns}
+
+    return toggle
+
+  ###*
+   * Update the order of all columns
+   *
+   * This method also stores the order of the columns in the browser's
+   * localstorage.
+   *
+   * @param order {array} Array of column IDs to be used as new order
+   * @returns {object} New ordered columns object
+  ###
+  setColumnsOrder: (order) ->
+    console.debug "ListingController::setColumnsOrder: order=#{order}"
+
+    # This object will hold the new ordered columns
+    ordered_columns = {}
+
+    # Although the column properties seem to be sorted, we keep in the local
+    # storage a list of column "visibility" objects to avoid any order issues
+    # with the JSON serialization step.
+    column_config = []
+
+    # get the keys of all columns (visible or not)
+    keys = Object.keys @state.columns
+
+    # sort the keys according to the passed in column order
+    keys.sort (a, b) ->
+      return order.indexOf(a) - order.indexOf(b)
+
+    # rebuild an object with the new property order
+    for key in keys
+      column = @state.columns[key]
+      toggle = column.toggle
+      if toggle is undefined then toggle = yes
+      # keep only a record of the column key and visibility in the local storage
+      column_config.push {key: key, toggle: toggle}
+      ordered_columns[key] = column
+
+    # store the new order and visibility in the local storage
+    @set_local_column_config column_config
+
+    # update the columns of the current state
+    @setState {columns: ordered_columns}
+    return ordered_columns
+
+  ###*
+   * Returns all column keys where the visibility toggle is true
+   *
+   * @returns columns {array} Array of ordered and visible columns
+  ###
+  get_visible_columns: ->
+    keys = []
+    allowed_keys = @get_allowed_column_keys()
+    visible = @get_columns_visibility()
+    for key in @get_columns_order()
+      # skip non-allowed keys
+      if key not in allowed_keys
+        continue
+      toggle = visible[key]
+      # skip columns which are not visible
+      if toggle is no
+        continue
+      # remember the key
+      keys.push key
+    return keys
+
+  ###*
+   * Get the default columns
+   *
+   * This method parses the JSON columns definitions from the DOM.
+   *
+   * @returns columns {object} Object of column definitions
+  ###
+  get_default_columns: ->
+    return JSON.parse @root_el.dataset.columns
+
+  ###*
+   * Get columns in the right order and visibility
+   *
+   * This method takes the local column settings into consideration to set the
+   * visibility and order of the final columns object.
+   *
+   * @returns columns {object} new columns object
+  ###
+  get_columns: ->
+    columns = {}
+    visibility = @get_columns_visibility()
+    for key in @get_columns_order()
+      column = @state.columns[key]
+      if column is undefined
+        console.warn "Skipping nonexisting column '#{key}'."
+        continue
+      toggle = visibility[key]
+      if toggle isnt undefined
+        column["toggle"] = toggle
+      columns[key] = column
     return columns
 
-  filterByState: (review_state="default") ->
-    ###
-     * Filter the results by the given state
-    ###
-    console.debug "ListingController::filterByState: review_state=#{review_state}"
+  ###*
+   * Extract all keys from the curent columns
+   *
+   * @returns keys {array} Current colum keys
+  ###
+  get_columns_keys: ->
+    return Object.keys @state.columns
 
+  ###*
+   * Return the order of all columns
+   *
+   * This method takes also the local column config into consideration
+   *
+   * @returns keys {array} Current colum keys
+  ###
+  get_columns_order: ->
+    keys = []
+    columns_keys = @get_columns_keys()
+    local_config = @get_local_column_config()
+    # Skip local settings if toggling/ordering is not allowed
+    allowed = @state.show_column_toggles
+
+    if allowed and local_config.length > 0
+      # extract the column keys in the user selected order
+      keys = local_config.map (item, index) ->
+        return item.key
+    else
+      # sort column keys by the current columns settings
+      allowed_keys = @get_allowed_column_keys()
+      keys = allowed_keys.concat columns_keys.filter (k) ->
+        # only append column keys which are not yet in  allowed_keys
+        return allowed_keys.indexOf(k) == -1
+
+    return keys
+
+  ###*
+   * Return the set visibility of all columns
+   *
+   * This method takes also the local column config into consideration
+   *
+   * @returns visibility {object} of column key -> visibility
+  ###
+  get_columns_visibility: ->
+    visibility = {}
+    local_config = @get_local_column_config()
+    # Skip local settings if toggling/ordering is not allowed
+    allowed = @state.show_column_toggles
+
+    if allowed and local_config.length > 0
+      # get the user defined visibility
+      for {key, toggle} in local_config
+        if toggle is undefined then toggle = true
+        visibility[key] = toggle
+    else
+      # use the default visibility of the columns
+      for key, column of @state.columns
+        toggle = column.toggle
+        if toggle is undefined then toggle = true
+        visibility[key] = toggle
+
+    return visibility
+
+  ###*
+   * Filter the results by the given state
+   *
+   * This method executes an Ajax request to the server.
+   *
+   * @param review_state {string} The state to filter, e.g. verified, published
+   * @returns {bool} true
+  ###
+  filterByState: (review_state="default") ->
+    console.debug "ListingController::filterByState: review_state=#{review_state}"
     @set_state
       review_state: review_state
       pagesize: @pagesize  # reset to the initial pagesize on state change
       limit_from: 0
+    return true
 
+  ###*
+   * Filter the results by the given searchterm
+   *
+   * This method executes an Ajax request to the server.
+   *
+   * @param filter {string} An arbitrary search string
+   * @returns {bool} true
+  ###
   filterBySearchterm: (filter="") ->
-    ###
-     * Filter the results by the given sarchterm
-    ###
     console.debug "ListingController::filterBySearchter: filter=#{filter}"
-
     @set_state
       filter: filter
       pagesize: @pagesize  # reset to the initial pagesize on search
       limit_from: 0
+    return true
 
+  ###*
+   * Sort a column with a specific order
+   *
+   * This method executes an Ajax request to the server.
+   *
+   * @param sort_on {string} Sort index, e.g. getId, created
+   * @param sort_order {string} Sort order, e.g. ascending, descending
+   * @returns {bool} true
+  ###
   sortBy: (sort_on, sort_order) ->
-    ###
-     * Sort the results by the given sort_on index with the given sort_order
-    ###
     console.debug "sort_on=#{sort_on} sort_order=#{sort_order}"
-
     @set_state
       sort_on: sort_on
       sort_order: sort_order
       pagesize: @get_item_count() # keep the current number of items on sort
       limit_from: 0
+    return true
 
+  ###*
+   * Show more results
+   *
+   * This method executes an Ajax request to the server.
+   *
+   * @param pagesize {int} The amount of additional items to request
+   * @returns {bool} true
+  ###
   showMore: (pagesize) ->
-    ###
-     * Show more items
-    ###
     console.debug "ListingController::showMore: pagesize=#{pagesize}"
 
     # the existing folderitems
@@ -391,11 +609,18 @@ class ListingController extends React.Component
           new_folderitems = folderitems.concat data.folderitems
           me.setState
             folderitems: new_folderitems
+    return true
 
+  ###*
+   * Submit form
+   *
+   * This method executes an HTTP POST form submission
+   *
+   * @param id {string} The workflow action id
+   * @param url {string} The form action URL
+   * @returns form submission
+  ###
   doAction: (id, url) ->
-    ###
-     * Perform an action coming from the WF Action Buttons
-    ###
 
     # handle clear button separate
     if id == "clear_selection"
@@ -423,11 +648,16 @@ class ListingController extends React.Component
 
     return form.submit()
 
+  ###*
+   * Select a row checkbox by UID
+   *
+   * This method executes an Ajax request to the server.
+   *
+   * @param uid {string} The UID of the row
+   * @param toggle {bool} true for select, false for deselect
+   * @returns {Promise} which is resolved when the state was sucessfully set
+  ###
   selectUID: (uid, toggle) ->
-    ###
-     * select/deselect the UID
-    ###
-
     # copy the selected UIDs from the state
     #
     # N.B. We use [].concat(@state.selected_uids) to get a copy, otherwise it
@@ -476,22 +706,33 @@ class ListingController extends React.Component
       @setState
         selected_uids: selected_uids, resolve
 
+  ###*
+   * Save the values of the state's `ajax_save_queue`
+   *
+   * This method executes an Ajax request to the server.
+   *
+   * @returns {Promise} of the Ajax Save Request
+  ###
   saveAjaxQueue: ->
-    ###
-     * Save the whole ajax queue
-    ###
     uids = Object.keys @state.ajax_save_queue
-    return unless uids.length > 0
-    promise = @ajax_save()
+    return false unless uids.length > 0
+    return @ajax_save()
 
+  ###*
+   * Save a named value by UID to the ajax_save_queue
+   *
+   * If the column has the `autosave` property set,
+   * the value will be send immediately to the server
+   *
+   * @param uid {string} UID of the object
+   * @param name {string} name of the field
+   * @param value {string} value to set
+   * @param item {object} additional server data
+   * @returns {bool} true
+  ###
   saveEditableField: (uid, name, value, item) ->
-    ###
-     * Save the editable field of a table cell
-    ###
-
     # Skip fields which are not editable
-    return unless name in item.allow_edit
-
+    return false unless name in item.allow_edit
     console.debug "ListingController::saveEditableField: uid=#{uid} name=#{name} value=#{value}"
 
     column = @state.columns[name] or {}
@@ -508,11 +749,20 @@ class ListingController extends React.Component
       , ->
         if column.autosave
           me.ajax_save()
+    return true
 
+  ###*
+   * Update a named value by UID
+   *
+   * Saves the value and selects the row.
+   *
+   * @param uid {string} UID of the object
+   * @param name {string} name of the field
+   * @param value {string} value to set
+   * @param item {object} additional server data
+   * @returns {bool} true
+  ###
   updateEditableField: (uid, name, value, item) ->
-    ###
-     * Update the editable field
-    ###
     console.debug "ListingController::updateEditableField: uid=#{uid} name=#{name} value=#{value}"
 
     # immediately fill the `ajax_save_queue` to show the "Save" button
@@ -526,17 +776,26 @@ class ListingController extends React.Component
         # fetch all possible transitions
         if me.state.fetch_transitions_on_select
           me.fetch_transitions()
+    return true
 
+  ###*
+   * Checks if the UID is selected.
+   *
+   * @param uid {string} UID of the object
+   * @returns {bool} true if the UID is selected or false
+  ###
   is_uid_selected: (uid) ->
-    ###
-     * Check if the UID is selected
-    ###
     return uid in @state.selected_uids
 
+  ###*
+   * Checks if the UID is selected.
+   *
+   * Throws an error if the ID was not found in the review_states list.
+   *
+   * @param id {string} ID of the review_state, e.g. "default" or "verified"
+   * @returns {object} review_states item
+  ###
   get_review_state_by_id: (id) ->
-    ###
-     * Fetch the current review_state item by id
-    ###
     current = null
 
     # review_states is the list of review_state items from the listing view
@@ -546,83 +805,107 @@ class ListingController extends React.Component
         break
 
     if not current
-      throw "No review_state definition found for ID #{id}"
+      console.warn "No review_state with ID '#{id}' found"
+      # return the default column keys
+      return {id: "default", columns: @get_columns_keys()}
 
     return current
 
-  get_column_order: ->
-    ###
-     * Get the column order defined in the current selected review_state item
-    ###
-    review_state_item = @get_review_state_by_id @state.review_state
-    return review_state_item.columns or []
+  ###*
+   * Get the allowed columns of the current review state.
+   *
+   * This is defined in the view config by tge review_states list, e.g.:
+   *
+   *  review_states = [
+   *      {
+   *          "id": "default",
+   *          "title": _("All"),
+   *          "contentFilter": {},
+   *          "transitions": [],
+   *          "custom_transitions": [],
+   *          "columns": ["Title", "Descritpion"],
+   *      }
+   *  ]
+   *
+   * Usually the columns are defined as `self.columns.keys()`, which means that
+   * they contain the same columns and order as defined in the `self.columns`
+   * ordered dictionary.
+   *
+   * @returns {array} columns of column keys
+  ###
+  get_allowed_column_keys: ->
+    # get the current active state filter, e.g. "default"
+    review_state = @state.review_state
+    # get the defined review state item from the config
+    review_state_item = @get_review_state_by_id review_state
+    keys = review_state_item.columns
+    if not keys
+      # return the keys of the columns object
+      Object.keys @state.columns
+    # filter out nonexisting fields
+    columns = @state.columns
+    keys = keys.filter (key) -> columns[key] isnt undefined
+    return keys
 
-  get_visible_columns: ->
-    ###
-     * Get the visible columns according to the user settings
-    ###
+  ###*
+   * Calculate a common local storage key for this listing view.
+   *
+   * Note:
+   * The browser view initially calculates the `listing_identifier`, which is
+   * basically a concatenation of the listed items portal_type and view name.
+   *
+   * @returns key {string} with optional prefix and postfix
+  ###
+  get_local_storage_key: (prefix, postfix) ->
+    key = @listing_identifier
+    if @listing_identifier is undefined
+      key = location.pathname
+    if prefix isnt undefined
+      key = prefix + key
+    if postfix isnt undefined
+      key = key + postfix
+    return key
 
-    # get the current user defined column toggles
-    column_toggles = @get_column_toggles()
+  ###*
+   * Set the columns definition to the local storage
+   *
+   * @param columns {array} Array of {"key":key, "toggle":toggle} records
+   * @returns {bool} true
+  ###
+  set_local_column_config: (columns) ->
+    console.debug "ListingController::set_local_column_config: columns=", columns
 
-    if column_toggles.length > 0
-      columns = []
-      for key in @get_column_order()
-        if key in column_toggles
-          columns.push key
-      return columns
-
-    return @get_default_columns()
-
-  get_default_columns: ->
-    ###
-     * Get the default visible columns of the listing
-    ###
-
-    columns = []
-    for key in @get_column_order()
-      column = @state.columns[key]
-      # only skip columns explicitly set to false
-      if column.toggle is no
-          continue
-      columns.push key
-    return columns
-
-  set_column_toggles: (columns) ->
-    ###
-     * Set the user defined column toggles to the local state and local storage
-    ###
-    console.debug "ListingController::set_column_toggles: columns=", columns
-
-    # set the columns to the local storage
-    key = location.pathname
+    key = @get_local_storage_key "columns-"
     storage = window.localStorage
     storage.setItem key, JSON.stringify(columns)
+    return true
 
-    @setState
-      column_toggles: columns
-
-  get_column_toggles: ->
-    ###
-     * Return the current column toggles from the local storage
-    ###
-
-    key = location.pathname
+  ###*
+   * Returns column definitions of the local storage
+   *
+   * @returns columns {array} of {"key":key, "toggle":toggle} records
+  ###
+  get_local_column_config: ->
+    key = @get_local_storage_key "columns-"
     storage = window.localStorage
     columns = storage.getItem key
 
     if not columns
-      return @state.column_toggles
+      return []
 
     try
       return JSON.parse columns
     catch
-      return @state.column_toggles
+      return []
 
-  get_column_count: ->
-    ###
-     * Calculate the current number of displayed columns
-    ###
+  ###*
+   * Calculate the number of displayed columns
+   *
+   * This method also counts the selection column if present.
+   *
+   * @returns count {int} of displayed columns
+  ###
+  get_columns_count: ->
     # get the current visible columns
     visible_columns = @get_visible_columns()
 
@@ -632,25 +915,27 @@ class ListingController extends React.Component
       count += 1
     return count
 
+  ###*
+   * Get the names of all expanded categories
+   *
+   * @returns {array} expanded category names
+  ###
   get_expanded_categories: ->
-    ###
-     * Get the expanded categories
-    ###
-
     # return all categories if the flag is on
     if @state.expand_all_categories
       return [].concat @state.categories
-
     # expand all categories for searches
     if @state.filter
       return [].concat @state.categories
-
     return []
 
+  ###*
+   * Create a mapping of UID -> folderitem
+   *
+   * @param folderitems {array} Array of folderitem records
+   * @returns {object} of {UID:folderitem}
+  ###
   group_by_uid: (folderitems) ->
-    ###
-     * Create a mapping of UID -> folderitem
-    ###
     folderitems ?= @state.folderitems
     mapping = {}
     folderitems.map (item, index) ->
@@ -659,36 +944,48 @@ class ListingController extends React.Component
       mapping[uid] = item
     return mapping
 
+  ###*
+   * Calculate the count of current folderitems
+   *
+   * @returns {int} Number of folderitems
+  ###
   get_item_count: ->
-    ###
-     * Return the current shown items
-    ###
     return @state.folderitems.length
 
+  ###*
+   * Toggles the loading animation on/off
+   *
+   * @param toggle {bool} true to show the loader, false otherwise
+   * @returns {bool} toggle state
+  ###
   toggle_loader: (toggle=off) ->
-    ###
-     * Toggle the loader on/off
-    ###
     @setState loading: toggle
+    return toggle
 
+  ###*
+   * Set the state with optional folderitems fetch
+   *
+   * @param data {object} data to set to the state
+   * @param fetch {bool} true to re-fetch the folderitems, false otherwise
+   * @returns {bool} true
+  ###
   set_state: (data, fetch=yes) ->
-    ###
-     * Helper to set the state and reload the folderitems
-    ###
     me = this
-
     @setState data, ->
       if fetch then me.fetch_folderitems()
+    return true
 
+  ###*
+   * Fetch the possible transitions of the selected UIDs
+   *
+   * @returns {Promise} for the API fetch transitions call
+  ###
   fetch_transitions: ->
-    ###
-     * Fetch the possible transitions
-    ###
     selected_uids = @state.selected_uids
 
     # empty the possible transitions if no UID is selected
     if selected_uids.length == 0
-      @setState transitions: []
+      @setState {transitions: []}
       return
 
     # turn loader on
@@ -704,13 +1001,14 @@ class ListingController extends React.Component
         console.debug "ListingController::fetch_transitions: NEW STATE=", me.state
         # turn loader off
         me.toggle_loader off
+    return promise
 
+  ###
+   * Fetch folderitems from the server
+   *
+   * @returns {Promise} for the API fetch folderitems call
+  ###
   fetch_folderitems: ->
-    ###
-     * Fetch folderitems from the server
-     *
-     * @param uids {array} List of UIDs to fetch (all if omitted)
-    ###
 
     # turn loader on
     @toggle_loader on
@@ -773,11 +1071,14 @@ class ListingController extends React.Component
 
     return promise
 
+  ###
+   * Fetch child-folderitems from the server
+   *
+   * @param {parent_uid} UID of the parent, e.g. the primary partition
+   * @param {child_uids} UIDs of the children (partitions) to load
+   * @returns {Promise} for the API fetch folderitems call
+  ###
   fetch_children: ({parent_uid, child_uids}={}) ->
-    ###
-     * Fetch the children of the parent by uid
-    ###
-
     # turn loader on
     @toggle_loader on
 
@@ -802,10 +1103,12 @@ class ListingController extends React.Component
 
     return promise
 
+  ###
+   * Checks if the top toolbar should be loaded or not.
+   *
+   * @returns {bool} true to render the top toolbar, false otherwise
+  ###
   render_toolbar_top: ->
-    ###
-     * Control if the top toolbar should be loaded
-    ###
     if @state.show_more
       return yes
     if @state.show_search
@@ -814,10 +1117,12 @@ class ListingController extends React.Component
       return yes
     return no
 
+  ###
+   * Send the `ajax_save_queue` to the server
+   *
+   * @returns {Promise} of the API set_fields call
+  ###
   ajax_save: ->
-    ###
-     * Save the items of the `ajax_save_queue`
-    ###
     console.debug "ListingController::ajax_save:ajax_save_queue=", @state.ajax_save_queue
 
     # turn loader on
@@ -853,11 +1158,16 @@ class ListingController extends React.Component
 
       # toggle loader off
       me.toggle_loader off
+    return promise
 
+  ###*
+   * Update existing folderitems
+   *
+   * This is done for performance increase to avoid a complete re-rendering
+   *
+   * @param folderitems {array} Array of folderitems records from the view
+  ###
   update_existing_folderitems_with: (folderitems) ->
-    ###
-     * Update existing folderitems
-    ###
     console.log "ListingController::update_existing_folderitems_with: ", folderitems
 
     # These folderitems get set to the state
@@ -897,16 +1207,20 @@ class ListingController extends React.Component
       folderitems: new_folderitems
 
   ###*
-    * EVENT HANDLERS
-    *
-    * N.B. All `event` objects are ReactJS events
-    *      https://reactjs.org/docs/handling-events.html
+   * EVENT HANDLERS
+   *
+   * N.B. All `event` objects are ReactJS events
+   *      https://reactjs.org/docs/handling-events.html
   ###
 
+  on_column_config_click: (event) ->
+    event.preventDefault()
+    return unless @state.show_column_toggles
+    toggle = not @state.show_column_config
+    @setState
+      show_column_config: toggle
+
   on_select_checkbox_checked: (event) ->
-    ###
-     * Event handler when a folderitem (row) was selected
-    ###
     console.debug "°°° ListingController::on_select_checkbox_checked"
     me = this
     el = event.currentTarget
@@ -919,134 +1233,138 @@ class ListingController extends React.Component
         me.fetch_transitions()
 
   on_api_error: (response) ->
-    ###
-     * API Error handler
-     * This method stops the loader animation and adds a status message
-    ###
     @toggle_loader off
     console.debug "°°° ListingController::on_api_error: GOT AN ERROR RESPONSE: ", response
-
-    me = this
-    response.json().then (data) ->
+    response.text().then (data) =>
       title = _("Oops, an error occured! 🙈")
-      message = _("The server responded with the status #{data.status}: #{data.message}")
-      me.addMessage title, message, data.traceback, level="danger"
+      message = _("The server responded with the status #{response.status}: #{response.statusText}")
+      @addMessage title, message, null, level="danger"
+    return response
 
   ###*
-    * VIEW
+   * Renders the listing table
+   * @returns {JSX}
   ###
-
   render: ->
-    ###
-     * Listing Table
-    ###
-    <div className="listing-container">
-      <Messages on_dismiss_message={@dismissMessage} id="messages" className="messages" messages={@state.messages} />
-      {@state.loading and <div id="table-overlay"/>}
-      {not @render_toolbar_top() and @state.loading and <Loader loading={@state.loading} />}
-      {@render_toolbar_top() and
-        <div className="row top-toolbar">
-          <div className="col-sm-8">
-            <FilterBar
-              className="filterbar nav nav-pills"
-              on_filter_button_clicked={@filterByState}
-              review_state={@state.review_state}
-              review_states={@state.review_states}/>
+    console.debug "*** RENDER ***"
+
+    # computed properties at render time
+    columns = @get_columns()
+    columns_order = @get_columns_order()
+    columns_count = @get_columns_count()
+    visible_columns = @get_visible_columns()
+    item_count = @get_item_count()
+    render_toolbar_top = @render_toolbar_top()
+
+    return (
+      <div className="listing-container">
+        <Messages on_dismiss_message={@dismissMessage} id="messages" className="messages" messages={@state.messages} />
+        {@state.loading and <div id="table-overlay"/>}
+        {not render_toolbar_top and @state.loading and <Loader loading={@state.loading} />}
+        {render_toolbar_top and
+          <div className="row top-toolbar">
+            <div className="col-sm-8">
+              <FilterBar
+                className="filterbar nav nav-pills"
+                on_filter_button_clicked={@filterByState}
+                review_state={@state.review_state}
+                review_states={@state.review_states}/>
+            </div>
+            <div className="col-sm-1 text-right">
+              <Loader loading={@state.loading} />
+            </div>
+            <div className="col-sm-3 text-right">
+              <SearchBox
+                show_search={@state.show_search}
+                on_search={@filterBySearchterm}
+                filter={@state.filter}
+                placeholder={_("Search")} />
+            </div>
           </div>
-          <div className="col-sm-1 text-right">
-            <Loader loading={@state.loading} />
-          </div>
-          <div className="col-sm-3 text-right">
-            <SearchBox
-              show_search={@state.show_search}
-              on_search={@filterBySearchterm}
-              filter={@state.filter}
-              placeholder={_("Search")} />
-          </div>
-        </div>
-      }
-      <div className="row">
-        <div className="col-sm-12 table-responsive">
-          {@state.show_column_toggles and
-            <TableContextMenu
-              show={@state.contextmenu_show}
-              x={@state.contextmenu_x}
-              y={@state.contextmenu_y}
-              title={_("Display Columns")}
-              reset_title={_("Reset")}
-              columns={@state.columns}
-              column_order={@get_column_order()}
-              table_columns={@get_visible_columns()}
-              on_column_toggle={@toggleColumn}
-              on_context_menu={@toggleContextMenu}
-              />}
-          <Table
-            className="contentstable table table-condensed table-hover small"
-            allow_edit={@state.allow_edit}
-            on_header_column_click={@sortBy}
-            on_select_checkbox_checked={@on_select_checkbox_checked}
-            on_context_menu={@toggleContextMenu}
-            sort_on={@state.sort_on}
-            sort_order={@state.sort_order}
-            catalog_indexes={@state.catalog_indexes}
-            catalog_columns={@state.catalog_columns}
-            sortable_columns={@state.sortable_columns}
-            columns={@state.columns}
-            column_toggles={@state.column_toggles}
-            column_count={@get_column_count()}
-            column_order={@get_column_order()}
-            table_columns={@get_visible_columns()}
-            review_state={@state.review_state}
-            review_states={@state.review_states}
-            folderitems={@state.folderitems}
-            children={@state.children}
-            selected_uids={@state.selected_uids}
-            select_checkbox_name={@state.select_checkbox_name}
-            show_select_column={@state.show_select_column}
-            show_select_all_checkbox={@state.show_select_all_checkbox}
-            categories={@state.categories}
-            expanded_categories={@state.expanded_categories}
-            expanded_rows={@state.expanded_rows}
-            expanded_remarks={@state.expanded_remarks}
-            show_categories={@state.show_categories}
-            on_category_click={@toggleCategory}
-            on_row_expand_click={@toggleRow}
-            on_remarks_expand_click={@toggleRemarks}
-            filter={@state.filter}
-            update_editable_field={@updateEditableField}
-            save_editable_field={@saveEditableField}
-            />
-        </div>
-      </div>
-      {@state.show_table_footer and
+        }
         <div className="row">
-          <div className="col-sm-8">
-            <ButtonBar
-              className="buttonbar nav nav-pills"
-              show_ajax_save={@state.show_ajax_save}
-              ajax_save_button_title={_("Save")}
-              on_transition_button_click={@doAction}
-              on_ajax_save_button_click={@saveAjaxQueue}
+          <div className="col-sm-12 table-responsive">
+            {@state.show_column_toggles and
+              <a
+                href="#"
+                onClick={@on_column_config_click}
+                className="pull-right">
+                <span className="glyphicon glyphicon-option-horizontal"></span>
+              </a>}
+            {@state.show_column_config and
+              <TableColumnConfig
+                title={_("Configure Table Columns")}
+                description={_("Click to toggle the visibility or drag&drop to change the order")}
+                columns={columns}
+                columns_order={columns_order}
+                on_column_toggle_click={@toggleColumn}
+                on_columns_order_change={@setColumnsOrder}/>}
+            <Table
+              className="contentstable table table-condensed table-hover small"
+              allow_edit={@state.allow_edit}
+              on_header_column_click={@sortBy}
+              on_select_checkbox_checked={@on_select_checkbox_checked}
+              on_context_menu={@on_column_config_click}
+              sort_on={@state.sort_on}
+              sort_order={@state.sort_order}
+              catalog_indexes={@state.catalog_indexes}
+              catalog_columns={@state.catalog_columns}
+              sortable_columns={@state.sortable_columns}
+              columns={columns}
+              columns_count={columns_count}
+              review_state={@state.review_state}
+              visible_columns={visible_columns}
+              review_states={@state.review_states}
+              folderitems={@state.folderitems}
+              children={@state.children}
               selected_uids={@state.selected_uids}
+              select_checkbox_name={@state.select_checkbox_name}
               show_select_column={@state.show_select_column}
-              transitions={@state.transitions}
-              review_state={@get_review_state_by_id(@state.review_state)}
+              show_select_all_checkbox={@state.show_select_all_checkbox}
+              categories={@state.categories}
+              expanded_categories={@state.expanded_categories}
+              expanded_rows={@state.expanded_rows}
+              expanded_remarks={@state.expanded_remarks}
+              show_categories={@state.show_categories}
+              on_category_click={@toggleCategory}
+              on_row_expand_click={@toggleRow}
+              on_remarks_expand_click={@toggleRemarks}
+              filter={@state.filter}
+              update_editable_field={@updateEditableField}
+              save_editable_field={@saveEditableField}
               />
           </div>
-          <div className="col-sm-1 text-right">
-            <Loader loading={@state.loading} />
-          </div>
-          <div className="col-sm-3 text-right">
-            <Pagination
-              id="pagination"
-              className="pagination-controls"
-              total={@state.total}
-              show_more_button_title={_("Show more")}
-              onShowMore={@showMore}
-              show_more={@state.show_more}
-              count={@get_item_count()}
-              pagesize={@state.pagesize}/>
-          </div>
         </div>
-      }
-    </div>
+        {@state.show_table_footer and
+          <div className="row">
+            <div className="col-sm-8">
+              <ButtonBar
+                className="buttonbar nav nav-pills"
+                show_ajax_save={@state.show_ajax_save}
+                ajax_save_button_title={_("Save")}
+                on_transition_button_click={@doAction}
+                on_ajax_save_button_click={@saveAjaxQueue}
+                selected_uids={@state.selected_uids}
+                show_select_column={@state.show_select_column}
+                transitions={@state.transitions}
+                review_state={@get_review_state_by_id(@state.review_state)}
+                />
+            </div>
+            <div className="col-sm-1 text-right">
+              <Loader loading={@state.loading} />
+            </div>
+            <div className="col-sm-3 text-right">
+              <Pagination
+                id="pagination"
+                className="pagination-controls"
+                total={@state.total}
+                show_more_button_title={_("Show more")}
+                onShowMore={@showMore}
+                show_more={@state.show_more}
+                count={item_count}
+                pagesize={@state.pagesize}/>
+            </div>
+          </div>
+        }
+      </div>
+    )
