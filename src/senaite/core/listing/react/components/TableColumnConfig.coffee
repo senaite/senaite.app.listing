@@ -84,21 +84,22 @@ class TableColumnConfig extends React.Component
           style={{padding: "0 5px 5px 0"}}
           className="column"
           onDragOver={@on_drag_over}>
-          <div
+          <a
+            href="#"
             column={key}
             className="draggable-column"
             onDragStart={@on_drag_start}
             onDragEnd={@on_drag_end}
             draggable={true}>
-            <button
+            <span
               column={key}
               onClick={@on_column_toggle_click}
               className="btn btn-default btn-xs">
               {visible and <span className="text-primary glyphicon glyphicon-check"></span>}
               {not visible and <span className="text-muted glyphicon glyphicon-unchecked"></span>}
               &nbsp;<span dangerouslySetInnerHTML={{__html: column.title or key}}></span>
-            </button>
-          </div>
+            </span>
+          </a>
         </li>
       )
     return columns
