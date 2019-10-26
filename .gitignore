@@ -8,5 +8,6 @@ eggs
 node_modules
 parts
 src/senaite.*
+var
 *.egg-info
 *.pyc
