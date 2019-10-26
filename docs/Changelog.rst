@@ -1,4 +1,4 @@
-1.3.0 (unreleased)
+1.3.0 (2019-10-26)
 ------------------
 
 - #21 Custom Column Configuration
