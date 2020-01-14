@@ -485,6 +485,9 @@ class ListingController extends React.Component
     keys = []
     columns_keys = @get_columns_keys()
     local_config = @get_local_column_config()
+    # filter out removed columns that still exist in the local config
+    local_config = local_config.filter (column) ->
+      columns_keys.indexOf(column.key) != -1
     # Skip local settings if toggling/ordering is not allowed
     allowed = @state.show_column_toggles
 
