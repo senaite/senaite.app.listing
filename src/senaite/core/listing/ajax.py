@@ -365,16 +365,9 @@ class AjaxListingView(BrowserView):
         :returns: list of sortable columns
         """
         # filter out any columns which are explicitly set to False
-        columns = filter(lambda (k, v): v.get("sortable", True),
+        columns = filter(lambda item: item[1].get("sortable", True),
                          self.columns.items())
-        # extract the column_keys
-        keys = set(map(lambda (k, v): k, columns))
-        # sortable by index
-        by_index = keys.intersection(self.get_catalog_indexes())
-        # sortable by metadata
-        by_metadata = keys.intersection(self.get_metadata_columns())
-        # return a list of possible sortable columns
-        return list(by_index.union(by_metadata))
+        return map(lambda item: item[0], columns)
 
     def recalculate_results(self, obj, recalculated=None):
         """Recalculate the result of the object and its dependents
