@@ -601,7 +601,7 @@ class ListingView(AjaxListingView):
             return re.compile(searchterm, re.IGNORECASE)
         return re.compile(searchterm)
 
-    def sort_brains(self, brains, sort_on=None):
+    def sort_brains(self, brains, sort_on=None, instance_fallback=True):
         """Sort the brains
 
         :param brains: List of catalog brains
@@ -612,9 +612,13 @@ class ListingView(AjaxListingView):
         wakeup = False
         if sort_on not in self.get_metadata_columns():
             logger.warn(
-                "ListingView::sort_brains: '{}' not in metadata columns! "
-                "---> Full object will be retrieved !!!"
+                "ListingView::sort_brains: '{}' not in metadata columns!"
                 .format(sort_on))
+            if not instance_fallback:
+                return brains
+            logger.warn(
+                "ListingView::sort_brains: !!! WAKING UP {} OBJECTS !!!"
+                .format(len(brains)))
             wakeup = True
 
         logger.warn(
