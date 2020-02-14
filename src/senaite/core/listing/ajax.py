@@ -548,13 +548,6 @@ class AjaxListingView(BrowserView):
         # update the config
         data.update(config)
 
-        # XXX fix broken `sort_on` lookup in BikaListing
-        sort_on = payload.get("sort_on")
-        if sort_on in self.get_catalog_indexes():
-            data["sort_on"] = sort_on
-        elif sort_on in self.get_metadata_columns():
-            data["sort_on"] = sort_on
-
         return data
 
     @set_application_json_header

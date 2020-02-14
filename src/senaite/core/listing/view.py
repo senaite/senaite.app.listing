@@ -454,49 +454,16 @@ class ListingView(AjaxListingView):
         sort_order = filter(lambda order: order in allowed, sort_order)
         return sort_order and sort_order[0] or "descending"
 
-    def get_sort_on(self, default="created"):
-        """Get the sort_on criteria to be used
+    def get_sort_on(self):
+        """Get the sort_on criteria from the request
 
-        :param default: The default sort_on index to be used
-        :returns: valid sort_on index or None
+        :returns: sort_on parameter or None
         """
         form_id = self.get_form_id()
         key = "{}_sort_on".format(form_id)
 
-        # List of known catalog columns
-        catalog_columns = self.get_metadata_columns()
-
         # The sort_on parameter from the request
-        sort_on = self.request.form.get(key, None)
-        # Use the index specified in the columns config
-        if sort_on in self.columns:
-            sort_on = self.columns[sort_on].get("index", sort_on)
-
-        # Return immediately if the request sort_on parameter is found in the
-        # catalog indexes
-        if self.is_valid_sort_index(sort_on):
-            return sort_on
-
-        # Flag manual sorting if the request sort_on parameter is found in the
-        # catalog metadata columns
-        if sort_on in catalog_columns:
-            self.manual_sort_on = sort_on
-
-        # The sort_on parameter from the catalog query
-        content_filter_sort_on = self.contentFilter.get("sort_on", None)
-        if self.is_valid_sort_index(content_filter_sort_on):
-            return content_filter_sort_on
-
-        # The sort_on attribute from the instance
-        instance_sort_on = self.sort_on
-        if self.is_valid_sort_index(instance_sort_on):
-            return instance_sort_on
-
-        # The default sort_on
-        if self.is_valid_sort_index(default):
-            return default
-
-        return None
+        return self.request.form.get(key, None)
 
     def is_valid_sort_index(self, sort_on):
         """Checks if the sort_on index is capable for a sort_
@@ -608,8 +575,10 @@ class ListingView(AjaxListingView):
 
         # set the sort_on criteria
         sort_on = self.get_sort_on()
-        if sort_on is not None:
+        if self.is_valid_sort_index(sort_on):
             query["sort_on"] = sort_on
+        else:
+            self.manual_sort_on = sort_on
 
         # set the sort_order criteria
         query["sort_order"] = self.get_sort_order()
