@@ -608,7 +608,6 @@ class ListingView(AjaxListingView):
         :param sort_on: The metadata column name to sort on
         :returns: Manually sorted list of brains
         """
-
         wakeup = False
         if sort_on not in self.get_metadata_columns():
             logger.warn(
@@ -772,7 +771,7 @@ class ListingView(AjaxListingView):
                 catalog, query, searchterm, ignorecase)
 
         # Sort manually?
-        if self.manual_sort_on is not None:
+        if self.manual_sort_on:
             brains = self.sort_brains(brains, sort_on=self.manual_sort_on)
 
         end = time.time()
