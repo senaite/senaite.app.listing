@@ -1,6 +1,7 @@
 1.4.0 (unreleased)
 ------------------
 
+- #24 Improved column sorting and index lookup
 - #23 Fix column config error
 
 
