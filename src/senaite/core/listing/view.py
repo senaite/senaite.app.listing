@@ -368,7 +368,7 @@ class ListingView(AjaxListingView):
         """
         try:
             return api.get_tool(self.catalog)
-        except api.BikaLIMSError:
+        except api.APIError:
             return api.get_tool(default)
 
     @view.memoize
