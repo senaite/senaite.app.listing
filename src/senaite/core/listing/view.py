@@ -48,6 +48,7 @@ from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from senaite.core.listing.ajax import AjaxListingView
 from senaite.core.listing.interfaces import IListingView
 from senaite.core.listing.interfaces import IListingViewAdapter
+from senaite.core.supermodel import SuperModel
 from zope.component import getAdapters
 from zope.component import getMultiAdapter
 from zope.component import subscribers
@@ -161,9 +162,7 @@ class ListingView(AjaxListingView):
     #      -> Consider if it is worth to keep that funcitonality
     show_all = False
 
-    # Manually sort catalog results on this column
-    # XXX: Currently the listing table sorts only if the catalog index exists.
-    #      -> Consider if it is worth to keep that functionality
+    # Manually sort brains by this criteria
     manual_sort_on = None
 
     # Render the search box in the upper right corner
@@ -573,19 +572,17 @@ class ListingView(AjaxListingView):
         for k, v in self.review_state.get("contentFilter", {}).items():
             query[k] = v
 
-        # set the sort_on criteria
         sort_on = self.get_sort_on()
+        # check if the sort_on criteria is a valid search index
         if self.is_valid_sort_index(sort_on):
+            # set the sort_on criteria to the query
             query["sort_on"] = sort_on
         else:
+            # flag for manual sorting
             self.manual_sort_on = sort_on
 
         # set the sort_order criteria
         query["sort_order"] = self.get_sort_order()
-
-        # # Pass the searchterm as well to the Searchable Text index
-        # if searchterm and isinstance(searchterm, basestring):
-        #     query.update({"SearchableText": searchterm + "*"})
 
         logger.info(u"ListingView::get_catalog_query: query={}".format(query))
         return query
@@ -611,23 +608,40 @@ class ListingView(AjaxListingView):
         :param sort_on: The metadata column name to sort on
         :returns: Manually sorted list of brains
         """
+
+        wakeup = False
         if sort_on not in self.get_metadata_columns():
             logger.warn(
-                "ListingView::sort_brains: '{}' not in metadata columns."
+                "ListingView::sort_brains: '{}' not in metadata columns! "
+                "---> Full object will be retrieved !!!"
                 .format(sort_on))
-            return brains
+            wakeup = True
 
         logger.warn(
-            "ListingView::sort_brains: Manual sorting on metadata column '{}'."
+            "ListingView::sort_brains: Manual sorting on '{}'. "
             "Consider to add an explicit catalog index to speed up filtering."
-            .format(self.manual_sort_on))
+            .format(sort_on))
 
         # calculate the sort_order
         reverse = self.get_sort_order() == "descending"
 
+        # added for Python 3 compatibility
+        def cmp(a, b):
+            return (a > b) - (a < b)
+
         def metadata_sort(a, b):
-            a = getattr(a, self.manual_sort_on, "")
-            b = getattr(b, self.manual_sort_on, "")
+            if wakeup:
+                a = SuperModel(a)
+                b = SuperModel(b)
+            # get the attribute from the brain or SuperModel
+            a = getattr(a, sort_on, "")
+            b = getattr(b, sort_on, "")
+            # check for callable
+            if callable(a):
+                a = a()
+            if callable(b):
+                b = b()
+            # Compare the two values
             return cmp(safe_unicode(a), safe_unicode(b))
 
         return sorted(brains, cmp=metadata_sort, reverse=reverse)
