@@ -646,7 +646,7 @@ class ListingView(AjaxListingView):
             if callable(b):
                 b = b()
             # Compare the two values
-            return cmp(safe_unicode(a), safe_unicode(b))
+            return cmp(a, b)
 
         return sorted(brains, cmp=metadata_sort, reverse=reverse)
 
