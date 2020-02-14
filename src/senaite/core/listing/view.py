@@ -439,7 +439,7 @@ class ListingView(AjaxListingView):
         if "state" in key.lower():
             return self.translate_review_state(
                 value, api.get_portal_type(brain))
-        if not isinstance(value, basestring):
+        if not isinstance(value, six.string_types):
             value = str(value)
         return safe_unicode(value)
 

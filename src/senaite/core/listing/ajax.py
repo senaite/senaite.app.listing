@@ -22,6 +22,8 @@ import inspect
 import json
 import urllib
 
+import six
+
 from bika.lims import api
 from bika.lims import logger
 from bika.lims.browser import BrowserView
@@ -426,7 +428,7 @@ class AjaxListingView(BrowserView):
     def is_field_writeable(self, obj, field):
         """Checks if the field is writeable
         """
-        if isinstance(field, basestring):
+        if isinstance(field, six.stringtypes):
             field = obj.getField(field)
         return field.writeable(obj)
 
