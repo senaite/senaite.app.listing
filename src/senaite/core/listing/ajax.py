@@ -428,7 +428,7 @@ class AjaxListingView(BrowserView):
     def is_field_writeable(self, obj, field):
         """Checks if the field is writeable
         """
-        if isinstance(field, six.stringtypes):
+        if isinstance(field, six.string_types):
             field = obj.getField(field)
         return field.writeable(obj)
 
