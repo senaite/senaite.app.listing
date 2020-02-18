@@ -48,6 +48,7 @@ from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from senaite.core.listing.ajax import AjaxListingView
 from senaite.core.listing.interfaces import IListingView
 from senaite.core.listing.interfaces import IListingViewAdapter
+from senaite.core.supermodel import SuperModel
 from zope.component import getAdapters
 from zope.component import getMultiAdapter
 from zope.component import subscribers
@@ -161,9 +162,7 @@ class ListingView(AjaxListingView):
     #      -> Consider if it is worth to keep that funcitonality
     show_all = False
 
-    # Manually sort catalog results on this column
-    # XXX: Currently the listing table sorts only if the catalog index exists.
-    #      -> Consider if it is worth to keep that functionality
+    # Manually sort brains by this criteria
     manual_sort_on = None
 
     # Render the search box in the upper right corner
@@ -369,7 +368,7 @@ class ListingView(AjaxListingView):
         """
         try:
             return api.get_tool(self.catalog)
-        except api.BikaLIMSError:
+        except api.APIError:
             return api.get_tool(default)
 
     @view.memoize
@@ -439,7 +438,7 @@ class ListingView(AjaxListingView):
         if "state" in key.lower():
             return self.translate_review_state(
                 value, api.get_portal_type(brain))
-        if not isinstance(value, basestring):
+        if not isinstance(value, six.string_types):
             value = str(value)
         return safe_unicode(value)
 
@@ -454,49 +453,16 @@ class ListingView(AjaxListingView):
         sort_order = filter(lambda order: order in allowed, sort_order)
         return sort_order and sort_order[0] or "descending"
 
-    def get_sort_on(self, default="created"):
-        """Get the sort_on criteria to be used
+    def get_sort_on(self):
+        """Get the sort_on criteria from the request
 
-        :param default: The default sort_on index to be used
-        :returns: valid sort_on index or None
+        :returns: sort_on parameter or None
         """
         form_id = self.get_form_id()
         key = "{}_sort_on".format(form_id)
 
-        # List of known catalog columns
-        catalog_columns = self.get_metadata_columns()
-
         # The sort_on parameter from the request
-        sort_on = self.request.form.get(key, None)
-        # Use the index specified in the columns config
-        if sort_on in self.columns:
-            sort_on = self.columns[sort_on].get("index", sort_on)
-
-        # Return immediately if the request sort_on parameter is found in the
-        # catalog indexes
-        if self.is_valid_sort_index(sort_on):
-            return sort_on
-
-        # Flag manual sorting if the request sort_on parameter is found in the
-        # catalog metadata columns
-        if sort_on in catalog_columns:
-            self.manual_sort_on = sort_on
-
-        # The sort_on parameter from the catalog query
-        content_filter_sort_on = self.contentFilter.get("sort_on", None)
-        if self.is_valid_sort_index(content_filter_sort_on):
-            return content_filter_sort_on
-
-        # The sort_on attribute from the instance
-        instance_sort_on = self.sort_on
-        if self.is_valid_sort_index(instance_sort_on):
-            return instance_sort_on
-
-        # The default sort_on
-        if self.is_valid_sort_index(default):
-            return default
-
-        return None
+        return self.request.form.get(key, None)
 
     def is_valid_sort_index(self, sort_on):
         """Checks if the sort_on index is capable for a sort_
@@ -606,17 +572,17 @@ class ListingView(AjaxListingView):
         for k, v in self.review_state.get("contentFilter", {}).items():
             query[k] = v
 
-        # set the sort_on criteria
         sort_on = self.get_sort_on()
-        if sort_on is not None:
+        # check if the sort_on criteria is a valid search index
+        if self.is_valid_sort_index(sort_on):
+            # set the sort_on criteria to the query
             query["sort_on"] = sort_on
+        else:
+            # flag for manual sorting
+            self.manual_sort_on = sort_on
 
         # set the sort_order criteria
         query["sort_order"] = self.get_sort_order()
-
-        # # Pass the searchterm as well to the Searchable Text index
-        # if searchterm and isinstance(searchterm, basestring):
-        #     query.update({"SearchableText": searchterm + "*"})
 
         logger.info(u"ListingView::get_catalog_query: query={}".format(query))
         return query
@@ -635,31 +601,51 @@ class ListingView(AjaxListingView):
             return re.compile(searchterm, re.IGNORECASE)
         return re.compile(searchterm)
 
-    def sort_brains(self, brains, sort_on=None):
+    def sort_brains(self, brains, sort_on=None, instance_fallback=True):
         """Sort the brains
 
         :param brains: List of catalog brains
         :param sort_on: The metadata column name to sort on
         :returns: Manually sorted list of brains
         """
+        wakeup = False
         if sort_on not in self.get_metadata_columns():
             logger.warn(
-                "ListingView::sort_brains: '{}' not in metadata columns."
+                "ListingView::sort_brains: '{}' not in metadata columns!"
                 .format(sort_on))
-            return brains
+            if not instance_fallback:
+                return brains
+            logger.warn(
+                "ListingView::sort_brains: !!! WAKING UP {} OBJECTS !!!"
+                .format(len(brains)))
+            wakeup = True
 
         logger.warn(
-            "ListingView::sort_brains: Manual sorting on metadata column '{}'."
+            "ListingView::sort_brains: Manual sorting on '{}'. "
             "Consider to add an explicit catalog index to speed up filtering."
-            .format(self.manual_sort_on))
+            .format(sort_on))
 
         # calculate the sort_order
         reverse = self.get_sort_order() == "descending"
 
+        # added for Python 3 compatibility
+        def cmp(a, b):
+            return (a > b) - (a < b)
+
         def metadata_sort(a, b):
-            a = getattr(a, self.manual_sort_on, "")
-            b = getattr(b, self.manual_sort_on, "")
-            return cmp(safe_unicode(a), safe_unicode(b))
+            if wakeup:
+                a = SuperModel(a)
+                b = SuperModel(b)
+            # get the attribute from the brain or SuperModel
+            a = getattr(a, sort_on, "")
+            b = getattr(b, sort_on, "")
+            # check for callable
+            if callable(a):
+                a = a()
+            if callable(b):
+                b = b()
+            # Compare the two values
+            return cmp(a, b)
 
         return sorted(brains, cmp=metadata_sort, reverse=reverse)
 
@@ -785,7 +771,7 @@ class ListingView(AjaxListingView):
                 catalog, query, searchterm, ignorecase)
 
         # Sort manually?
-        if self.manual_sort_on is not None:
+        if self.manual_sort_on:
             brains = self.sort_brains(brains, sort_on=self.manual_sort_on)
 
         end = time.time()

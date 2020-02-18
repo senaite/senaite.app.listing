@@ -22,6 +22,8 @@ import inspect
 import json
 import urllib
 
+import six
+
 from bika.lims import api
 from bika.lims import logger
 from bika.lims.browser import BrowserView
@@ -365,16 +367,9 @@ class AjaxListingView(BrowserView):
         :returns: list of sortable columns
         """
         # filter out any columns which are explicitly set to False
-        columns = filter(lambda (k, v): v.get("sortable", True),
+        columns = filter(lambda item: item[1].get("sortable", True),
                          self.columns.items())
-        # extract the column_keys
-        keys = set(map(lambda (k, v): k, columns))
-        # sortable by index
-        by_index = keys.intersection(self.get_catalog_indexes())
-        # sortable by metadata
-        by_metadata = keys.intersection(self.get_metadata_columns())
-        # return a list of possible sortable columns
-        return list(by_index.union(by_metadata))
+        return map(lambda item: item[0], columns)
 
     def recalculate_results(self, obj, recalculated=None):
         """Recalculate the result of the object and its dependents
@@ -433,7 +428,7 @@ class AjaxListingView(BrowserView):
     def is_field_writeable(self, obj, field):
         """Checks if the field is writeable
         """
-        if isinstance(field, basestring):
+        if isinstance(field, six.string_types):
             field = obj.getField(field)
         return field.writeable(obj)
 
@@ -552,13 +547,6 @@ class AjaxListingView(BrowserView):
 
         # update the config
         data.update(config)
-
-        # XXX fix broken `sort_on` lookup in BikaListing
-        sort_on = payload.get("sort_on")
-        if sort_on in self.get_catalog_indexes():
-            data["sort_on"] = sort_on
-        elif sort_on in self.get_metadata_columns():
-            data["sort_on"] = sort_on
 
         return data
 
