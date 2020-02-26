@@ -115,6 +115,7 @@ class Select extends React.Component
               onChange={@props.onChange or @on_change}
               required={@props.required}
               className={@props.className}
+              tabIndex={@props.tabIndex}
               {...@props.attrs}>
         {@build_options()}
       </select>

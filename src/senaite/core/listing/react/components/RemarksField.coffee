@@ -117,6 +117,7 @@ class RemarksField extends React.Component
           onBlur={@props.onBlur or @on_blur}
           onChange={@props.onChange or @on_change}
           defaultValue={value}
+          tabIndex={@props.tabIndex}
           {...@props.attrs}>
         </textarea>)
 
