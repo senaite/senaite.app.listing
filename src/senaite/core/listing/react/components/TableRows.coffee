@@ -166,6 +166,7 @@ class TableRows extends React.Component
           disabled={disabled}
           className={css}
           onClick={expandable and @on_row_expand_click or undefined}
+          row_index={item_index}
           />)
 
       # columns with type="remarks" set are rendered in their own row
@@ -191,6 +192,7 @@ class TableRows extends React.Component
             disabled={disabled}
             className={css + " remarksrow"}
             colspan={colspan}
+            row_index={item_index}
             />)
 
       # append expanded rows
