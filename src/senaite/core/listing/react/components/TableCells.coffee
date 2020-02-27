@@ -29,6 +29,12 @@ class TableCells extends React.Component
     item = @get_item()
     return item.uid
 
+  get_tab_index: (column_key, column_index) ->
+    row_index = @props.row_index
+    # we multiply the row index with 100 to avoid overlapping tab indexes
+    # (we assume there are never more than 100 columns)
+    return 100 * row_index + column_index
+
   get_colspan: (column_key, item) ->
     colspan = item.colspan or {}
     return colspan[column_key]
@@ -102,10 +108,12 @@ class TableCells extends React.Component
         key={column_index}
         item={item}
         column_key={column_key}
+        column_index={column_index}
         column={column}
         colspan={colspan}
         rowspan={rowspan}
         className={css}
+        tabIndex={@get_tab_index(column_key, column_index)}
         />)
     return cell
 
@@ -138,11 +146,13 @@ class TableCells extends React.Component
         key={column_index}
         item={item}
         column_key={column_key}
+        column_index={column_index}
         column={column}
         colspan={colspan}
         rowspan={rowspan}
         on_remarks_expand_click={@on_remarks_expand_click}
         className={css}
+        tabIndex={@get_tab_index(column_key, column_index)}
         />)
     return cell
 

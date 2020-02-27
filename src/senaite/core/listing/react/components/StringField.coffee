@@ -67,6 +67,7 @@ class StringField extends React.Component
              className={@props.className}
              placeholder={@props.placeholder}
              onChange={@props.onChange or @on_change}
+             tabIndex={@props.tabIndex}
              {...@props.attrs}/>
       {@props.after and <span className="after_field" dangerouslySetInnerHTML={{__html: @props.after}}></span>}
     </span>

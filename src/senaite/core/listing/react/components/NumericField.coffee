@@ -108,6 +108,7 @@ class NumericField extends React.Component
              placeholder={@props.placeholder}
              onBlur={@props.onBlur or @on_blur}
              onChange={@props.onChange or @on_change}
+             tabIndex={@props.tabIndex}
              {...@props.attrs}/>
       {@props.after and <span className="after_field" dangerouslySetInnerHTML={{__html: @props.after}}></span>}
     </span>

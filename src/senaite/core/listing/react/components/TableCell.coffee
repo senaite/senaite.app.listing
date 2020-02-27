@@ -366,6 +366,7 @@ class TableCell extends React.Component
         after={unit}
         update_editable_field={@props.update_editable_field}
         save_editable_field={@props.save_editable_field}
+        tabIndex={@props.tabIndex}
         {...props}
         />)
 
@@ -411,6 +412,7 @@ class TableCell extends React.Component
         after={unit}
         update_editable_field={@props.update_editable_field}
         save_editable_field={@props.save_editable_field}
+        tabIndex={@props.tabIndex}
         {...props}
         />)
 
@@ -454,6 +456,7 @@ class TableCell extends React.Component
         className={css_class}
         update_editable_field={@props.update_editable_field}
         save_editable_field={@props.save_editable_field}
+        tabIndex={@props.tabIndex}
         {...props}
         />)
 
@@ -497,6 +500,7 @@ class TableCell extends React.Component
         className={css_class}
         update_editable_field={@props.update_editable_field}
         save_editable_field={@props.save_editable_field}
+        tabIndex={@props.tabIndex}
         {...props}
         />)
 

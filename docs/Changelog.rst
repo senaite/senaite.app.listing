@@ -1,6 +1,7 @@
 1.4.0 (unreleased)
 ------------------
 
+- #25 Added tab index to result input fields
 - #24 Improved column sorting and index lookup
 - #23 Fix column config error
 
