@@ -1,4 +1,4 @@
-1.4.0 (unreleased)
+1.4.0 (2020-03-01)
 ------------------
 
 - #25 Added tab index to result input fields
