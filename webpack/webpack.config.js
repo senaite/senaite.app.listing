@@ -51,15 +51,15 @@ module.exports = {
     // https://webpack.js.org/plugins/provide-plugin/
     new webpack.ProvidePlugin({
       $: "jquery",
-      jQuery: "jquery"
+      jQuery: "jquery",
     }),
   ],
   externals: {
     // https://webpack.js.org/configuration/externals
     react: "React",
     "react-dom": "ReactDOM",
+    $: "jQuery",
     jquery: "jQuery",
-    bootstrap: "bootstrap",
     jsi18n: {
       root: "_"
     }

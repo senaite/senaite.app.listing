@@ -17,7 +17,7 @@
       "@babel/plugin-proposal-class-properties"
     ]
   },
-  "author": "SENAITE Foundation",
+  "author": "RIDING BYTES & NARALABS",
   "license": "GPL-2.0-only",
   "devDependencies": {
     "@babel/core": "^7.6.2",
@@ -40,6 +40,5 @@
     "webpack-cli": "^3.3.9"
   },
   "dependencies": {
-    "bootstrap-confirmation2": "^4.1.0"
   }
 }
