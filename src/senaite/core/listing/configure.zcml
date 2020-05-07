@@ -3,14 +3,26 @@
     xmlns:five="http://namespaces.zope.org/five"
     xmlns:browser="http://namespaces.zope.org/browser"
     xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    xmlns:plone="http://namespaces.plone.org/plone"
     i18n_domain="senaite.core.listing">
 
   <five:registerPackage package="." initialize=".initialize" />
 
-  <!-- Register the static resource directory -->
-  <browser:resourceDirectory
-      name="senaite.core.listing.static"
+  <!-- Static directory for js, css and image resources -->
+  <plone:static
       directory="static"
+      type="plone"
+      name="senaite.core.listing.static"
+      />
+
+  <!-- Static Resources Viewlet -->
+  <browser:viewlet
+      name="senaite.core.listing.static"
+      manager="plone.app.layout.viewlets.interfaces.IHtmlHead"
+      class="senaite.core.browser.viewlets.resources.ResourcesViewlet"
+      permission="zope2.View"
+      template="static/resources.pt"
+      layer="senaite.core.interfaces.ISenaiteCore"
       />
 
   <!-- Generic Setup *INSTALL* Profile -->
