@@ -24,9 +24,9 @@ class ButtonBar extends React.Component
 
     @css_mapping =
       # default buttons
-      "reassign": "btn-outline-secondary"
+      "reassign": "btn-secondary"
       # blue buttons
-      "assign": "btn-outline-secondary"
+      "assign": "btn-secondary"
       "receive": "btn-primary"
       # green buttons
       "activate": "btn-success"
@@ -37,7 +37,7 @@ class ButtonBar extends React.Component
       # orange buttons
       "unassign": "btn-warning"
       # red buttons
-      "cancel": "btn-danger"
+      "cancel": "btn-outline-danger"
       "deactivate": "btn-danger"
       "invalidate": "btn-danger"
       "reject": "btn-danger"
@@ -64,7 +64,7 @@ class ButtonBar extends React.Component
 
   get_button_css: (id) ->
     # calculate the button CSS
-    cls = "btn btn-outline-secondary btn-sm"
+    cls = "btn btn-sm"
 
     # append additional button styles
     additional_cls = @css_mapping[id]
@@ -103,26 +103,28 @@ class ButtonBar extends React.Component
     if @props.show_select_column
       if @props.transitions.length > 0
         buttons.push(
-          <li key="clear">
-            <button className="btn btn-outline-secondary btn-sm"
-                    title={_("Clear selection")}
-                    onClick={@on_transition_button_click}
-                    id="clear_selection">
-              <span className="glyphicon glyphicon-ban-circle"></span>
-            </button>
-          </li>)
+          <button
+            key="clear"
+            className="btn btn-outline-secondary btn-sm"
+            title={_("Clear selection")}
+            onClick={@on_transition_button_click}
+            id="clear_selection">
+            <span className="glyphicon glyphicon-ban-circle"></span>
+          </button>
+          )
 
     # Add an Ajax save button
     if @props.show_ajax_save
       buttons.push(
-        <li key="ajax-save">
-          <button className="btn btn-primary btn-sm"
-                  onClick={@on_ajax_save_button_click}
-                  title={@props.ajax_save_button_title}
-                  id="ajax_save_selection">
-            {@props.ajax_save_button_title} <span className="glyphicon glyphicon-floppy-open"></span>
-          </button>
-        </li>)
+        <button
+          key="ajax-save"
+          className="btn btn-primary btn-sm"
+          onClick={@on_ajax_save_button_click}
+          title={@props.ajax_save_button_title}
+          id="ajax_save_selection">
+          {@props.ajax_save_button_title} <span className="glyphicon glyphicon-floppy-open"></span>
+        </button>
+        )
 
     # build the transition buttons
     for transition in @props.transitions
@@ -148,17 +150,16 @@ class ButtonBar extends React.Component
         attrs["data-title"] = "#{title}?"
 
       buttons.push(
-        <li key={transition.id}>
-          <Button
-            id={btn_id}
-            title={title}
-            help={help}
-            url={url}
-            className={cls}
-            badge={@props.selected_uids.length}
-            onClick={@on_transition_button_click}
-            attrs={attrs}/>
-        </li>
+        <Button
+          key={transition.id}
+          id={btn_id}
+          title={title}
+          help={help}
+          url={url}
+          className={cls}
+          badge={@props.selected_uids.length}
+          onClick={@on_transition_button_click}
+          attrs={attrs}/>
       )
 
     return buttons
@@ -167,9 +168,9 @@ class ButtonBar extends React.Component
     if @props.selected_uids.length == 0
       return null
 
-    <ul className={@props.className}>
+    <div className={@props.className}>
       {@build_buttons()}
-    </ul>
+    </div>
 
 
 export default ButtonBar

@@ -19,7 +19,7 @@ class Button extends React.Component
             {...@props.attrs}>
       <span dangerouslySetInnerHTML={{__html: @props.title}}></span>
       {@props.badge and
-        <span className="badge"
+        <span className="badge badge-light"
               style={{marginLeft: "0.25em"}}>
           {@props.badge}
         </span>

@@ -1346,7 +1346,7 @@ class ListingController extends React.Component
           <div className="row">
             <div className="col-sm-8">
               <ButtonBar
-                className="buttonbar nav nav-pills"
+                className="buttonbar btn-group"
                 show_ajax_save={@state.show_ajax_save}
                 ajax_save_button_title={_("Save")}
                 on_transition_button_click={@doAction}
