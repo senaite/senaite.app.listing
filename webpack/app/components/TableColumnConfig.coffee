@@ -94,7 +94,7 @@ class TableColumnConfig extends React.Component
             <span
               column={key}
               onClick={@on_column_toggle_click}
-              className="btn btn-default btn-xs">
+              className="nav-item btn btn-outline-secondary btn-sm">
               {visible and <span className="text-primary glyphicon glyphicon-check"></span>}
               {not visible and <span className="text-muted glyphicon glyphicon-unchecked"></span>}
               &nbsp;<span dangerouslySetInnerHTML={{__html: column.title or key}}></span>
@@ -111,12 +111,12 @@ class TableColumnConfig extends React.Component
         <div className="col-sm-12 text-left">
           <strong>{@props.title}</strong>
           <div className="help-block">{@props.description}</div>
-          <ul className="list-inline">
+          <ul className="list-inline nav nav-pills">
             {@build_column_toggles()}
             <li
               key="reset"
               style={{padding: "0 5px 5px 0"}}>
-              <button onClick={@on_reset_click} className="btn btn-warning btn-xs">
+              <button onClick={@on_reset_click} className="btn btn-warning btn-sm">
                 {_("Reset Columns")}
               </button>
             </li>

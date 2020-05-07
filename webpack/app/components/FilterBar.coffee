@@ -38,19 +38,18 @@ class FilterBar extends React.Component
     for key, value of @props.review_states
 
       # button CSS
-      cls = "btn btn-default btn-sm"
+      cls = "btn btn-outline-secondary btn-sm"
 
       if value.id == active_state
         cls += " active"
 
       buttons.push(
-        <li key={value.id}>
-          <Button
-            onClick={@on_filter_button_clicked}
-            id={value.id}
-            title={value.title}
-            className={cls}/>
-        </li>
+        <Button
+          key={value.id}
+          onClick={@on_filter_button_clicked}
+          id={value.id}
+          title={value.title}
+          className={cls}/>
       )
 
     # omit filter buttons if there is only one
@@ -60,9 +59,9 @@ class FilterBar extends React.Component
     return buttons
 
   render: ->
-    <ul className={@props.className}>
+    <div className={@props.className}>
       {@build_filter_buttons()}
-    </ul>
+    </div>
 
 
 export default FilterBar

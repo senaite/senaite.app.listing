@@ -28,9 +28,9 @@ class ButtonBar extends React.Component
 
     @css_mapping =
       # default buttons
-      "reassign": "btn-default"
+      "reassign": "btn-outline-secondary"
       # blue buttons
-      "assign": "btn-default"
+      "assign": "btn-outline-secondary"
       "receive": "btn-primary"
       # green buttons
       "activate": "btn-success"
@@ -68,7 +68,7 @@ class ButtonBar extends React.Component
 
   get_button_css: (id) ->
     # calculate the button CSS
-    cls = "btn btn-default btn-sm"
+    cls = "btn btn-outline-secondary btn-sm"
 
     # append additional button styles
     additional_cls = @css_mapping[id]
@@ -108,7 +108,7 @@ class ButtonBar extends React.Component
       if @props.transitions.length > 0
         buttons.push(
           <li key="clear">
-            <button className="btn btn-default btn-sm"
+            <button className="btn btn-outline-secondary btn-sm"
                     title={_("Clear selection")}
                     onClick={@on_transition_button_click}
                     id="clear_selection">

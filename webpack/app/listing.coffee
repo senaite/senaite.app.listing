@@ -25,6 +25,10 @@ import "./listing.css"
 document.addEventListener "DOMContentLoaded", ->
   console.debug "*** SENAITE.CORE.LISTING::DOMContentLoaded: --> Loading ReactJS Controller"
 
+  console.warn("Mocking jsi18n to _")
+  if not window._?
+    window._ = (text) -> text
+
   tables = document.getElementsByClassName "ajax-contents-table"
   window.listings ?= {}
   for table in tables
@@ -1268,7 +1272,7 @@ class ListingController extends React.Component
           <div className="row top-toolbar">
             <div className="col-sm-8">
               <FilterBar
-                className="filterbar nav nav-pills"
+                className="filterbar btn-group"
                 on_filter_button_clicked={@filterByState}
                 review_state={@state.review_state}
                 review_states={@state.review_states}/>

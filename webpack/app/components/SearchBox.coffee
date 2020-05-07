@@ -73,12 +73,12 @@ class SearchBox extends React.Component
              defaultValue={@props.filter}
              onKeyPress={@on_search_field_keypress}
              placeholder={this.props.placeholder}/>
-      <span className="input-group-btn">
-        <button className="btn btn-default"
+      <span className="input-group-append">
+        <button className="btn btn-outline-secondary"
                 onClick={@on_clear_button_click}>
           <span className="glyphicon glyphicon-remove"></span>
         </button>
-        <button className="btn btn-default"
+        <button className="btn btn-outline-secondary"
                 onClick={@on_search_button_click}>
           <span className="glyphicon glyphicon-search"></span>
         </button>

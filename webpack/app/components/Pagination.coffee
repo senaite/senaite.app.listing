@@ -90,7 +90,7 @@ class Pagination extends React.Component
                  disabled={@props.count >= @props.total}
                  className="form-control"/>
           <span className="input-group-btn">
-            <button className="btn btn-default"
+            <button className="btn btn-outline-secondary"
                     disabled={@props.count >= @props.total}
                     ref={@show_more_button}
                     onClick={@on_show_more_click}>
