@@ -20,39 +20,32 @@
 
 import collections
 import copy
-import json
 import re
 import time
 
-import six
-
 import DateTime
 import Missing
+import six
 from AccessControl import getSecurityManager
+from Products.CMFPlone.utils import safe_unicode
+from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
+from plone.memoize import view
+from senaite.core.listing.ajax import AjaxListingView
+from senaite.core.listing.interfaces import IListingView
+from senaite.core.listing.interfaces import IListingViewAdapter
+from senaite.core.supermodel import SuperModel
+from zope.component import subscribers
+from zope.interface import implements
+
 from bika.lims import api
 from bika.lims import bikaMessageFactory as _
-from bika.lims import deprecated
 from bika.lims import logger
 from bika.lims.catalog import CATALOG_ANALYSIS_LISTING
 from bika.lims.catalog import CATALOG_ANALYSIS_REQUEST_LISTING
 from bika.lims.catalog import CATALOG_AUDITLOG
 from bika.lims.catalog import CATALOG_WORKSHEET_LISTING
-from bika.lims.interfaces import IFieldIcons
 from bika.lims.utils import getFromString
-from bika.lims.utils import t
-from bika.lims.utils import to_utf8
-from plone.memoize import view
-from Products.CMFCore.utils import getToolByName
-from Products.CMFPlone.utils import safe_unicode
-from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
-from senaite.core.listing.ajax import AjaxListingView
-from senaite.core.listing.interfaces import IListingView
-from senaite.core.listing.interfaces import IListingViewAdapter
-from senaite.core.supermodel import SuperModel
-from zope.component import getAdapters
-from zope.component import getMultiAdapter
-from zope.component import subscribers
-from zope.interface import implements
+from bika.lims.utils import get_link
 
 
 class ListingView(AjaxListingView):
@@ -542,6 +535,8 @@ class ListingView(AjaxListingView):
     def get_item_info(self, brain_or_object):
         """Return the data of this brain or object
         """
+        portal_type = api.get_portal_type(brain_or_object)
+        state = api.get_workflow_status_of(brain_or_object)
         return {
             "obj": brain_or_object,
             "uid": api.get_uid(brain_or_object),
@@ -549,7 +544,9 @@ class ListingView(AjaxListingView):
             "id": api.get_id(brain_or_object),
             "title": api.get_title(brain_or_object),
             "portal_type": api.get_portal_type(brain_or_object),
-            "review_state": api.get_workflow_status_of(brain_or_object),
+            "review_state": state,
+            "state_title": self.translate_review_state(state, portal_type),
+            "state_class": "state-{}".format(state),
         }
 
     def get_catalog_query(self, searchterm=None):
@@ -786,18 +783,46 @@ class ListingView(AjaxListingView):
         return True
 
     def folderitem(self, obj, item, index):
-        """Service triggered each time an item is iterated in folderitems.
-
-        The use of this service prevents the extra-loops in child objects.
-
-        :obj: the instance of the class to be foldered
-        :item: dict containing the properties of the object to be used by
-            the template
-        :index: current index of the item
+        """Applies new properties to the item being rendered in the list
+        :param obj: object to be rendered as a row in the list
+        :param item: dict representation of the obj suitable for the listing
+        :param index: current index within the list of items
+        :type obj: CatalogBrain
+        :type item: dict
+        :type index: int
+        :return: the dict representation of the item
+        :rtype: dict
         """
         return item
 
-    def folderitems(self, full_objects=False, classic=True):
+    def resolve_value_for_column(self, column_id, item, default=None):
+        value = item.get(column_id, None)
+        if value:
+            return value
+
+        # Maybe a custom attr
+        attr = self.columns[column_id].get("attr", None)
+        if attr:
+            return getFromString(item["obj"], attr, default)
+
+        # Maybe the column id represents a stringified call
+        return getFromString(item["obj"], column_id, default)
+
+    def resolve_replace_url_for_column(self, column_id, item):
+        column = self.columns[column_id]
+        replace_url = column.get("replace_url", None)
+        if not replace_url:
+            return None
+
+        value = getFromString(item["obj"], replace_url)
+        if not value:
+            return None
+
+        url = self.url_or_path_to_url(value)
+        value = self.resolve_value_for_column(column_id, item) or value
+        return get_link(url, value=value)
+
+    def folderitems(self):
         """This function returns an array of dictionaries where each dictionary
         contains the columns data to render the list.
 
@@ -815,21 +840,13 @@ class ListingView(AjaxListingView):
                   function is mainly used to maintain the integrity with the
                   old version.
         """
-        # Getting a security manager instance for the current request
-        self.security_manager = getSecurityManager()
-        self.workflow = getToolByName(self.context, 'portal_workflow')
-
-        if classic:
-            return self._folderitems(full_objects)
-
         # idx increases one unit each time an object is added to the 'items'
         # dictionary to be returned. Note that if the item is not rendered,
         # the idx will not increase.
         idx = 0
         results = []
         self.show_more = False
-        brains = self._fetch_brains(self.limit_from)
-        for obj in brains:
+        for obj in self._fetch_brains(self.limit_from):
             # avoid creating unnecessary info for items outside the current
             # batch;  only the path is needed for the "select all" case...
             # we only take allowed items into account
@@ -838,25 +855,14 @@ class ListingView(AjaxListingView):
                 self.show_more = True
                 break
 
-            # check if the item must be rendered or not (prevents from
-
-            # doing it later in folderitems) and dealing with paging
+            # check if the item must be rendered
             if not obj or not self.isItemAllowed(obj):
                 continue
-
-            # Get the css for this row in accordance with the obj's state
-            states = obj.getObjectWorkflowStates
-            if not states:
-                states = {}
-            state_class = ['state-{0}'.format(v) for v in states.values()]
-            state_class = ' '.join(state_class)
 
             # Building the dictionary with basic items
-            results_dict = dict(
-                # To colour the list items by state
-                state_class=state_class,
+            item = {
                 # a list of names of fields that may be edited on this item
-                allow_edit=[],
+                "allow_edit": [],
                 # a dict where the column name works as a key and the value is
                 # the name of the field related with the column. It is used
                 # when the name given to the column and the content field it
@@ -864,277 +870,38 @@ class ListingView(AjaxListingView):
                 # attribute for each item, this attribute is named 'field' and
                 # the system fills it taking advantage of this dictionary or
                 # the name of the column if it isn't defined in the dict.
-                field={},
-                # "before", "after" and replace: dictionary (key is column ID)
-                # A snippet of HTML which will be rendered
-                # before/after/instead of the table cell content.
-                before={},  # { before : "<a href=..>" }
-                after={},
-                replace={},
-                choices={},
-            )
-
-            # update with the base item info
-            results_dict.update(self.get_item_info(obj))
-
-            # Set states and state titles
-            ptype = obj.portal_type
-            workflow = api.get_tool('portal_workflow')
-            for state_var, state in states.items():
-                results_dict[state_var] = state
-                state_title = self.state_titles.get(state, None)
-                if not state_title:
-                    state_title = workflow.getTitleForStateOnType(state, ptype)
-                    if state_title:
-                        self.state_titles[state] = state_title
-                if state_title and state == obj.review_state:
-                    results_dict['state_title'] = _(state_title)
-
-            # extra classes for individual fields on this item
-            # { field_id : "css classes" }
-            results_dict['class'] = {}
+                "field": {},
+                "before": {},
+                "after": {},
+                "replace": {},
+                "choices": {},
+                "class": {},
+            }
+            # Update with the base item info
+            item.update(self.get_item_info(obj))
 
             # Search for values for all columns in obj
             for key in self.columns.keys():
-                # if the key is already in the results dict
-                # then we don't replace it's value
-                value = results_dict.get(key, '')
-                if not value:
-                    attrobj = getFromString(obj, key)
-                    value = attrobj if attrobj else value
 
-                    # Custom attribute? Inspect to set the value
-                    # for the current column dynamically
-                    vattr = self.columns[key].get('attr', None)
-                    if vattr:
-                        attrobj = getFromString(obj, vattr)
-                        value = attrobj if attrobj else value
-                    results_dict[key] = value
-                # Replace with an url?
-                replace_url = self.columns[key].get('replace_url', None)
-                if replace_url:
-                    attrobj = getFromString(obj, replace_url)
-                    if attrobj:
-                        url = self.url_or_path_to_url(attrobj)
-                        results_dict['replace'][key] = \
-                            '<a href="%s">%s</a>' % (url, value)
-            # The item basics filled. Delegate additional actions to folderitem
-            # service. folderitem service is frequently overriden by child
-            # objects
-            item = self.folderitem(obj, results_dict, idx)
+                # Resolve the value of this item for the given column
+                item[key] = self.resolve_value_for_column(key, item)
 
-            # Call folder_item from subscriber adapters
-            for subscriber in self.get_listing_view_adapters():
-                subscriber.folder_item(obj, item, idx)
+                # Resolve the "replace_url" attr
+                replace = self.resolve_replace_url_for_column(key, item)
+                if replace:
+                    item["replace"][key] = replace
 
-            if item:
-                results.append(item)
-                idx += 1
-        return results
-
-    @deprecated("Using bikalisting.folderitems(classic=True) is very slow")
-    def _folderitems(self, full_objects=False):
-        """WARNING: :full_objects: could create a big performance hit.
-        """
-        # Setting up some attributes
-        plone_layout = getMultiAdapter((self.context.aq_inner, self.request),
-                                       name=u'plone_layout')
-        plone_utils = getToolByName(self.context.aq_inner, 'plone_utils')
-        portal_types = getToolByName(self.context.aq_inner, 'portal_types')
-        if self.request.form.get('show_all', '').lower() == 'true' \
-                or self.show_all is True \
-                or self.pagesize == 0:
-            show_all = True
-        else:
-            show_all = False
-
-        # idx increases one unit each time an object is added to the 'items'
-        # dictionary to be returned. Note that if the item is not rendered,
-        # the idx will not increase.
-        idx = 0
-        results = []
-        self.show_more = False
-        brains = self._fetch_brains(self.limit_from)
-        for obj in brains:
-            # avoid creating unnecessary info for items outside the current
-            # batch;  only the path is needed for the "select all" case...
-            # we only take allowed items into account
-            if not show_all and idx >= self.pagesize:
-                # Maximum number of items to be shown reached!
-                self.show_more = True
-                break
-
-            # we don't know yet if it's a brain or an object
-            path = hasattr(obj, 'getPath') and obj.getPath() or \
-                "/".join(obj.getPhysicalPath())
-
-            # This item must be rendered, we need the object instead of a brain
-            obj = obj.getObject() if hasattr(obj, 'getObject') else obj
-
-            # check if the item must be rendered or not (prevents from
-            # doing it later in folderitems) and dealing with paging
-            if not obj or not self.isItemAllowed(obj):
+            # Fill additional (folderitem func implemented by child classes)
+            item = self.folderitem(obj, item, idx)
+            if not item:
                 continue
 
-            uid = obj.UID()
-            title = obj.Title()
-            description = obj.Description()
-            icon = plone_layout.getIcon(obj)
-            url = obj.absolute_url()
-            relative_url = obj.absolute_url(relative=True)
-
-            fti = portal_types.get(obj.portal_type)
-            if fti is not None:
-                type_title_msgid = fti.Title()
-            else:
-                type_title_msgid = obj.portal_type
-
-            url_href_title = '%s at %s: %s' % (
-                t(type_title_msgid),
-                path,
-                to_utf8(description))
-
-            modified = self.ulocalized_time(obj.modified()),
-
-            # element css classes
-            type_class = 'contenttype-' + \
-                         plone_utils.normalizeString(obj.portal_type)
-
-            state_class = ''
-            states = {}
-            for w in self.workflow.getWorkflowsFor(obj):
-                state = w._getWorkflowStateOf(obj).id
-                states[w.state_var] = state
-                state_class += "state-%s " % state
-
-            results_dict = dict(
-                obj=obj,
-                id=obj.getId(),
-                title=title,
-                uid=uid,
-                path=path,
-                url=url,
-                fti=fti,
-                item_data=json.dumps([]),
-                url_href_title=url_href_title,
-                obj_type=obj.Type,
-                size=obj.getObjSize,
-                modified=modified,
-                icon=icon.html_tag(),
-                type_class=type_class,
-                # a list of lookups for single-value-select fields
-                choices={},
-                state_class=state_class,
-                relative_url=relative_url,
-                view_url=url,
-                table_row_class="",
-                category='None',
-
-                # a list of names of fields that may be edited on this item
-                allow_edit=[],
-
-                # a list of names of fields that are compulsory (if editable)
-                required=[],
-                # a dict where the column name works as a key and the value is
-                # the name of the field related with the column. It is used
-                # when the name given to the column and the content field it
-                # represents diverges. bika_listing_table_items.pt defines an
-                # attribute for each item, this attribute is named 'field' and
-                # the system fills it taking advantage of this dictionary or
-                # the name of the column if it isn't defined in the dict.
-                field={},
-                # "before", "after" and replace: dictionary (key is column ID)
-                # A snippet of HTML which will be rendered
-                # before/after/instead of the table cell content.
-                before={},  # { before : "<a href=..>" }
-                after={},
-                replace={},
-            )
-
-            rs = None
-            wf_state_var = None
-
-            workflows = self.workflow.getWorkflowsFor(obj)
-            for wf in workflows:
-                if wf.state_var:
-                    wf_state_var = wf.state_var
-                    break
-
-            if wf_state_var is not None:
-                rs = self.workflow.getInfoFor(obj, wf_state_var)
-                st_title = self.workflow.getTitleForStateOnType(
-                    rs, obj.portal_type)
-                st_title = t(_(st_title))
-
-            if rs:
-                results_dict['review_state'] = rs
-
-            for state_var, state in states.items():
-                if not st_title:
-                    st_title = self.workflow.getTitleForStateOnType(
-                        state, obj.portal_type)
-                results_dict[state_var] = state
-            results_dict['state_title'] = st_title
-
-            results_dict['class'] = {}
-
-            # As far as I am concerned, adapters for IFieldIcons are only used
-            # for Analysis content types. Since AnalysesView is not using this
-            # "classic" folderitems from bikalisting anymore, this logic has
-            # been added in AnalysesView. Even though, this logic hasn't been
-            # removed from here, cause this _folderitems function is marked as
-            # deprecated, so it will be eventually removed alltogether.
-            for name, adapter in getAdapters((obj,), IFieldIcons):
-                auid = obj.UID() if hasattr(obj, 'UID') and callable(
-                    obj.UID) else None
-                if not auid:
-                    continue
-                alerts = adapter()
-                # logger.info(str(alerts))
-                if alerts and auid in alerts:
-                    if auid in self.field_icons:
-                        self.field_icons[auid].extend(alerts[auid])
-                    else:
-                        self.field_icons[auid] = alerts[auid]
-
-            # Search for values for all columns in obj
-            for key in self.columns.keys():
-                # if the key is already in the results dict
-                # then we don't replace it's value
-                value = results_dict.get(key, '')
-                if key not in results_dict:
-                    attrobj = getFromString(obj, key)
-                    value = attrobj if attrobj else value
-
-                    # Custom attribute? Inspect to set the value
-                    # for the current column dinamically
-                    vattr = self.columns[key].get('attr', None)
-                    if vattr:
-                        attrobj = getFromString(obj, vattr)
-                        value = attrobj if attrobj else value
-                    results_dict[key] = value
-
-                # Replace with an url?
-                replace_url = self.columns[key].get('replace_url', None)
-                if replace_url:
-                    attrobj = getFromString(obj, replace_url)
-                    if attrobj:
-                        url = self.url_or_path_to_url(attrobj)
-                        results_dict['replace'][key] = \
-                            '<a href="%s">%s</a>' % (url, value)
-
-            # The item basics filled. Delegate additional actions to folderitem
-            # service. folderitem service is frequently overriden by child
-            # objects
-            item = self.folderitem(obj, results_dict, idx)
-
             # Call folder_item from subscriber adapters
             for subscriber in self.get_listing_view_adapters():
                 subscriber.folder_item(obj, item, idx)
 
-            if item:
-                results.append(item)
-                idx += 1
+            results.append(item)
+            idx += 1
 
         return results
 

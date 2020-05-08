@@ -1,3 +1,8 @@
+1.5.0 (unreleased)
+------------------
+
+- #28 Remove classic listing mode and improve folderitems
+
 1.4.0 (2020-03-01)
 ------------------
 
