@@ -14,9 +14,9 @@ class ReadonlyField extends React.Component
   render: ->
     if @is_boolean_field()
       if @props.value
-        return <span>_("Yes")</span>
+        return <span>{_("Yes")}</span>
       else
-        return <span>_("No")</span>
+        return <span>{_("No")}</span>
     else
       return (
         <span className={@props.className}>
