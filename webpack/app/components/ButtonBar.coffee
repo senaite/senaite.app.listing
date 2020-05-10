@@ -54,11 +54,11 @@ class ButtonBar extends React.Component
     $("[data-toggle=confirmation]").confirmation
       rootSelector: "[data-toggle=confirmation]"
       btnOkLabel: _("Yes")
-      btnOkIcon: "glyphicon glyphicon-thumbs-up"
-      # btnOkClass: "btn btn-success btn-xs"
+      btnOkClass: "btn btn-outline-primary"
+      btnOkIconClass: "fas fa-check-circle mr-1"
       btnCancelLabel: _("No")
-      # btnCancelIcon: "glyphicon glyphicon-thumbs-down"
-      # btnCancelClass: "btn btn-danger btn-xs"
+      btnCancelClass: "btn btn-outline-secondary"
+      btnCancelIconClass: "fas fa-circle mr-1"
       container: "body"
       singleton: yes
 
@@ -109,7 +109,7 @@ class ButtonBar extends React.Component
             title={_("Clear selection")}
             onClick={@on_transition_button_click}
             id="clear_selection">
-            <span className="glyphicon glyphicon-ban-circle"></span>
+            <i className="fas fa-circle-notch"></i>
           </button>
           )
 
@@ -122,7 +122,7 @@ class ButtonBar extends React.Component
           onClick={@on_ajax_save_button_click}
           title={@props.ajax_save_button_title}
           id="ajax_save_selection">
-          {@props.ajax_save_button_title} <span className="glyphicon glyphicon-floppy-open"></span>
+          {@props.ajax_save_button_title} <i className="fas fa-save"></i>
         </button>
         )
 
@@ -168,7 +168,7 @@ class ButtonBar extends React.Component
     if @props.selected_uids.length == 0
       return null
 
-    <div className={@props.className}>
+    <div className="{@props.className}">
       {@build_buttons()}
     </div>
 

@@ -22,12 +22,12 @@ class TableCategoryRow extends React.Component
   build_category: ->
     # collaped css
     cls = "collapsed"
-    icon_cls = "glyphicon glyphicon-collapse-up"
+    icon_cls = "fas fa-caret-square-up"
 
     # expanded css
     if @props.expanded
       cls = "expanded"
-      icon_cls = "glyphicon glyphicon-collapse-down"
+      icon_cls = "fas fa-caret-square-down"
 
     return (
       <td key="toggle"

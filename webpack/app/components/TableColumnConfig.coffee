@@ -94,9 +94,9 @@ class TableColumnConfig extends React.Component
             <span
               column={key}
               onClick={@on_column_toggle_click}
-              className="nav-item btn btn-outline-secondary btn-sm">
-              {visible and <span className="text-primary glyphicon glyphicon-check"></span>}
-              {not visible and <span className="text-muted glyphicon glyphicon-unchecked"></span>}
+              className="nav-item btn btn-light btn-sm">
+              {visible and <i className="text-primary fas fa-check-square"></i>}
+              {not visible and <i className="text-muted fas fa-square"></i>}
               &nbsp;<span dangerouslySetInnerHTML={{__html: column.title or key}}></span>
             </span>
           </a>
@@ -108,7 +108,7 @@ class TableColumnConfig extends React.Component
   render: ->
     <div id={@props.id} className={@props.className}>
       <div className="row">
-        <div className="col-sm-12 text-left">
+        <div className="col-sm-12 text-left my-3">
           <strong>{@props.title}</strong>
           <div className="help-block">{@props.description}</div>
           <ul className="list-inline nav nav-pills">

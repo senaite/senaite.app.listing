@@ -1272,7 +1272,7 @@ class ListingController extends React.Component
           <div className="row top-toolbar">
             <div className="col-sm-8">
               <FilterBar
-                className="filterbar btn-group"
+                className="filterbar nav nav-pills"
                 on_filter_button_clicked={@filterByState}
                 review_state={@state.review_state}
                 review_states={@state.review_states}/>
@@ -1296,7 +1296,7 @@ class ListingController extends React.Component
                 href="#"
                 onClick={@on_column_config_click}
                 className="pull-right">
-                <span className="glyphicon glyphicon-option-horizontal"></span>
+                <i className="fas fa-ellipsis-h"></i>
               </a>}
             {@state.show_column_config and
               <TableColumnConfig
@@ -1346,7 +1346,7 @@ class ListingController extends React.Component
           <div className="row">
             <div className="col-sm-8">
               <ButtonBar
-                className="buttonbar btn-group"
+                className="buttonbar nav nav-pills"
                 show_ajax_save={@state.show_ajax_save}
                 ajax_save_button_title={_("Save")}
                 on_transition_button_click={@doAction}

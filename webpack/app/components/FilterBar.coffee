@@ -38,7 +38,7 @@ class FilterBar extends React.Component
     for key, value of @props.review_states
 
       # button CSS
-      cls = "btn btn-outline-secondary btn-sm"
+      cls = "nav-item btn btn-sm btn-outline-secondary mr-1"
 
       if value.id == active_state
         cls += " active"

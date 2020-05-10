@@ -179,7 +179,7 @@ class TableTransposedCell extends TableCell
             className="transposed_remarks"
             uid={uid}
             onClick={@props.on_remarks_expand_click}>
-          <span className="remarksicon glyphicon glyphicon-comment"></span>
+          <i className="remarksicon fas fa-comment"></i>
         </a>)
     item["before_components"] = before_components
 

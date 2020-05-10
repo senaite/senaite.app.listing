@@ -76,11 +76,11 @@ class SearchBox extends React.Component
       <span className="input-group-append">
         <button className="btn btn-outline-secondary"
                 onClick={@on_clear_button_click}>
-          <span className="glyphicon glyphicon-remove"></span>
+          <i className="fas fa-undo"></i>
         </button>
         <button className="btn btn-outline-secondary"
                 onClick={@on_search_button_click}>
-          <span className="glyphicon glyphicon-search"></span>
+          <i className="fas fa-search"></i>
         </button>
       </span>
     </div>

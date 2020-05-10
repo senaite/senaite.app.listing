@@ -83,7 +83,7 @@ class TableCells extends React.Component
             href="#"
             className="remarks"
             onClick={@on_remarks_expand_click}>
-          <span className="remarksicon glyphicon glyphicon-comment"/>
+          <span className="remarksicon fas fa-comment-alt"/>
         </a>}
       </td>)
     return cell
