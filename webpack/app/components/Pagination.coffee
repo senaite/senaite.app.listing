@@ -78,10 +78,10 @@ class Pagination extends React.Component
       </div>
     else
       <div id={@props.id} className={@props.className}>
-        <div className="input-group input-group-sm">
-          <span className="input-group-addon">
-            {@props.count} / {@props.total}
-          </span>
+        <div className="input-group input-group-sm text-right">
+          <div className="input-group-prepend">
+            <span className="input-group-text">{@props.count} / {@props.total}</span>
+          </div>
           <input type="text"
                  defaultValue={@state.pagesize}
                  onChange={@on_pagesize_change}
@@ -89,7 +89,7 @@ class Pagination extends React.Component
                  ref={@pagesize_input}
                  disabled={@props.count >= @props.total}
                  className="form-control"/>
-          <span className="input-group-btn">
+          <span className="input-group-append">
             <button className="btn btn-outline-secondary"
                     disabled={@props.count >= @props.total}
                     ref={@show_more_button}
