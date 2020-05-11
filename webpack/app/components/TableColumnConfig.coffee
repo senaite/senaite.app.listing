@@ -117,7 +117,7 @@ class TableColumnConfig extends React.Component
               key="reset"
               style={{padding: "0 5px 5px 0"}}>
               <button onClick={@on_reset_click} className="btn btn-warning btn-sm">
-                {_("Reset Columns")}
+                {_t("Reset Columns")}
               </button>
             </li>
           </ul>

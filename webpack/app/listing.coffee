@@ -25,9 +25,10 @@ import "./listing.css"
 document.addEventListener "DOMContentLoaded", ->
   console.debug "*** SENAITE.CORE.LISTING::DOMContentLoaded: --> Loading ReactJS Controller"
 
-  console.warn("Mocking jsi18n to _")
-  if not window._?
-    window._ = (text) -> text
+  if not window._t?
+    console.warn("Global translation variable `_t` not found! Translations won't work!")
+    # Mock the variable to return the input as output
+    window._t = (text, ...) -> text
 
   tables = document.getElementsByClassName "ajax-contents-table"
   window.listings ?= {}
@@ -826,7 +827,7 @@ class ListingController extends React.Component
    *  review_states = [
    *      {
    *          "id": "default",
-   *          "title": _("All"),
+   *          "title": _t("All"),
    *          "contentFilter": {},
    *          "transitions": [],
    *          "custom_transitions": [],
@@ -1243,8 +1244,8 @@ class ListingController extends React.Component
     @toggle_loader off
     console.debug "°°° ListingController::on_api_error: GOT AN ERROR RESPONSE: ", response
     response.text().then (data) =>
-      title = _("Oops, an error occured! 🙈")
-      message = _("The server responded with the status #{response.status}: #{response.statusText}")
+      title = _t("Oops, an error occured! 🙈")
+      message = _t("The server responded with the status #{response.status}: #{response.statusText}")
       @addMessage title, message, null, level="danger"
     return response
 
@@ -1285,7 +1286,7 @@ class ListingController extends React.Component
                 show_search={@state.show_search}
                 on_search={@filterBySearchterm}
                 filter={@state.filter}
-                placeholder={_("Search")} />
+                placeholder={_t("Search")} />
             </div>
           </div>
         }
@@ -1300,8 +1301,8 @@ class ListingController extends React.Component
               </a>}
             {@state.show_column_config and
               <TableColumnConfig
-                title={_("Configure Table Columns")}
-                description={_("Click to toggle the visibility or drag&drop to change the order")}
+                title={_t("Configure Table Columns")}
+                description={_t("Click to toggle the visibility or drag&drop to change the order")}
                 columns={columns}
                 columns_order={columns_order}
                 on_column_toggle_click={@toggleColumn}
@@ -1348,7 +1349,7 @@ class ListingController extends React.Component
               <ButtonBar
                 className="buttonbar nav nav-pills"
                 show_ajax_save={@state.show_ajax_save}
-                ajax_save_button_title={_("Save")}
+                ajax_save_button_title={_t("Save")}
                 on_transition_button_click={@doAction}
                 on_ajax_save_button_click={@saveAjaxQueue}
                 selected_uids={@state.selected_uids}
@@ -1365,7 +1366,7 @@ class ListingController extends React.Component
                 id="pagination"
                 className="pagination-controls"
                 total={@state.total}
-                show_more_button_title={_("Show more")}
+                show_more_button_title={_t("Show more")}
                 onShowMore={@showMore}
                 show_more={@state.show_more}
                 count={item_count}

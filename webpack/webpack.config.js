@@ -61,7 +61,7 @@ module.exports = {
     $: "jQuery",
     jquery: "jQuery",
     jsi18n: {
-      root: "_"
+      root: "_t"
     }
   }
 };

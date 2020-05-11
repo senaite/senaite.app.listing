@@ -25,6 +25,7 @@ class ButtonBar extends React.Component
     @css_mapping =
       # default buttons
       "reassign": "btn-secondary"
+      "duplicate": "btn-secondary"
       # blue buttons
       "assign": "btn-secondary"
       "receive": "btn-primary"
@@ -53,10 +54,10 @@ class ButtonBar extends React.Component
     # http://bootstrap-confirmation.js.org/
     $("[data-toggle=confirmation]").confirmation
       rootSelector: "[data-toggle=confirmation]"
-      btnOkLabel: _("Yes")
+      btnOkLabel: _t("Yes")
       btnOkClass: "btn btn-outline-primary"
       btnOkIconClass: "fas fa-check-circle mr-1"
-      btnCancelLabel: _("No")
+      btnCancelLabel: _t("No")
       btnCancelClass: "btn btn-outline-secondary"
       btnCancelIconClass: "fas fa-circle mr-1"
       container: "body"
@@ -64,7 +65,7 @@ class ButtonBar extends React.Component
 
   get_button_css: (id) ->
     # calculate the button CSS
-    cls = "btn btn-sm"
+    cls = "btn btn-sm mr-1"
 
     # append additional button styles
     additional_cls = @css_mapping[id]
@@ -105,8 +106,8 @@ class ButtonBar extends React.Component
         buttons.push(
           <button
             key="clear"
-            className="btn btn-outline-secondary btn-sm"
-            title={_("Clear selection")}
+            className="btn btn-outline-secondary btn-sm mr-1"
+            title={_t("Clear selection")}
             onClick={@on_transition_button_click}
             id="clear_selection">
             <i className="fas fa-circle-notch"></i>
@@ -118,7 +119,7 @@ class ButtonBar extends React.Component
       buttons.push(
         <button
           key="ajax-save"
-          className="btn btn-primary btn-sm"
+          className="btn btn-primary btn-sm mr-1"
           onClick={@on_ajax_save_button_click}
           title={@props.ajax_save_button_title}
           id="ajax_save_selection">
@@ -130,8 +131,8 @@ class ButtonBar extends React.Component
     for transition in @props.transitions
       id = transition.id
       url = transition.url
-      title = _(transition.title)
-      help = _(transition.help)
+      title = _t(transition.title)
+      help = _t(transition.help)
       cls = @get_button_css id
       btn_id = "#{id}_transition"
 
