@@ -26,9 +26,11 @@ class ButtonBar extends React.Component
       # default buttons
       "reassign": "btn-secondary"
       "duplicate": "btn-secondary"
+      "close": "btn-secondary"
       # blue buttons
       "assign": "btn-secondary"
       "receive": "btn-primary"
+      "open": "btn-primary"
       # green buttons
       "activate": "btn-success"
       "prepublish": "btn-success"
@@ -38,7 +40,7 @@ class ButtonBar extends React.Component
       # orange buttons
       "unassign": "btn-warning"
       # red buttons
-      "cancel": "btn-outline-danger"
+      "cancel": "btn-danger"
       "deactivate": "btn-danger"
       "invalidate": "btn-danger"
       "reject": "btn-danger"
