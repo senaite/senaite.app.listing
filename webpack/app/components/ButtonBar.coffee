@@ -16,10 +16,11 @@ class ButtonBar extends React.Component
     @confirm_transitions = [
       "cancel"
       "deactivate"
-      "unassign"
-      "reject"
-      "retract"
       "invalidate"
+      "reject"
+      "remove"
+      "retract"
+      "unassign"
     ]
 
     @css_mapping =
@@ -45,6 +46,7 @@ class ButtonBar extends React.Component
       "invalidate": "btn-danger"
       "reject": "btn-danger"
       "retract": "btn-danger"
+      "remove": "btn-danger"
 
   componentDidUpdate: ->
     # N.B. This needs jQuery.js and bootstrap.js injected from the outer scope
