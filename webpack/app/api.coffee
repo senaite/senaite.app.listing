@@ -47,6 +47,7 @@ class ListingAPI
       method: method
       headers:
         "Content-Type": "application/json"
+        "X-CSRF-TOKEN": @get_csrf_token()
       body: if method is "POST" then data else null
       credentials: "include"
     console.info "ListingAPI::fetch:endpoint=#{endpoint} init=",init
@@ -111,6 +112,13 @@ class ListingAPI
       data: data or {}
       method: "POST"
     return @get_json "transitions", options
+
+  get_csrf_token: () ->
+    ###
+     * Get the plone.protect CSRF token
+     * Note: The fields won't save w/o that token set
+    ###
+    return document.querySelector("#protect-script").dataset.token
 
 
 export default ListingAPI
