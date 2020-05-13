@@ -75,6 +75,8 @@ class ButtonBar extends React.Component
     additional_cls = @css_mapping[id]
     if additional_cls
       cls += " #{additional_cls}"
+    else
+      cls += " btn-outline-secondary"
 
     return cls
 
