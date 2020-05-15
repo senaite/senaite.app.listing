@@ -76,7 +76,7 @@ class TableRows extends React.Component
 
     # selected
     if @is_selected item
-      cls.push "info"
+      cls.push "table-info"
 
     # child/parent
     if @is_child_item item
