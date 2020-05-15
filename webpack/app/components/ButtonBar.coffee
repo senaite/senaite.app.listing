@@ -32,6 +32,7 @@ class ButtonBar extends React.Component
       "assign": "btn-secondary"
       "receive": "btn-primary"
       "open": "btn-primary"
+      "verify": "btn-primary"
       # green buttons
       "activate": "btn-success"
       "prepublish": "btn-success"
