@@ -21,6 +21,7 @@ class ButtonBar extends React.Component
       "remove"
       "retract"
       "unassign"
+      "retest"
     ]
 
     @css_mapping =
@@ -33,6 +34,7 @@ class ButtonBar extends React.Component
       "receive": "btn-primary"
       "open": "btn-primary"
       "verify": "btn-primary"
+      "retest": "btn-primary"
       # green buttons
       "activate": "btn-success"
       "prepublish": "btn-success"
