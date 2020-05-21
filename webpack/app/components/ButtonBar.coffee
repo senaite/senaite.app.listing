@@ -72,7 +72,7 @@ class ButtonBar extends React.Component
 
   get_button_css: (id) ->
     # calculate the button CSS
-    cls = "btn btn-sm mr-1"
+    cls = "btn btn-sm mr-1 mb-1"
 
     # append additional button styles
     additional_cls = @css_mapping[id]
