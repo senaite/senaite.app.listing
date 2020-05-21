@@ -1,0 +1,30 @@
+<tal:contents_table
+  define="portal context/@@plone_portal_state/portal;
+          folderitems python:view.folderitems();
+          selected python:filter(lambda i: i.get('selected'), folderitems);
+          columns python:view.columns;
+          column_keys python:columns.keys();">
+
+  <table class="table table-bordered table-striped table-sm">
+    <thead>
+      <tr>
+        <th tal:repeat="key column_keys">
+          <span tal:content="python:columns[key]['title']"></span>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr tal:repeat="item selected">
+        <td tal:repeat="key column_keys">
+          <tal:value condition="python:key not in item['replace']">
+            <span tal:content="python:item[key]"></span>
+          </tal:value>
+          <tal:replace_value condition="python:key in item['replace']">
+            <span tal:content="structure python:item['replace'][key]"></span>
+          </tal:replace_value>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+</tal:contents_table>

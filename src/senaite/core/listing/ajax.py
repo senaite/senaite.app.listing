@@ -53,6 +53,8 @@ class AjaxListingView(BrowserView):
     implements(IAjaxListingView, IPublishTraverse)
     contents_table_template = ViewPageTemplateFile(
         "templates/contents_table.pt")
+    contents_table_template_view = ViewPageTemplateFile(
+        "templates/contents_table_view.pt")
 
     def __init__(self, context, request):
         super(AjaxListingView, self).__init__(context, request)
@@ -60,10 +62,13 @@ class AjaxListingView(BrowserView):
 
     def ajax_contents_table(self, *args, **kwargs):
         """Render the ReactJS enabled contents table template
-
-        It is called from the `BikaListingView.contents_table` method
         """
         return self.contents_table_template()
+
+    def contents_table_view(self, *args, **kwargs):
+        """Render contents table in 'view' mode
+        """
+        return self.contents_table_template_view()
 
     def publishTraverse(self, request, name):
         """Called before __call__ for each path name and allows to dispatch
