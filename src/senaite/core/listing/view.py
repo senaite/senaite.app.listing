@@ -345,7 +345,7 @@ class ListingView(AjaxListingView):
 
         This method is used in bika_listing_table.pt
         """
-        return "workflow_action"
+        return "{}/workflow_action".format(api.get_url(self.context))
 
     def get_form_id(self):
         """Return the form id
