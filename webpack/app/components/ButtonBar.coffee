@@ -115,7 +115,7 @@ class ButtonBar extends React.Component
         buttons.push(
           <button
             key="clear"
-            className="btn btn-outline-secondary btn-sm mr-1"
+            className="btn btn-outline-secondary btn-sm mb-1 mr-1"
             title={_t("Clear selection")}
             onClick={@on_transition_button_click}
             id="clear_selection">
@@ -128,7 +128,7 @@ class ButtonBar extends React.Component
       buttons.push(
         <button
           key="ajax-save"
-          className="btn btn-primary btn-sm mr-1"
+          className="btn btn-primary btn-sm mb-1 mr-1"
           onClick={@on_ajax_save_button_click}
           title={@props.ajax_save_button_title}
           id="ajax_save_selection">
@@ -178,7 +178,7 @@ class ButtonBar extends React.Component
     if @props.selected_uids.length == 0
       return null
 
-    <div className="{@props.className}">
+    <div className="#{@props.className}">
       {@build_buttons()}
     </div>
 
