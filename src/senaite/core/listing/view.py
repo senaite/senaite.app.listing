@@ -857,6 +857,7 @@ class ListingView(AjaxListingView):
 
             # check if the item must be rendered
             if not obj or not self.isItemAllowed(obj):
+                self.total -= 1  # correct the total number of results
                 continue
 
             # Building the dictionary with basic items
