@@ -23,20 +23,11 @@ import copy
 import re
 import time
 
+import six
+
 import DateTime
 import Missing
-import six
 from AccessControl import getSecurityManager
-from Products.CMFPlone.utils import safe_unicode
-from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
-from plone.memoize import view
-from senaite.core.listing.ajax import AjaxListingView
-from senaite.core.listing.interfaces import IListingView
-from senaite.core.listing.interfaces import IListingViewAdapter
-from senaite.core.supermodel import SuperModel
-from zope.component import subscribers
-from zope.interface import implements
-
 from bika.lims import api
 from bika.lims import bikaMessageFactory as _
 from bika.lims import logger
@@ -44,8 +35,18 @@ from bika.lims.catalog import CATALOG_ANALYSIS_LISTING
 from bika.lims.catalog import CATALOG_ANALYSIS_REQUEST_LISTING
 from bika.lims.catalog import CATALOG_AUDITLOG
 from bika.lims.catalog import CATALOG_WORKSHEET_LISTING
-from bika.lims.utils import getFromString
 from bika.lims.utils import get_link
+from bika.lims.utils import getFromString
+from plone.memoize import view
+from plone.protect.utils import addTokenToUrl
+from Products.CMFPlone.utils import safe_unicode
+from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
+from senaite.core.listing.ajax import AjaxListingView
+from senaite.core.listing.interfaces import IListingView
+from senaite.core.listing.interfaces import IListingViewAdapter
+from senaite.core.supermodel import SuperModel
+from zope.component import subscribers
+from zope.interface import implements
 
 
 class ListingView(AjaxListingView):
@@ -929,4 +930,5 @@ class ListingView(AjaxListingView):
         if url_or_path.startswith("/"):
             url_or_path = url_or_path.replace("/", "", 1)
 
-        return "/".join([portal_url, url_or_path])
+        url = "/".join([portal_url, url_or_path])
+        return addTokenToUrl(url)
