@@ -121,10 +121,10 @@ class AjaxListingView(BrowserView):
             new_pairs = []
             for key, value in pairs.iteritems():
                 # Encode the key
-                if isinstance(key, unicode):
+                if isinstance(key, six.string_types):
                     key = key.encode(encoding)
                 # Encode the value
-                if isinstance(value, unicode):
+                if isinstance(value, six.string_types):
                     value = value.encode(encoding)
                 new_pairs.append((key, value))
             return dict(new_pairs)
