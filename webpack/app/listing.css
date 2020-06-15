@@ -127,10 +127,11 @@
 .ajax-contents-table tr.contentrow.collapsed td:first-child:before,
 .ajax-contents-table tr.contentrow.expanded td:first-child:before,
 .ajax-contents-table tr.contentrow.child td:first-child:before {
-    padding-right: 0.5em;
+    padding-right: 0.5rem;
     vertical-align: bottom;
     color: #555;
     cursor: pointer;
+    float: left;
 }
 .ajax-contents-table tr.contentrow.collapsed td:first-child:before {
     content: "▶";
