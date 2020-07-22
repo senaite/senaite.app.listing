@@ -2,7 +2,7 @@
 
 from setuptools import setup, find_packages
 
-version = "2.0.0"
+version = "2.0.0rc1"
 
 with open("docs/About.rst", "r") as fh:
     long_description = fh.read()
@@ -30,7 +30,7 @@ setup(
     author_email="hello@senaite.com",
     url="https://github.com/senaite/senaite.core.listing",
     license="GPLv2",
-    packages=find_packages("src", exclude=["ez_setup"]),
+    packages=find_packages(where="src", include=("senaite*")),
     package_dir={"": "src"},
     namespace_packages=["senaite", "senaite.core"],
     include_package_data=True,
@@ -41,9 +41,8 @@ setup(
     ],
     extras_require={
         "test": [
-            "Products.PloneTestCase",
-            "plone.app.testing",
             "unittest2",
+            "plone.app.testing",
         ]
     },
     entry_points="""

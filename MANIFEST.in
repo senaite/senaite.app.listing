@@ -1,7 +1,7 @@
 include LICENSE
-include README.md
-include docs *.rst
-recursive-exclude src/senaite/core/listing *.pyc
-recursive-exclude src/senaite/core/listing/tests *
-recursive-exclude src/senaite/core/listing/react *
-recursive-exclude node_modules *
+include *.rst
+include *.md
+recursive-exclude docs *
+recursive-include src/senaite *
+recursive-exclude webpack *
+recursive-exclude src *.pyc
