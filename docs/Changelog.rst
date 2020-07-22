@@ -1,7 +1,14 @@
+2.0.0rc1 (2020-07-22)
+---------------------
+
+- Compatibility with `senaite.core` 2.x
+
+
 1.5.0 (unreleased)
 ------------------
 
 - #28 Remove classic listing mode and improve folderitems
+
 
 1.4.0 (2020-03-01)
 ------------------

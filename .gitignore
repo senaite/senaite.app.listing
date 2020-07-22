@@ -11,3 +11,7 @@ src/senaite.*
 var
 *.egg-info
 *.pyc
+/pyvenv.cfg
+/include
+/.Python
+/lib
