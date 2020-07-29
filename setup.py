@@ -14,7 +14,7 @@ with open("docs/Changelog.rst", "r") as fh:
     long_description += fh.read()
 
 setup(
-    name="senaite.core.listing",
+    name="senaite.app.listing",
     version=version,
     description="ReactJS powered listing tables for SENAITE LIMS",
     long_description=long_description,
@@ -28,11 +28,11 @@ setup(
     keywords=['senaite', 'lims', 'opensource', 'reactjs'],
     author="SENAITE Foundation",
     author_email="hello@senaite.com",
-    url="https://github.com/senaite/senaite.core.listing",
+    url="https://github.com/senaite/senaite.app.listing",
     license="GPLv2",
     packages=find_packages(where="src", include=("senaite*")),
     package_dir={"": "src"},
-    namespace_packages=["senaite", "senaite.core"],
+    namespace_packages=["senaite", "senaite.app"],
     include_package_data=True,
     zip_safe=False,
     install_requires=[

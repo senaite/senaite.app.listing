@@ -8,7 +8,7 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const gitCmd = "git rev-list -1 HEAD -- `pwd`";
 let gitHash = childProcess.execSync(gitCmd).toString().substring(0, 7);
 
-const staticPath = path.resolve(__dirname, "../src/senaite/core/listing/static");
+const staticPath = path.resolve(__dirname, "../src/senaite/app/listing/static");
 
 const devMode = process.env.NODE_ENV !== 'production';
 
@@ -19,9 +19,9 @@ module.exports = {
     listing: "./listing.coffee"
   },
   output: {
-    filename: gitHash ? `senaite.core.[name]-${gitHash}.js` : "senaite.core.[name].js",
-    path: path.resolve(__dirname, "../src/senaite/core/listing/static/bundles"),
-    publicPath: "++plone++senaite.core.listing.static/bundles"
+    filename: gitHash ? `senaite.app.listing-${gitHash}.js` : "senaite.core.[name].js",
+    path: path.resolve(__dirname, "../src/senaite/app/listing/static/bundles"),
+    publicPath: "++plone++senaite.app.listing.static/bundles"
   },
   module: {
     rules: [

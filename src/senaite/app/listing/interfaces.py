@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of SENAITE.CORE.LISTING.
+# This file is part of SENAITE.APP.LISTING.
 #
-# SENAITE.CORE.LISTING is free software: you can redistribute it and/or modify
+# SENAITE.APP.LISTING is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by the Free
 # Software Foundation, version 2.
 #
@@ -18,19 +18,27 @@
 # Copyright 2018-2020 by it's authors.
 # Some rights reserved, see README and LICENSE.
 
-import logging
-
-from zope.i18nmessageid import MessageFactory
-
-# Defining a Message Factory for when this product is internationalized.
-senaiteMessageFactory = MessageFactory("senaite.core.listing")
-
-logger = logging.getLogger("senaite.core.listing")
-
-# convenience import
-from senaite.core.listing.view import ListingView  # noqa
+from zope.interface import Interface
 
 
-def initialize(context):
-    """Initializer called when used as a Zope 2 product."""
-    logger.info("*** Initializing SENAITE.CORE.LISTING ***")
+class IListingView(Interface):
+    """Senaite.App.Listing View
+    """
+
+
+class IAjaxListingView(Interface):
+    """Senaite Core Ajax Listing View
+    """
+
+
+class IListingViewAdapter(Interface):
+    """Marker that allows to modify the behavior of ListingView
+    """
+
+    def before_render(self):
+        """Before render hook
+        """
+
+    def folder_item(self, obj, item, index):
+        """folder_item hook
+        """

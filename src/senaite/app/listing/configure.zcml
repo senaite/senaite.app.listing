@@ -4,7 +4,7 @@
     xmlns:browser="http://namespaces.zope.org/browser"
     xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
     xmlns:plone="http://namespaces.plone.org/plone"
-    i18n_domain="senaite.core.listing">
+    i18n_domain="senaite.app.listing">
 
   <five:registerPackage package="." initialize=".initialize" />
 
@@ -12,12 +12,12 @@
   <plone:static
       directory="static"
       type="plone"
-      name="senaite.core.listing.static"
+      name="senaite.app.listing.static"
       />
 
   <!-- Static Resources Viewlet -->
   <browser:viewlet
-      name="senaite.core.listing.static"
+      name="senaite.app.listing.static"
       manager="plone.app.layout.viewlets.interfaces.IHtmlHead"
       class="senaite.core.browser.viewlets.resources.ResourcesViewlet"
       permission="zope2.View"
@@ -28,26 +28,26 @@
   <!-- Generic Setup *INSTALL* Profile -->
   <genericsetup:registerProfile
       name="default"
-      title="SENAITE CORE LISTING"
+      title="SENAITE.APP.LISTING"
       directory="profiles/default"
-      description="SENAITE CORE LISTING"
-      post_handler="senaite.core.listing.setuphandlers.post_install"
+      description="SENAITE.APP.LISTING"
+      post_handler="senaite.app.listing.setuphandlers.post_install"
       provides="Products.GenericSetup.interfaces.EXTENSION"/>
 
   <!-- Generic Setup *UNINSTALL* Profile -->
   <genericsetup:registerProfile
       name="uninstall"
-      title="SENAITE CORE LISTING"
+      title="SENAITE.APP.LISTING"
       directory="profiles/uninstall"
-      description="SENAITE CORE LISTING"
-      post_handler="senaite.core.listing.setuphandlers.post_uninstall"
+      description="SENAITE.APP.LISTING"
+      post_handler="senaite.app.listing.setuphandlers.post_uninstall"
       provides="Products.GenericSetup.interfaces.EXTENSION"/>
 
   <!-- Generic Setup *IMPORT STEP* -->
   <genericsetup:importStep
-      name="senaite.core.listing.setupHandler"
-      title="SENAITE CORE LISTING: Run Setup Handler"
+      name="senaite.app.listing.setupHandler"
+      title="SENAITE.APP.LISTING: Run Setup Handler"
       description="Run various configuration actions"
-      handler="senaite.core.listing.setuphandlers.setup_handler"/>
+      handler="senaite.app.listing.setuphandlers.setup_handler"/>
 
 </configure>

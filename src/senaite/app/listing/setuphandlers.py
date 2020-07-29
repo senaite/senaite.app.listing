@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of SENAITE.CORE.LISTING.
+# This file is part of SENAITE.APP.LISTING.
 #
-# SENAITE.CORE.LISTING is free software: you can redistribute it and/or modify
+# SENAITE.APP.LISTING is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by the Free
 # Software Foundation, version 2.
 #
@@ -18,14 +18,14 @@
 # Copyright 2018-2020 by it's authors.
 # Some rights reserved, see README and LICENSE.
 
-from senaite.core.listing import logger
+from senaite.app.listing import logger
 
 
 def setup_handler(context):
     """Generic setup handler
     """
 
-    if context.readDataFile('senaite.core.listing.txt') is None:
+    if context.readDataFile('senaite.app.listing.txt') is None:
         return
 
     logger.info("SENAITE setup handler [BEGIN]")
@@ -40,14 +40,14 @@ def post_install(portal_setup):
 
     :param portal_setup: SetupTool
     """
-    logger.info("SENAITE.CORE.LISTING install handler [BEGIN]")
+    logger.info("SENAITE.APP.LISTING install handler [BEGIN]")
 
     # https://docs.plone.org/develop/addons/components/genericsetup.html#custom-installer-code-setuphandlers-py
-    profile_id = "profile-senaite.core.listing:default"
+    profile_id = "profile-senaite.app.listing:default"
     context = portal_setup._getImportContext(profile_id)
     portal = context.getSite()  # noqa
 
-    logger.info("SENAITE.CORE.LISTING install handler [DONE]")
+    logger.info("SENAITE.APP.LISTING install handler [DONE]")
 
 
 def post_uninstall(portal_setup):
@@ -57,11 +57,11 @@ def post_uninstall(portal_setup):
 
     :param portal_setup: SetupTool
     """
-    logger.info("SENAITE.CORE.LISTING uninstall handler [BEGIN]")
+    logger.info("SENAITE.APP.LISTING uninstall handler [BEGIN]")
 
     # https://docs.plone.org/develop/addons/components/genericsetup.html#custom-installer-code-setuphandlers-py
-    profile_id = "profile-senaite.core.listing:uninstall"
+    profile_id = "profile-senaite.app.listing:uninstall"
     context = portal_setup._getImportContext(profile_id)
     portal = context.getSite()  # noqa
 
-    logger.info("SENAITE.CORE.LISTING uninstall handler [DONE]")
+    logger.info("SENAITE.APP.LISTING uninstall handler [DONE]")

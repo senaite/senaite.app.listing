@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of SENAITE.CORE.LISTING.
+# This file is part of SENAITE.APP.LISTING.
 #
-# SENAITE.CORE.LISTING is free software: you can redistribute it and/or modify
+# SENAITE.APP.LISTING is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by the Free
 # Software Foundation, version 2.
 #
@@ -18,7 +18,7 @@
 # Copyright 2018-2020 by it's authors.
 # Some rights reserved, see README and LICENSE.
 
-from senaite.core.listing.interfaces import IListingView
+from senaite.app.listing.interfaces import IListingView
 import collections
 
 

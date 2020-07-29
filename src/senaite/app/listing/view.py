@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of SENAITE.CORE.LISTING.
+# This file is part of SENAITE.APP.LISTING.
 #
-# SENAITE.CORE.LISTING is free software: you can redistribute it and/or modify
+# SENAITE.APP.LISTING is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by the Free
 # Software Foundation, version 2.
 #
@@ -41,9 +41,9 @@ from plone.memoize import view
 from plone.protect.utils import addTokenToUrl
 from Products.CMFPlone.utils import safe_unicode
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
-from senaite.core.listing.ajax import AjaxListingView
-from senaite.core.listing.interfaces import IListingView
-from senaite.core.listing.interfaces import IListingViewAdapter
+from senaite.app.listing.ajax import AjaxListingView
+from senaite.app.listing.interfaces import IListingView
+from senaite.app.listing.interfaces import IListingViewAdapter
 from senaite.core.supermodel import SuperModel
 from zope.component import subscribers
 from zope.interface import implements
@@ -244,7 +244,7 @@ class ListingView(AjaxListingView):
         configuration.
 
         Also see this issue for more details:
-        https://github.com/senaite/senaite.core.listing/issues/16
+        https://github.com/senaite/senaite.app.listing/issues/16
         """
         key = None
         view_name = self.__name__
@@ -562,7 +562,7 @@ class ListingView(AjaxListingView):
 
         # Skip all further processing if explicit UIDs are requested.
         # This is required to render child-nodes properly.
-        # https://github.com/senaite/senaite.core.listing/issues/12
+        # https://github.com/senaite/senaite.app.listing/issues/12
         if "UID" in query:
             return query
 

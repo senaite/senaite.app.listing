@@ -23,7 +23,7 @@ import "./listing.css"
 
 ###* DOCUMENT READY ENTRY POINT ###
 document.addEventListener "DOMContentLoaded", ->
-  console.debug "*** SENAITE.CORE.LISTING::DOMContentLoaded: --> Loading ReactJS Controller"
+  console.debug "*** SENAITE.APP.LISTING::DOMContentLoaded: --> Loading ReactJS Controller"
 
   if not window._t?
     console.warn("Global translation variable `_t` not found! Translations won't work!")

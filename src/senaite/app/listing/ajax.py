@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of SENAITE.CORE.LISTING.
+# This file is part of SENAITE.APP.LISTING.
 #
-# SENAITE.CORE.LISTING is free software: you can redistribute it and/or modify
+# SENAITE.APP.LISTING is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by the Free
 # Software Foundation, version 2.
 #
@@ -33,11 +33,11 @@ from plone.memoize import view
 from Products.Archetypes.event import ObjectEditedEvent
 from Products.Archetypes.utils import mapply
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
-from senaite.core.listing.decorators import inject_runtime
-from senaite.core.listing.decorators import returns_safe_json
-from senaite.core.listing.decorators import set_application_json_header
-from senaite.core.listing.decorators import translate
-from senaite.core.listing.interfaces import IAjaxListingView
+from senaite.app.listing.decorators import inject_runtime
+from senaite.app.listing.decorators import returns_safe_json
+from senaite.app.listing.decorators import set_application_json_header
+from senaite.app.listing.decorators import translate
+from senaite.app.listing.interfaces import IAjaxListingView
 from zope import event
 from zope.interface import implements
 from zope.lifecycleevent import modified

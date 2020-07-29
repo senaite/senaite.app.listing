@@ -1,26 +1,26 @@
-.. image:: https://raw.githubusercontent.com/senaite/senaite.core.listing/master/static/logo_pypi.png
-   :target: https://github.com/senaite/senaite.core.listing
-   :alt: senaite.core.listing
+.. image:: https://raw.githubusercontent.com/senaite/senaite.app.listing/master/static/logo_pypi.png
+   :target: https://github.com/senaite/senaite.app.listing
+   :alt: senaite.app.listing
    :height: 128px
 
 
 *ReactJS powered listing tables for SENAITE LIMS*
 =================================================
 
-.. image:: https://img.shields.io/pypi/v/senaite.core.listing.svg?style=flat-square
-   :target: https://pypi.python.org/pypi/senaite.core.listing
+.. image:: https://img.shields.io/pypi/v/senaite.app.listing.svg?style=flat-square
+   :target: https://pypi.python.org/pypi/senaite.app.listing
 
-.. image:: https://img.shields.io/github/issues-pr/senaite/senaite.core.listing.svg?style=flat-square
-   :target: https://github.com/senaite/senaite.core.listing/pulls
+.. image:: https://img.shields.io/github/issues-pr/senaite/senaite.app.listing.svg?style=flat-square
+   :target: https://github.com/senaite/senaite.app.listing/pulls
 
-.. image:: https://img.shields.io/github/issues/senaite/senaite.core.listing.svg?style=flat-square
-   :target: https://github.com/senaite/senaite.core.listing/issues
+.. image:: https://img.shields.io/github/issues/senaite/senaite.app.listing.svg?style=flat-square
+   :target: https://github.com/senaite/senaite.app.listing/issues
 
 .. image:: https://img.shields.io/badge/README-GitHub-blue.svg?style=flat-square
-   :target: https://github.com/senaite/senaite.core.listing#readme
+   :target: https://github.com/senaite/senaite.app.listing#readme
 
 .. image:: https://img.shields.io/badge/Built%20with-%E2%9D%A4-red.svg
-   :target: https://github.com/senaite/senaite.core.listing
+   :target: https://github.com/senaite/senaite.app.listing
 
 .. image:: https://img.shields.io/badge/Made%20for%20SENAITE-%E2%AC%A1-lightgrey.svg
    :target: https://www.senaite.com
@@ -42,7 +42,7 @@ Installation
 Please follow the installations instructions for `Plone 4`_ and
 `senaite.lims`_.
 
-To install SENAITE.CORE.LISTING, you have to add `senaite.core.listing` into the
+To install SENAITE.APP.LISTING, you have to add `senaite.app.listing` into the
 `eggs` list inside the `[buildout]` section of your `buildout.cfg`::
 
    [buildout]
@@ -95,7 +95,7 @@ console::
 Installation Requirements
 -------------------------
 
-The following versions are required for SENAITE.CORE.LISTING:
+The following versions are required for SENAITE.APP.LISTING:
 
 -  Plone 4.3.18
 -  senaite.lims >= 1.3.0

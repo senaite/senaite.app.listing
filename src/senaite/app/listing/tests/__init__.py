@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 #
-# This file is part of SENAITE.CORE.LISTING.
+# This file is part of SENAITE.APP.LISTING.
 #
-# SENAITE.CORE.LISTING is free software: you can redistribute it and/or modify
+# SENAITE.APP.LISTING is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by the Free
 # Software Foundation, version 2.
 #
@@ -17,9 +17,3 @@
 #
 # Copyright 2018-2020 by it's authors.
 # Some rights reserved, see README and LICENSE.
-
-try:
-    __import__('pkg_resources').declare_namespace(__name__)
-except ImportError:
-    from pkgutil import extend_path
-    __path__ = extend_path(__path__, __name__)

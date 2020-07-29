@@ -1,23 +1,23 @@
 <div align="center">
 
-  <a href="https://github.com/senaite/senaite.core.listing">
-    <img src="static/logo.png" alt="senaite.core.listing" height="128" />
+  <a href="https://github.com/senaite/senaite.app.listing">
+    <img src="static/logo.png" alt="senaite.app.listing" height="128" />
   </a>
 
   <p>ReactJS powered listing tables for SENAITE LIMS</p>
 
   <div>
-    <a href="https://pypi.python.org/pypi/senaite.core.listing">
-      <img src="https://img.shields.io/pypi/v/senaite.core.listing.svg?style=flat-square" alt="pypi-version" />
+    <a href="https://pypi.python.org/pypi/senaite.app.listing">
+      <img src="https://img.shields.io/pypi/v/senaite.app.listing.svg?style=flat-square" alt="pypi-version" />
     </a>
-    <a href="https://travis-ci.org/senaite/senaite.core.listing">
-      <img src="https://img.shields.io/travis/senaite/senaite.core.listing.svg?style=flat-square" alt="travis-ci" />
+    <a href="https://travis-ci.org/senaite/senaite.app.listing">
+      <img src="https://img.shields.io/travis/senaite/senaite.app.listing.svg?style=flat-square" alt="travis-ci" />
     </a>
-    <a href="https://github.com/senaite/senaite.core.listing/pulls">
-      <img src="https://img.shields.io/github/issues-pr/senaite/senaite.core.listing.svg?style=flat-square" alt="open PRs" />
+    <a href="https://github.com/senaite/senaite.app.listing/pulls">
+      <img src="https://img.shields.io/github/issues-pr/senaite/senaite.app.listing.svg?style=flat-square" alt="open PRs" />
     </a>
-    <a href="https://github.com/senaite/senaite.core.listing/issues">
-      <img src="https://img.shields.io/github/issues/senaite/senaite.core.listing.svg?style=flat-square" alt="open Issues" />
+    <a href="https://github.com/senaite/senaite.app.listing/issues">
+      <img src="https://img.shields.io/github/issues/senaite/senaite.app.listing.svg?style=flat-square" alt="open Issues" />
     </a>
     <a href="#">
       <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="pr" />
@@ -42,7 +42,7 @@ License](https://github.com/facebook/react/blob/master/LICENSE)
 
 ## Screenshots
 
-This section shows some screenshots how `senaite.core.listing` looks like.
+This section shows some screenshots how `senaite.app.listing` looks like.
 
 
 ### Samples Listing
@@ -89,8 +89,8 @@ The skeleton of the subscriber adapter may look like follows:
 
 ```python
 from bika.lims import api
-from senaite.core.listing.interfaces import IListingView
-from senaite.core.listing.interfaces import IListingViewAdapter
+from senaite.app.listing.interfaces import IListingView
+from senaite.app.listing.interfaces import IListingViewAdapter
 from zope.component import adapts
 from zope.component import implements
 
@@ -125,13 +125,13 @@ the configure.zcml is in that same directory:
   <subscriber
     for="bika.lims.browser.analysisrequest.AnalysisRequestsView
          bika.lims.interfaces.IAnalysisRequestsFolder"
-    provides="senaite.core.listing.interfaces.IListingViewAdapter"
+    provides="senaite.app.listing.interfaces.IListingViewAdapter"
     factory=".samples.SamplesListingViewAdapter"
   />
 ```
 
 Note that `AnalysisRequestsView` (from `senaite.core`) inherits from
-`senaite.core.listing`'s `ListingView`, that in turn implements `IListingView`.
+`senaite.app.listing`'s `ListingView`, that in turn implements `IListingView`.
 
 
 ## Development
