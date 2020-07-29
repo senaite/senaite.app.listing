@@ -44,7 +44,7 @@ from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from senaite.app.listing.ajax import AjaxListingView
 from senaite.app.listing.interfaces import IListingView
 from senaite.app.listing.interfaces import IListingViewAdapter
-from senaite.core.supermodel import SuperModel
+from senaite.app.supermodel import SuperModel
 from zope.component import subscribers
 from zope.interface import implements
 
