@@ -4,7 +4,19 @@
 - Compatibility with `senaite.core` 2.x
 
 
-1.5.0 (unreleased)
+1.5.2 (2020-08-05)
+------------------
+
+- Missing files added over MANIFEST.in
+
+
+1.5.1 (2020-08-05)
+------------------
+
+- Fixed release package
+
+
+1.5.0 (2020-08-04)
 ------------------
 
 - #28 Remove classic listing mode and improve folderitems
