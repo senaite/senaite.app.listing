@@ -1,3 +1,9 @@
+1.5.3 (unreleased)
+------------------
+
+- #31 Dismiss items if cleared by subscribers
+
+
 1.5.2 (2020-08-05)
 ------------------
 
