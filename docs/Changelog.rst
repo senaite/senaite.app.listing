@@ -1,7 +1,19 @@
+2.0.0rc2 (unreleased)
+---------------------
+
+- no changes yet
+
+
 2.0.0rc1 (2020-08-05)
 ---------------------
 
 - Compatibility with `senaite.core` 2.x
+
+
+1.5.3 (unreleased)
+------------------
+
+- #31 Dismiss items if cleared by subscribers
 
 
 1.5.2 (2020-08-05)

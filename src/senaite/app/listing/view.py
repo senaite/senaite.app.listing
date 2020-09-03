@@ -902,6 +902,10 @@ class ListingView(AjaxListingView):
             for subscriber in self.get_listing_view_adapters():
                 subscriber.folder_item(obj, item, idx)
 
+            # Dismiss item if cleared by subscribers
+            if not item:
+                continue
+
             results.append(item)
             idx += 1
 
