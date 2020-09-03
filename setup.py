@@ -2,7 +2,7 @@
 
 from setuptools import setup, find_packages
 
-version = "1.5.2"
+version = "1.5.3"
 
 with open("docs/About.rst", "r") as fh:
     long_description = fh.read()
