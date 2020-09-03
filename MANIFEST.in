@@ -1,7 +1,7 @@
 include LICENSE
 include *.rst
 include *.md
-recursive-exclude docs *
+recursive-include docs *
 recursive-include src/senaite *
 recursive-exclude webpack *
 recursive-exclude src *.pyc
