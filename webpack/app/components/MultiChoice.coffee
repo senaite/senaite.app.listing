@@ -1,13 +1,13 @@
 import React from "react"
 
 
-class MultiSelect extends React.Component
+class MultiChoice extends React.Component
 
   ###*
-   * Multi-Select Field for the Listing Table
+   * Multi-Choice Field for the Listing Table
    *
-   * A multi select field is identified by the column type "multichoices" in the listing
-   * view, e.g.  `self.columns = {"Result": {"type": "multichoices"}, ... }`
+   * A multi select field is identified by the column type "multichoice" in the listing
+   * view, e.g.  `self.columns = {"Result": {"type": "multichoice"}, ... }`
    *
   ###
   constructor: (props) ->
@@ -34,7 +34,7 @@ class MultiSelect extends React.Component
     # Prepare a list of UIDs
     value = (input.value for input in checked)
 
-    console.debug "MultiSelect::on_blur: value=#{value}"
+    console.debug "MultiChoice::on_blur: value=#{value}"
 
     # Call the *save* field handler with the UID, name, value
     if @props.save_editable_field
@@ -57,7 +57,7 @@ class MultiSelect extends React.Component
     # Prepare a list of UIDs
     value = (input.value for input in checked)
 
-    console.debug "MultiSelect::on_change: value=#{value}"
+    console.debug "MultiChoice::on_change: value=#{value}"
 
     # Call the *update* field handler
     if @props.update_editable_field
@@ -100,13 +100,13 @@ class MultiSelect extends React.Component
     return options
 
   render: ->
-    <div className="multiselect">
+    <div className="multichoice">
       {@props.before and <span className="before_field" dangerouslySetInnerHTML={{__html: @props.before}}></span>}
-      <ul className="list-unstyled">
+      <ul className="">
         {@build_options()}
       </ul>
       {@props.after and <span className="after_field" dangerouslySetInnerHTML={{__html: @props.after}}></span>}
     </div>
 
 
-export default MultiSelect
+export default MultiChoice

@@ -2,7 +2,7 @@ import React from "react"
 
 import Checkbox from "./Checkbox.coffee"
 import HiddenField from "./HiddenField.coffee"
-import MultiSelect from "./MultiSelect.coffee"
+import MultiChoice from "./MultiChoice.coffee"
 import NumericField from "./NumericField.coffee"
 import CalculatedField from "./CalculatedField.coffee"
 import ReadonlyField from "./ReadonlyField.coffee"
@@ -21,7 +21,7 @@ class TableCell extends React.Component
       "select": ":records"
       "choices": ":records"
       "multiselect": ":record:list"
-      "multichoices": ":record:list"
+      "multichoice": ":record:list"
       "numeric": ":records"
       "string": ":records"
       "readonly": ""
@@ -217,6 +217,9 @@ class TableCell extends React.Component
     # check if the field is listed in choices
     choices = @get_choices()
     if column_key of choices
+      # check if the field is a multi-choices
+      if resultfield and item.multichoice_result
+        return "multichoice"
       return "select"
 
     # check if the field is an interim
@@ -461,11 +464,11 @@ class TableCell extends React.Component
         />)
 
   ###*
-   * Creates a multiselect field component
+   * Creates a multichoice field component
    * @param props {object} properties passed to the component
-   * @returns SelectField component
+   * @returns MultiChoice component
   ###
-  create_multiselect_field: ({props}={}) ->
+  create_multichoice_field: ({props}={}) ->
     column_key = @get_column_key()
     item = @get_item()
     props ?= {}
@@ -475,7 +478,7 @@ class TableCell extends React.Component
     options = item.choices[column_key] or []
     formatted_value = @get_formatted_value()
     uid = @get_uid()
-    converter = @ZPUBLISHER_CONVERTER["multiselect"]
+    converter = @ZPUBLISHER_CONVERTER["multichoice"]
     fieldname = name + converter
     title = @props.column.title or column_key
     selected = @is_selected()
@@ -485,7 +488,7 @@ class TableCell extends React.Component
     if required then css_class += " required"
 
     return (
-      <MultiSelect
+      <MultiChoice
         key={name}
         uid={uid}
         item={item}
@@ -569,8 +572,8 @@ class TableCell extends React.Component
       field = field.concat @create_numeric_field()
     else if type in ["select", "choices"]
       field = field.concat @create_select_field()
-    else if type in ["multiselect", "multichoices"]
-      field = field.concat @create_multiselect_field()
+    else if type in ["multichoice", "multiselect" ]
+      field = field.concat @create_multichoice_field()
     else if type == "boolean"
       field = field.concat @create_checkbox_field()
     else if type == "numeric"

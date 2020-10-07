@@ -157,24 +157,33 @@
     border-radius: 3px;
 }
 
-/* Multi select */
-.ajax-contents-table tr td div.multiselect {
+/* Multi choice */
+.ajax-contents-table tr td div.multichoice {
     max-height: 120px;
     width: 200px;
     overflow: auto;
     border: 1px solid #ccc;
     border-radius: 3px;
 }
-.ajax-contents-table tr td div.multiselect ul {
+.ajax-contents-table tr td div.multichoice ul {
     padding: 0;
     margin: 0;
 }
-.ajax-contents-table tr td div.multiselect li {
+.ajax-contents-table tr td div.multichoice li {
     padding: 6px;
 }
-.ajax-contents-table tr td div.multiselect li:hover {
+.ajax-contents-table tr td div.multichoice li:hover {
     background-color: #f9f9f9;
 }
+
+/* Result multi choice */
+.ajax-contents-table tr td.Result div.multichoice {
+    border: none;
+}
+.ajax-contents-table tr td.Result div.multichoice li {
+    padding: 4px 6px;
+}
+
 
 /* Rowspan support */
 .ajax-contents-table tr td[rowspan] {
