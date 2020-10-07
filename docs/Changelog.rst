@@ -1,7 +1,7 @@
 2.0.0rc2 (unreleased)
 ---------------------
 
-- no changes yet
+- #32 MultiSelect component renamed to MultiChoice
 
 
 2.0.0rc1 (2020-08-05)
