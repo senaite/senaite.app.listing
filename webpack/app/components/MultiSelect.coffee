@@ -18,31 +18,7 @@ class MultiSelect extends React.Component
       value: props.defaultValue
 
     # bind event handler to the current context
-    @on_blur = @on_blur.bind @
     @on_change = @on_change.bind @
-
-  ###*
-   * Event handler when the mouse left the select field
-   * @param event {object} ReactJS event object
-  ###
-  on_blur: (event) ->
-    el = event.currentTarget
-    # Get the parent list wrapper
-    ul = el.parentNode.parentNode
-    # Extract all checked items
-    checked = ul.querySelectorAll("select")
-    # Extract the UID attribute
-    uid = el.getAttribute("uid")
-    # Extract the column_key attribute
-    name = el.getAttribute("column_key") or el.name
-    # Prepare a list of UIDs
-    value = (input.value for input in checked)
-
-    console.debug "MultiSelect::on_blur: value=#{value}"
-
-    # Call the *save* field handler with the UID, name, value
-    if @props.save_editable_field
-      @props.save_editable_field uid, value, checked, @props.item
 
   ###*
    * Event handler when the value changed of the select field
