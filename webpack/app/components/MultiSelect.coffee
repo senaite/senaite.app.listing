@@ -154,9 +154,6 @@ class MultiSelect extends React.Component
           </select>
         </li>
       )
-      if not @props.duplicates
-        # Do not allow duplicates
-        exclude_values.push(selected_value)
 
     return selectors
 
