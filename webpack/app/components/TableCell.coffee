@@ -530,6 +530,7 @@ class TableCell extends React.Component
     selected = @is_selected()
     disabled = @is_disabled()
     required = @is_required()
+    duplicates = item.result_type == "multiselect_duplicates"
     css_class = "form-control input-sm"
     if required then css_class += " required"
 
@@ -547,6 +548,7 @@ class TableCell extends React.Component
         selected={selected}
         required={required}
         options={options}
+        duplicates={duplicates}
         className={css_class}
         update_editable_field={@props.update_editable_field}
         save_editable_field={@props.save_editable_field}
@@ -621,7 +623,7 @@ class TableCell extends React.Component
       field = field.concat @create_select_field()
     else if type in ["multichoice"]
       field = field.concat @create_multichoice_field()
-    else if type in ["multiselect"]
+    else if type in ["multiselect", "multiselect_duplicates" ]
       field = field.concat @create_multiselect_field()
     else if type == "boolean"
       field = field.concat @create_checkbox_field()

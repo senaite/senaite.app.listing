@@ -52,12 +52,17 @@ class MultiSelect extends React.Component
    * @param selected_value the option to be selected
    * @param options {array} list of option objects, e.g.:
    *                        {"ResultText": ..., "ResultValue": ...}
+   * @param exclude_values {array} list of option values to exclude
   ###
-  build_options: ->
+  build_options: (exclude_values) ->
     options = []
 
     # Possible options of the selection list
     props_options = @props.options or []
+
+    # Exclude some options
+    props_options = props_options.filter (option) ->
+      option.ResultValue not in exclude_values
 
     # Add an empty option to be displayed by default, but only when no empty
     # option does not exist yet
@@ -116,11 +121,19 @@ class MultiSelect extends React.Component
     # Bail out empties
     values = values.filter (value) -> value isnt ""
 
-    # Add an empty selector at the end
-    values.push("")
+    if @props.duplicates
+      # Duplicates allowed. Add an empty selector at the end
+      values.push("")
+    else
+      # Add an empty selector at the end, but only if there are still options
+      # available for selection
+      options = @props.options or []
+      if values.length < options.length
+        values.push("")
 
     # Build the selectors
     selectors = []
+    exclude_values = []
     for selected_value in values
       console.log "MultiSelect::build_selectors:value='#{selected_value}'"
       selectors.push(
@@ -132,10 +145,13 @@ class MultiSelect extends React.Component
                   column_key={@props.column_key}
                   className={@props.className}
                   {...@props.attrs}>
-            {@build_options()}
+            {@build_options(exclude_values)}
           </select>
         </li>
       )
+      if not @props.duplicates
+        # Do not allow duplicates
+        exclude_values.push(selected_value)
 
     return selectors
 
