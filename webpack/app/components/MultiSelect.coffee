@@ -121,10 +121,14 @@ class MultiSelect extends React.Component
     # Bail out empties
     values = values.filter (value) -> value isnt ""
 
+    excluded_values = []
     if @props.duplicates
       # Duplicates allowed. Add an empty selector at the end
       values.push("")
     else
+      # Values exclusion
+      excluded_values = values
+
       # Add an empty selector at the end, but only if there are still options
       # available for selection
       options = @props.options or []
@@ -136,6 +140,7 @@ class MultiSelect extends React.Component
     exclude_values = []
     for selected_value in values
       console.log "MultiSelect::build_selectors:value='#{selected_value}'"
+      excluded = excluded_values.filter (value) -> value isnt selected_value
       selectors.push(
         <li key={selected_value}>
           <select value={selected_value}
@@ -145,7 +150,7 @@ class MultiSelect extends React.Component
                   column_key={@props.column_key}
                   className={@props.className}
                   {...@props.attrs}>
-            {@build_options(exclude_values)}
+            {@build_options(excluded)}
           </select>
         </li>
       )
