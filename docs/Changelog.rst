@@ -1,6 +1,7 @@
 2.0.0rc2 (unreleased)
 ---------------------
 
+- #33 Added MultiSelect react component
 - #32 MultiSelect component renamed to MultiChoice
 
 
