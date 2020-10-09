@@ -65,7 +65,6 @@ class MultiChoice extends React.Component
                  defaultChecked={selected}
                  value={value}
                  onChange={@props.onChange or @on_change}
-                 tabIndex={@props.tabIndex}
                  {...@props.attrs}/> {title}
         </li>)
 
@@ -77,7 +76,8 @@ class MultiChoice extends React.Component
       <ul className="list-unstyled"
         uid={@props.uid}
         column_key={@props.column_key}
-        name={@props.name}>
+        name={@props.name}
+        tabIndex={@props.tabIndex}>
         {@build_options()}
       </ul>
       {@props.after and <span className="after_field" dangerouslySetInnerHTML={{__html: @props.after}}></span>}
