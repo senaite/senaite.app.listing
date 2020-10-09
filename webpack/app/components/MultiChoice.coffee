@@ -27,9 +27,9 @@ class MultiChoice extends React.Component
     # Extract all checked items
     checked = ul.querySelectorAll("input[type='checkbox']:checked")
     # Extract the UID attribute
-    uid = el.getAttribute("uid")
+    uid = ul.getAttribute("uid")
     # Extract the column_key attribute
-    name = el.getAttribute("column_key") or el.name
+    name = ul.getAttribute("column_key") or ul.name
     # Prepare a list of UIDs
     value = (input.value for input in checked)
 
@@ -63,12 +63,8 @@ class MultiChoice extends React.Component
         <li key={value}>
           <input type="checkbox"
                  defaultChecked={selected}
-                 uid={@props.uid}
-                 name={@props.name}
                  value={value}
                  onChange={@props.onChange or @on_change}
-                 column_key={@props.column_key}
-                 tabIndex={@props.tabIndex}
                  {...@props.attrs}/> {title}
         </li>)
 
@@ -77,7 +73,11 @@ class MultiChoice extends React.Component
   render: ->
     <div className="multichoice">
       {@props.before and <span className="before_field" dangerouslySetInnerHTML={{__html: @props.before}}></span>}
-      <ul className="list-unstyled">
+      <ul className="list-unstyled"
+        uid={@props.uid}
+        column_key={@props.column_key}
+        name={@props.name}
+        tabIndex={@props.tabIndex}>
         {@build_options()}
       </ul>
       {@props.after and <span className="after_field" dangerouslySetInnerHTML={{__html: @props.after}}></span>}
