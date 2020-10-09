@@ -14,31 +14,7 @@ class MultiSelect extends React.Component
     super(props)
 
     # bind event handler to the current context
-    @on_blur = @on_blur.bind @
     @on_change = @on_change.bind @
-
-  ###*
-   * Event handler when the mouse left the select field
-   * @param event {object} ReactJS event object
-  ###
-  on_blur: (event) ->
-    el = event.currentTarget
-    # Get the parent list wrapper
-    ul = el.parentNode.parentNode
-    # Extract all checked items
-    checked = ul.querySelectorAll("input[type='checkbox']:checked")
-    # Extract the UID attribute
-    uid = el.getAttribute("uid")
-    # Extract the column_key attribute
-    name = el.getAttribute("column_key") or el.name
-    # Prepare a list of UIDs
-    value = (input.value for input in checked)
-
-    console.debug "MultiSelect::on_blur: value=#{value}"
-
-    # Call the *save* field handler with the UID, name, value
-    if @props.save_editable_field
-      @props.save_editable_field uid, value, checked, @props.item
 
   ###*
    * Event handler when the value changed of the select field
@@ -51,9 +27,9 @@ class MultiSelect extends React.Component
     # Extract all checked items
     checked = ul.querySelectorAll("input[type='checkbox']:checked")
     # Extract the UID attribute
-    uid = el.getAttribute("uid")
+    uid = ul.getAttribute("uid")
     # Extract the column_key attribute
-    name = el.getAttribute("column_key") or el.name
+    name = ul.getAttribute("column_key") or ul.name
     # Prepare a list of UIDs
     value = (input.value for input in checked)
 
@@ -87,13 +63,8 @@ class MultiSelect extends React.Component
         <li key={value}>
           <input type="checkbox"
                  defaultChecked={selected}
-                 uid={@props.uid}
-                 name={@props.name}
                  value={value}
                  onChange={@props.onChange or @on_change}
-                 onBlur={@props.onBlur or @on_blur}
-                 column_key={@props.column_key}
-                 tabIndex={@props.tabIndex}
                  {...@props.attrs}/> {title}
         </li>)
 
@@ -102,7 +73,11 @@ class MultiSelect extends React.Component
   render: ->
     <div className="multiselect">
       {@props.before and <span className="before_field" dangerouslySetInnerHTML={{__html: @props.before}}></span>}
-      <ul className="list-unstyled">
+      <ul className="list-unstyled"
+        uid={@props.uid}
+        column_key={@props.column_key}
+        name={@props.name}
+        tabIndex={@props.tabIndex}>
         {@build_options()}
       </ul>
       {@props.after and <span className="after_field" dangerouslySetInnerHTML={{__html: @props.after}}></span>}
