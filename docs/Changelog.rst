@@ -1,6 +1,7 @@
 1.5.3 (unreleased)
 ------------------
 
+- #36 Fix unpredictable ZPublisher's AttributeError on MultiSelect submit
 - #31 Dismiss items if cleared by subscribers
 
 
