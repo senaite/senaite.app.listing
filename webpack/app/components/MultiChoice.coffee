@@ -49,8 +49,8 @@ class MultiChoice extends React.Component
 
     # Sort the items alphabetically
     sorted_options = @props.options.sort (a, b) ->
-      text_a = a.ResultText
-      text_b = b.ResultText
+      text_a = a.ResultText.toLowerCase()
+      text_b = b.ResultText.toLowerCase()
       if text_a > text_b then return 1
       if text_a < text_b then return -1
       return 0

@@ -68,17 +68,12 @@ class MultiSelect extends React.Component
     # option does not exist yet
     empties = props_options.filter (option) -> option.ResultValue ==  ""
     if empties.length == 0
-      props_options.push(
-        {
-          ResultValue: ""
-          ResultText: ""
-        }
-      )
+      props_options.push({ResultValue: "", ResultText: ""})
 
     # Sort the options alphabetically
     sorted_options = props_options.sort (a, b) ->
-      text_a = a.ResultText
-      text_b = b.ResultText
+      text_a = a.ResultText.toLowerCase()
+      text_b = b.ResultText.toLowerCase()
       if text_a > text_b then return 1
       if text_a < text_b then return -1
       return 0
@@ -101,9 +96,6 @@ class MultiSelect extends React.Component
       return []
     if Array.isArray(value)
       return value
-    value = "#{value}"
-    value = value.split("u'").join("'")
-    value = value.split("'").join("")
     return JSON.parse value
 
   ###
@@ -118,7 +110,7 @@ class MultiSelect extends React.Component
     # Convert the result to an array
     values = @to_array @state.value
 
-    # Bail out empties
+    # filter out empties
     values = values.filter (value) -> value isnt ""
 
     excluded_values = []
