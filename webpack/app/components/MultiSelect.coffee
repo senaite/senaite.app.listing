@@ -31,9 +31,9 @@ class MultiSelect extends React.Component
     # Extract all selected items
     checked = ul.querySelectorAll("select")
     # Extract the UID attribute
-    uid = ul.getAttribute("uid")
+    uid = el.getAttribute("uid")
     # Extract the column_key attribute
-    name = ul.getAttribute("column_key") or ul.name
+    name = el.getAttribute("column_key") or el.name
     # Prepare a list of UIDs
     value = (input.value for input in checked)
 
@@ -68,17 +68,12 @@ class MultiSelect extends React.Component
     # option does not exist yet
     empties = props_options.filter (option) -> option.ResultValue ==  ""
     if empties.length == 0
-      props_options.push(
-        {
-          ResultValue: ""
-          ResultText: ""
-        }
-      )
+      props_options.push({ResultValue: "", ResultText: ""})
 
     # Sort the options alphabetically
     sorted_options = props_options.sort (a, b) ->
-      text_a = a.ResultText
-      text_b = b.ResultText
+      text_a = a.ResultText.toLowerCase()
+      text_b = b.ResultText.toLowerCase()
       if text_a > text_b then return 1
       if text_a < text_b then return -1
       return 0
@@ -101,9 +96,6 @@ class MultiSelect extends React.Component
       return []
     if Array.isArray(value)
       return value
-    value = "#{value}"
-    value = value.split("u'").join("'")
-    value = value.split("'").join("")
     return JSON.parse value
 
   ###
@@ -118,7 +110,7 @@ class MultiSelect extends React.Component
     # Convert the result to an array
     values = @to_array @state.value
 
-    # Bail out empties
+    # filter out empties
     values = values.filter (value) -> value isnt ""
 
     excluded_values = []
@@ -144,7 +136,10 @@ class MultiSelect extends React.Component
       selectors.push(
         <li key={selected_value}>
           <select value={selected_value}
+                  uid={@props.uid}
+                  name={@props.name}
                   onChange={@props.onChange or @on_change}
+                  column_key={@props.column_key}
                   className={@props.className}
                   {...@props.attrs}>
             {@build_options(excluded)}
@@ -157,11 +152,7 @@ class MultiSelect extends React.Component
   render: ->
     <div className="multiselect">
       {@props.before and <span className="before_field" dangerouslySetInnerHTML={{__html: @props.before}}></span>}
-      <ul className="list-unstyled"
-        uid={@props.uid}
-        column_key={@props.column_key}
-        name={@props.name}
-        tabIndex={@props.tabIndex}>
+      <ul className="list-unstyled" tabIndex={@props.tabIndex}>
         {@build_selectors()}
       </ul>
       {@props.after and <span className="after_field" dangerouslySetInnerHTML={{__html: @props.after}}></span>}

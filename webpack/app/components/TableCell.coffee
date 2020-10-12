@@ -21,8 +21,8 @@ class TableCell extends React.Component
       "boolean": ":record:ignore_empty"
       "select": ":records"
       "choices": ":records"
-      "multiselect": ":record:list"
-      "multichoice": ":record:list"
+      "multiselect": ":list"
+      "multichoice": ":list"
       "numeric": ":records"
       "string": ":records"
       "readonly": ""
@@ -477,7 +477,16 @@ class TableCell extends React.Component
 
     name = @get_name()
     value = @get_value()
+    # convert value to array
+    if value.length > 0
+      value = JSON.parse value
     options = item.choices[column_key] or []
+    # mark selected options
+    options.forEach (option) ->
+      selected = no
+      if Array.isArray value
+        selected = value.indexOf(option.ResultValue) > -1
+      option.selected = selected
     formatted_value = @get_formatted_value()
     uid = @get_uid()
     converter = @ZPUBLISHER_CONVERTER["multichoice"]
@@ -495,7 +504,6 @@ class TableCell extends React.Component
         uid={uid}
         item={item}
         name={fieldname}
-        defaultValue={value}
         column_key={column_key}
         title={title}
         disabled={disabled}
