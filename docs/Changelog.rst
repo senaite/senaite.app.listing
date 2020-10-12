@@ -1,6 +1,7 @@
 2.0.0rc2 (unreleased)
 ---------------------
 
+- #38 Added event subscriber to reload the listing table
 - #34 Set autofocus on search field
 - #33 Added MultiSelect react component
 - #32 MultiSelect component renamed to MultiChoice

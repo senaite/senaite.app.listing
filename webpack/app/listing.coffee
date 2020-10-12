@@ -62,6 +62,7 @@ class ListingController extends React.Component
     @on_api_error = @on_api_error.bind @
     @on_column_config_click = @on_column_config_click.bind @
     @on_select_checkbox_checked = @on_select_checkbox_checked.bind @
+    @on_reload = @on_reload.bind @
     @saveAjaxQueue = @saveAjaxQueue.bind @
     @saveEditableField = @saveEditableField.bind @
     @setColumnsOrder = @setColumnsOrder.bind @
@@ -84,6 +85,9 @@ class ListingController extends React.Component
     @pagesize = parseInt @root_el.dataset.pagesize
     @review_states = JSON.parse @root_el.dataset.review_states
     @show_column_toggles = JSON.parse @root_el.dataset.show_column_toggles
+
+    # bind event handlers
+    @root_el.addEventListener "reload", @on_reload
 
     # the API is responsible for async calls and knows about the endpoints
     @api = new ListingAPI
@@ -1248,6 +1252,11 @@ class ListingController extends React.Component
       message = _t("The server responded with the status #{response.status}: #{response.statusText}")
       @addMessage title, message, null, level="danger"
     return response
+
+  on_reload: (event) ->
+    console.debug "°°° ListingController::on_reload:event=", event
+    @fetch_folderitems()
+
 
   ###*
    * Renders the listing table
