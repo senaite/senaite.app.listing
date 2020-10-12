@@ -1,1 +1,1 @@
-<script tal:attributes="src string:${view/site_url}/++plone++senaite.app.listing.static/bundles/senaite.app.listing-08f3bef.js"></script>
+<script tal:attributes="src string:${view/site_url}/++plone++senaite.app.listing.static/bundles/senaite.app.listing-f6f19d5.js"></script>
