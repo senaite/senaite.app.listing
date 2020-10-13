@@ -1,4 +1,4 @@
-2.0.0rc2 (unreleased)
+2.0.0rc2 (2020-10-13)
 ---------------------
 
 - #38 Added event subscriber to reload the listing table
