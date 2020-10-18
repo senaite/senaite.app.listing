@@ -1,6 +1,7 @@
 2.0.0rc3 (unreleased)
 ---------------------
 
+- #40 Fix url auto-resolution when object's path starts with portal id
 - #39 Less intrusive table-overlay on loading
 
 
