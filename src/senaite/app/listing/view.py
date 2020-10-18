@@ -921,7 +921,7 @@ class ListingView(AjaxListingView):
         :param url_or_path: Absolute URL, physical path or relative path
         :returns: Absolute URL
         """
-        portal_path = api.get_path(self.portal)
+        portal_path = "{}/".format(api.get_path(self.portal))
         portal_url = api.get_url(self.portal)
 
         # remove the portal_url from the url_or_path
