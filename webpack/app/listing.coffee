@@ -85,7 +85,6 @@ class ListingController extends React.Component
     @pagesize = parseInt @root_el.dataset.pagesize
     @review_states = JSON.parse @root_el.dataset.review_states
     @show_column_toggles = JSON.parse @root_el.dataset.show_column_toggles
-    @tabindex_start = @root_el.dataset.tabindex_start
 
     # bind event handlers
     @root_el.addEventListener "reload", @on_reload
@@ -162,7 +161,6 @@ class ListingController extends React.Component
       show_ajax_save: no
       show_table_footer: no
       fetch_transitions_on_select: yes
-      tabindex_start: @tabindex_start
 
 
   ###*
