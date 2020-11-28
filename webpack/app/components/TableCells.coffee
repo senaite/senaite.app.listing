@@ -29,11 +29,10 @@ class TableCells extends React.Component
     item = @get_item()
     return item.uid
 
-  get_tab_index: (column_key, column_index) ->
-    row_index = @props.row_index
-    # we multiply the row index with 100 to avoid overlapping tab indexes
-    # (we assume there are never more than 100 columns)
-    return 100 * row_index + column_index
+  get_tab_index: (column_key, item) ->
+    tabindex = item.tabindex or {column_key: "active"}
+    tabindex = tabindex[column_key]
+    return if tabindex == "disabled" then -1 else 0
 
   get_colspan: (column_key, item) ->
     colspan = item.colspan or {}
@@ -76,6 +75,7 @@ class TableCells extends React.Component
           value={uid}
           disabled={@props.disabled}
           checked={@props.selected}
+          tabIndex="-1"
           onChange={@props.on_select_checkbox_checked}/>
 
         {remarks and
@@ -100,6 +100,7 @@ class TableCells extends React.Component
     column = @get_column column_key
     colspan = @get_colspan column_key, item
     rowspan = @get_rowspan column_key, item
+    tabindex = @get_tab_index column_key, item
     css = "contentcell #{column_key}"
 
     cell = (
@@ -113,7 +114,7 @@ class TableCells extends React.Component
         colspan={colspan}
         rowspan={rowspan}
         className={css}
-        tabIndex={@get_tab_index(column_key, column_index)}
+        tabIndex={tabindex}
         />)
     return cell
 
@@ -138,6 +139,7 @@ class TableCells extends React.Component
     column = @get_column column_key
     colspan = @get_colspan column_key, item
     rowspan = @get_rowspan column_key, item
+    tabindex = @get_tab_index column_key, item
     css = "contentcell #{column_key}"
 
     cell = (
@@ -152,7 +154,7 @@ class TableCells extends React.Component
         rowspan={rowspan}
         on_remarks_expand_click={@on_remarks_expand_click}
         className={css}
-        tabIndex={@get_tab_index(column_key, column_index)}
+        tabIndex={tabindex}
         />)
     return cell
 
