@@ -878,6 +878,7 @@ class ListingView(AjaxListingView):
                 "replace": {},
                 "choices": {},
                 "class": {},
+                "tabindex": {},
             }
             # Update with the base item info
             item.update(self.get_item_info(obj))

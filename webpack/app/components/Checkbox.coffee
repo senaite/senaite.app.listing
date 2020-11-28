@@ -55,6 +55,7 @@ class Checkbox extends React.Component
             defaultChecked={@props.defaultChecked}
             className={@props.className}
             onChange={@props.onChange or @on_change}
+            tabIndex={@props.tabIndex}
             {...@props.attrs}/>
       {@props.after and <span className="after_field" dangerouslySetInnerHTML={{__html: @props.after}}></span>}
     </span>
