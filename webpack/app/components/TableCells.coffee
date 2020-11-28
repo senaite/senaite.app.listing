@@ -75,7 +75,7 @@ class TableCells extends React.Component
           value={uid}
           disabled={@props.disabled}
           checked={@props.selected}
-          tabIndex={"-1"}
+          tabIndex="-1"
           onChange={@props.on_select_checkbox_checked}/>
 
         {remarks and

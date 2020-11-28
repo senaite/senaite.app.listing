@@ -25,7 +25,7 @@ class CalculatedField extends React.Component
              required={@props.required}
              className={@props.className}
              placeholder={@props.placeholder}
-             tabIndex={"-1"}
+             tabIndex="-1"
              {...@props.attrs}/>
       {@props.after and <span className="after_field" dangerouslySetInnerHTML={{__html: @props.after}}></span>}
     </span>
