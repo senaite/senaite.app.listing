@@ -125,6 +125,24 @@ class TableCell extends React.Component
 
     return value
 
+  ###
+  Returns the size for the folderitem or interim field
+  ###
+  get_size: ->
+    size = 5
+    item = @get_item()
+    if item.hasOwnProperty "size"
+      size = item.size
+
+    # Maybe is an interim field
+    if @is_interimfield()
+      column_key = @get_column_key()
+      interim = item[column_key]
+      if interim and interim.hasOwnProperty "size"
+        size = interim.size
+
+    return size
+
   ###*
    *  Returns the unit of the interimfield or of the folderitem
   ###
@@ -350,6 +368,7 @@ class TableCell extends React.Component
     selected = @is_selected()
     disabled = @is_disabled()
     required = @is_required()
+    size = @get_size()
     css_class = "form-control input-sm"
     if required then css_class += " required"
 
@@ -372,6 +391,7 @@ class TableCell extends React.Component
         update_editable_field={@props.update_editable_field}
         save_editable_field={@props.save_editable_field}
         tabIndex={@props.tabIndex}
+        size={size}
         {...props}
         />)
 
