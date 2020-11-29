@@ -111,6 +111,8 @@ class TableTransposedCell extends TableCell
       unit = interim.unit or ""
       # title / keyword
       title = interim.title or keyword
+      # field size
+      size = interim.size or 5
       # prepare the field properties
       props =
         key: keyword
@@ -119,6 +121,7 @@ class TableTransposedCell extends TableCell
         defaultValue: interim.value
         placeholder: title
         formatted_value: interim.formatted_value
+        size: size
         before: "<span>#{title}</span>"
         after: "<span>#{unit}</span>"
 
