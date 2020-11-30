@@ -83,7 +83,15 @@ class TableCell extends React.Component
 
   is_disabled: ->
     item = @get_item()
-    return item.disabled or no
+    disabled = item.disabled
+    if disabled in [yes, no]
+      return disabled
+
+    return no unless disabled?
+
+    # check if the field is listed in the item's disabled list
+    column_key = @get_column_key()
+    return column_key in disabled
 
   is_required: ->
     column_key = @get_column_key()

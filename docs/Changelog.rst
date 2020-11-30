@@ -1,6 +1,7 @@
 2.0.0rc3 (unreleased)
 ---------------------
 
+- #43 Allow "disabled" to be cell-specific
 - #42 Allow to set the input size through item
 - #41 Fix bad tabbing across elements from the listing
 - #40 Fix url auto-resolution when object's path starts with portal id
