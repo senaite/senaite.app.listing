@@ -88,6 +88,12 @@ class Pagination extends React.Component
   render: ->
     if @props.count >= @props.total
       <div id={@props.id} className={@props.className}>
+        {not @props.show_export and
+        <div className="text-right">
+          {@props.count} / {@props.total}
+        </div>
+        }
+        {@props.show_export and
         <div className="input-group input-group-sm float-right">
           <div className="input-group-prepend">
             <span className="input-group-text">{@props.count} / {@props.total}</span>
@@ -101,6 +107,7 @@ class Pagination extends React.Component
             </button>
           </span>
         </div>
+        }
       </div>
     else
       <div id={@props.id} className={@props.className}>
@@ -123,12 +130,14 @@ class Pagination extends React.Component
                     onClick={@on_show_more_click}>
               <span>{@props.show_more_button_title or "Show more"}</span>
             </button>
+            {@props.show_export and
             <button className="btn btn-outline-secondary"
                     ref={@export_button}
                     disabled={@props.count == 0}
                     onClick={@on_export_click}>
               <span>{@props.export_button_title or "Export"}</span>
             </button>
+            }
           </span>
         </div>
       </div>

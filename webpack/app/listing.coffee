@@ -162,6 +162,7 @@ class ListingController extends React.Component
       show_ajax_save: no
       show_table_footer: no
       fetch_transitions_on_select: yes
+      show_export: yes
 
 
   ###*
@@ -1453,6 +1454,7 @@ class ListingController extends React.Component
                 count={item_count}
                 pagesize={@state.pagesize}
                 export_button_title={_t("Export")}
+                show_export={@state.show_export}
                 onExport={@export} />
             </div>
           </div>
