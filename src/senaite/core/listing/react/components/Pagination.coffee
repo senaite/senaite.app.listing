@@ -15,10 +15,12 @@ class Pagination extends React.Component
     # bind event handler to local context
     @on_show_more_click = @on_show_more_click.bind @
     @on_pagesize_change = @on_pagesize_change.bind @
+    @on_export_click = @on_export_click.bind @
 
     # create element references
     @pagesize_input = React.createRef()
     @show_more_button = React.createRef()
+    @export_button = React.createRef()
 
   on_show_more_click: (event) ->
     ###
@@ -71,10 +73,34 @@ class Pagination extends React.Component
 
     return pagesize
 
+  on_export_click: (event) ->
+    ###
+     * Event handler when the "Show more" button was clicked
+    ###
+
+    # prevent form submission
+    event.preventDefault()
+    console.debug "Pagination::on_export_click"
+
+    # call the parent event handler
+    @props.onExport()
+
   render: ->
     if @props.count >= @props.total
       <div className="text-right">
-        {@props.count} / {@props.total}
+        <div className="input-group input-group-sm">
+          <span className="input-group-addon">
+            {@props.count} / {@props.total}
+          </span>
+          <span className="input-group-btn">
+            <button className="btn btn-default"
+                    ref={@export_button}
+                    disabled={@props.count == 0}
+                    onClick={@on_export_click}>
+              <span>{@props.export_button_title or "Export"}</span>
+            </button>
+          </span>
+        </div>
       </div>
     else
       <div id={@props.id} className={@props.className}>
@@ -95,6 +121,12 @@ class Pagination extends React.Component
                     ref={@show_more_button}
                     onClick={@on_show_more_click}>
               <span>{@props.show_more_button_title or "Show more"}</span>
+            </button>
+            <button className="btn btn-default"
+                    ref={@export_button}
+                    disabled={@props.count == 0}
+                    onClick={@on_export_click}>
+              <span>{@props.export_button_title or "Export"}</span>
             </button>
           </span>
         </div>
