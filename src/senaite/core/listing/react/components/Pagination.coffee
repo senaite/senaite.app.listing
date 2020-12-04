@@ -75,7 +75,7 @@ class Pagination extends React.Component
 
   on_export_click: (event) ->
     ###
-     * Event handler when the "Show more" button was clicked
+     * Event handler when the "Export" button was clicked
     ###
 
     # prevent form submission
