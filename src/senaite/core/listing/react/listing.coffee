@@ -61,6 +61,7 @@ class ListingController extends React.Component
     @saveEditableField = @saveEditableField.bind @
     @setColumnsOrder = @setColumnsOrder.bind @
     @showMore = @showMore.bind @
+    @export = @export.bind @
     @sortBy = @sortBy.bind @
     @toggleCategory = @toggleCategory.bind @
     @toggleColumn = @toggleColumn.bind @
@@ -613,6 +614,77 @@ class ListingController extends React.Component
           me.setState
             folderitems: new_folderitems
     return true
+
+  ###
+  Export the current displayed items to a CSV
+  ###
+  export: () ->
+    console.debug "ListingController::onExport"
+
+    # Column keys, sorted properly
+    columns_keys = @get_columns_order()
+
+    # Only interested in visible columns
+    columns_visibility = @get_columns_visibility()
+    columns_keys = (col for col in columns_keys when columns_visibility[col] is yes)
+
+    # Generate the header
+    columns = @get_columns()
+    header = (JSON.stringify columns[key]["title"] or key for key in columns_keys)
+
+    # Generate the list of rows
+    folderitems = @state.folderitems
+    rows = (@to_csv_row(item, columns_keys) for item in folderitems)
+
+    # Join all together
+    csv = header.join ","
+    csv = csv + "\n" + rows.join "\n"
+    @download_csv csv, "download.csv"
+
+  ###
+  Triggers the download of the csv
+  ###
+  download_csv: (csv, filename) ->
+    universalBOM = "\uFEFF"
+    csv_properties =
+      encoding: "UTF-8"
+      type: "text/csv;charset=UTF-8"
+
+    csv_file = new Blob [universalBOM, csv], csv_properties
+    down_link = document.createElement "a"
+    down_link.download = filename
+    down_link.href = window.URL.createObjectURL csv_file
+    down_link.display = "none"
+    document.body.appendChild down_link
+    down_link.click()
+
+  ###
+  Converts the item to a well-formed csv row
+  ###
+  to_csv_row: (item, columns) ->
+    cells = []
+    console.debug item
+    for column in columns
+
+      cell = item[column] or ""
+      if column == "Result"
+        # Give priority to formatted_result
+        cell = item.formatted_result or cell
+
+      else if cell.constructor == Object
+        # Handle interim fields gracefully
+        cell = cell.formatted_value or cell.value
+
+      if item.choices?
+        # Handle choices
+        choices = item.choices[column]
+        if choices?
+          choice = (c.ResultText for c in choices when c.ResultValue == cell)
+          cell = choice[0] or cell
+
+      cell = JSON.stringify cell
+      cells.push cell
+    cells.join(',')
 
   ###*
    * Submit form
@@ -1365,7 +1437,9 @@ class ListingController extends React.Component
                 onShowMore={@showMore}
                 show_more={@state.show_more}
                 count={item_count}
-                pagesize={@state.pagesize}/>
+                pagesize={@state.pagesize}
+                export_button_title={_("Export")}
+                onExport={@export}/>
             </div>
           </div>
         }

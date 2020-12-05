@@ -1,6 +1,7 @@
 1.5.3 (unreleased)
 ------------------
 
+- #44 Add "Export" button next to Pagination
 - #36 Fix unpredictable ZPublisher's AttributeError on MultiSelect submit
 - #31 Dismiss items if cleared by subscribers
 
