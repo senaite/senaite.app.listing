@@ -4,8 +4,8 @@
   "description": "",
   "main": "app/senaite.app.listing.coffee",
   "scripts": {
-    "build": "webpack --optimization-node-env production",
-    "watch": "webpack --optimization-node-env development --watch",
+    "build": "mode=production webpack",
+    "watch": "mode=development webpack --watch",
     "test": "jest"
   },
   "babel": {
