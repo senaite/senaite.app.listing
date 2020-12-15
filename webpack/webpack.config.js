@@ -15,6 +15,7 @@ let gitHash = childProcess.execSync(gitCmd).toString().substring(0, 7);
 const staticPath = path.resolve(__dirname, "../src/senaite/app/listing/static");
 
 const devMode = process.env.mode == "development";
+const prodMode = process.env.mode == "production";
 const mode = process.env.mode;
 console.log(`RUNNING WEBPACK IN '${mode}' MODE`);
 
@@ -51,7 +52,7 @@ module.exports = {
   },
   // https://webpack.js.org/configuration/optimization
   optimization: {
-    minimize: true,
+    minimize: prodMode,
     minimizer: [
       // https://webpack.js.org/plugins/terser-webpack-plugin/
       new TerserPlugin({
@@ -86,7 +87,12 @@ module.exports = {
     // https://github.com/webpack-contrib/webpack-bundle-analyzer
     // new BundleAnalyzerPlugin(),
     // https://github.com/johnagan/clean-webpack-plugin
-    new CleanWebpackPlugin(),
+    new CleanWebpackPlugin({
+      verbose: false,
+      // Workaround in `watch` mode when trying to remove the `resources.pt` in the parent folder:
+      // Error: clean-webpack-plugin: Cannot delete files/folders outside the current working directory.
+      cleanAfterEveryBuildPatterns: ["!../*"],
+    }),
     // https://webpack.js.org/plugins/html-webpack-plugin/
     new HtmlWebpackPlugin({
       inject: false,
