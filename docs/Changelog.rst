@@ -1,6 +1,7 @@
 2.0.0rc3 (unreleased)
 ---------------------
 
+- #47 Updated build system to Webpack 5
 - #45 Add "Export" button next to Pagination
 - #43 Allow "disabled" to be cell-specific
 - #42 Allow to set the input size through item
