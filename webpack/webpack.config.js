@@ -2,8 +2,10 @@ const path = require("path");
 const webpack = require("webpack");
 const childProcess = require("child_process");
 
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const TerserPlugin = require('terser-webpack-plugin');
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
@@ -26,7 +28,7 @@ module.exports = {
     listing: "./listing.coffee"
   },
   output: {
-    filename: devMode ? "senaite.app.[name].js" : `senaite.app.listing-${gitHash}.js`,
+    filename: devMode ? "senaite.app.[name].js" : `senaite.app.[name]-${gitHash}.js`,
     path: path.resolve(__dirname, "../src/senaite/app/listing/static/bundles"),
     publicPath: "++plone++senaite.app.listing.static/bundles"
   },
@@ -42,42 +44,25 @@ module.exports = {
         use: ["babel-loader"]
       }, {
         test: /\.css$/,
-        use: ["style-loader", "css-loader"]
+        use: [MiniCssExtractPlugin.loader, "css-loader"]
       }
-      {
-        // SCSS
-        test: /\.s[ac]ss$/i,
-        use: [
-          {
-            // https://webpack.js.org/plugins/mini-css-extract-plugin/
-            loader: MiniCssExtractPlugin.loader,
-            options: {
-              hmr: process.env.NODE_ENV === "development"
-            },
-          },
-          {
-            // https://webpack.js.org/loaders/css-loader/
-            loader: "css-loader"
-          },
-          {
-            // https://webpack.js.org/loaders/sass-loader/
-            loader: "sass-loader"
-          }
-        ]
-      },
     ]
   },
+  // https://webpack.js.org/configuration/optimization
   optimization: {
     minimize: true,
     minimizer: [
       // https://webpack.js.org/plugins/terser-webpack-plugin/
       new TerserPlugin({
-        extractComments: true,
         terserOptions: {
+          format: {
+            comments: false,
+          },
           compress: {
             drop_console: true,
-          },
-	      }
+            passes: 2,
+          }
+	      },
       }),
       // https://webpack.js.org/plugins/css-minimizer-webpack-plugin/
       new CssMinimizerPlugin({
@@ -93,6 +78,12 @@ module.exports = {
     ],
   },
   plugins: [
+    // https://webpack.js.org/plugins/mini-css-extract-plugin
+    new MiniCssExtractPlugin({
+      filename: devMode ? "senaite.app.[name].css" : `senaite.app.[name]-${gitHash}.css`,
+    }),
+    // https://github.com/webpack-contrib/webpack-bundle-analyzer
+    // new BundleAnalyzerPlugin(),
     // https://github.com/johnagan/clean-webpack-plugin
     new CleanWebpackPlugin(),
     // https://webpack.js.org/plugins/html-webpack-plugin/
@@ -112,9 +103,6 @@ module.exports = {
     react: "React",
     "react-dom": "ReactDOM",
     $: "jQuery",
-    jquery: "jQuery",
-    jsi18n: {
-      root: "_t"
-    }
+    jquery: "jQuery"
   }
 };
