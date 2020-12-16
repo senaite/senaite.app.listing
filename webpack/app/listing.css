@@ -53,11 +53,6 @@
 .ajax-contents-table tr.state-unassigned { border-left:2px solid #ddd; }
 .ajax-contents-table td.result.state-unassigned { border-left:2px solid transparent; }
 
-/* state attachment-due */
-.ajax-contents-table tr.state-attachment_due { border-left:2px solid #ffc107 !important; }
-.ajax-contents-table td.result.state-attachment_due { border-left:2px solid #ffc107 !important; }
-.ajax-contents-table tr.state-attachment_due:hover { background-color: rgba(255, 152, 0, 0.2); }
-
 /* state cancelled */
 .ajax-contents-table tr.state-cancelled { border-left:2px solid #000000 !important; }
 .ajax-contents-table tr.state-cancelled:hover { background-color: rgba(0, 0, 0, 0.1); }
