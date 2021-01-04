@@ -1,4 +1,4 @@
-2.0.0rc3 (unreleased)
+2.0.0rc3 (2021-01-04)
 ---------------------
 
 - #47 Updated build system to Webpack 5
