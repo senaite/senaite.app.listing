@@ -3,5 +3,6 @@ include *.rst
 include *.md
 recursive-include docs *
 recursive-include src/senaite *
+recursive-exclude src/senaite/app/listing/tests *
 recursive-exclude webpack *
 recursive-exclude src *.pyc
