@@ -21,8 +21,6 @@ console.log(`RUNNING WEBPACK IN '${mode}' MODE`);
 
 
 module.exports = {
-  // https://webpack.js.org/configuration/devtool
-  devtool: devMode ? "eval" : "source-map",
   // https://webpack.js.org/configuration/mode/#usage
   mode: mode,
   context: path.resolve(__dirname, "app"),
@@ -30,7 +28,8 @@ module.exports = {
     listing: "./listing.coffee"
   },
   output: {
-    filename: devMode ? "senaite.app.[name].js" : `senaite.app.[name]-${gitHash}.js`,
+    // filename: devMode ? "senaite.app.[name].js" : `senaite.app.[name]-${gitHash}.js`,
+    filename: "senaite.app.[name].js",
     path: path.resolve(__dirname, "../src/senaite/app/listing/static/bundles"),
     publicPath: "++plone++senaite.app.listing.static/bundles"
   },
@@ -56,7 +55,10 @@ module.exports = {
     minimizer: [
       // https://webpack.js.org/plugins/terser-webpack-plugin/
       new TerserPlugin({
+        exclude: /\/modules/,
         terserOptions: {
+          // https://github.com/webpack-contrib/terser-webpack-plugin#terseroptions
+          sourceMap: false, // Must be set to true if using source-maps in production
           format: {
             comments: false,
           },
@@ -68,6 +70,7 @@ module.exports = {
       }),
       // https://webpack.js.org/plugins/css-minimizer-webpack-plugin/
       new CssMinimizerPlugin({
+        exclude: /\/modules/,
         minimizerOptions: {
           preset: [
             "default",
@@ -82,7 +85,8 @@ module.exports = {
   plugins: [
     // https://webpack.js.org/plugins/mini-css-extract-plugin
     new MiniCssExtractPlugin({
-      filename: devMode ? "senaite.app.[name].css" : `senaite.app.[name]-${gitHash}.css`,
+      // filename: devMode ? "senaite.app.[name].css" : `senaite.app.[name]-${gitHash}.css`,
+      filename: "senaite.app.[name].css",
     }),
     // https://github.com/webpack-contrib/webpack-bundle-analyzer
     // new BundleAnalyzerPlugin(),
