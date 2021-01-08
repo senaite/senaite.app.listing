@@ -73,12 +73,22 @@ def add_column(listing, column_id, column_values, before=None, after=None,
         raise ValueError("Column '{}' does not exist".format(after))
 
     new_dict = collections.OrderedDict()
+    inserted = False
+
     for key, item in listing.columns.copy().items():
         if before == key:
             new_dict[column_id] = column_values
+            inserted = True
         new_dict[key] = item
         if after == key:
             new_dict[column_id] = column_values
+            inserted = True
+
+    # If not not an "after" or "before" position was given, insert
+    # the column at the end
+    if not inserted:
+        new_dict[column_id] = column_values
+
     listing.columns = new_dict
 
     if not review_states:
