@@ -38,6 +38,7 @@ from senaite.app.listing.decorators import returns_safe_json
 from senaite.app.listing.decorators import set_application_json_header
 from senaite.app.listing.decorators import translate
 from senaite.app.listing.interfaces import IAjaxListingView
+from senaite.core.decorators import readonly_transaction
 from zope import event
 from zope.interface import implements
 from zope.lifecycleevent import modified
@@ -501,6 +502,7 @@ class AjaxListingView(BrowserView):
         """
         raise NotImplementedError("Must be implemented by subclass")
 
+    @readonly_transaction
     @set_application_json_header
     @returns_safe_json
     @inject_runtime
