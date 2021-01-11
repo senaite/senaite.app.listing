@@ -1,7 +1,7 @@
 2.0.0 (unreleased)
 ------------------
 
-- no changes yet
+- #49 Set ajax folderitems to a readonly transaction
 
 
 2.0.0rc3 (2021-01-04)
