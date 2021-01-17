@@ -1170,10 +1170,10 @@ class ListingController extends React.Component
     # lookup child_uids from the folderitem
     if not child_uids
       by_uid = @group_by_uid()
-      folderitem = by_uid[parent_uid]
-      if not folderitem
-        throw "No folderitem could be found for UID #{uid}"
-      child_uids = folderitem.children or []
+      child_uids = []
+      if parent_uid of by_uid
+        folderitem = by_uid[parent_uid]
+        child_uids = folderitem.children or []
 
     # fetch the children from the server
     promise = @api.fetch_children

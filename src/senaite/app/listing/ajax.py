@@ -38,20 +38,22 @@ from senaite.app.listing.decorators import returns_safe_json
 from senaite.app.listing.decorators import set_application_json_header
 from senaite.app.listing.decorators import translate
 from senaite.app.listing.interfaces import IAjaxListingView
+from senaite.app.listing.interfaces import IChildFolderItems
 from senaite.core.decorators import readonly_transaction
 from zope import event
-from zope.interface import implements
+from zope.component import getMultiAdapter
+from zope.interface import implementer
 from zope.lifecycleevent import modified
 from zope.publisher.interfaces import IPublishTraverse
 
 
+@implementer(IAjaxListingView, IPublishTraverse)
 class AjaxListingView(BrowserView):
     """Mixin Class for the ajax enabled listing table
 
     The main purpose of this class is to provide a JSON API endpoint for the
     ReactJS based listing table.
     """
-    implements(IAjaxListingView, IPublishTraverse)
     contents_table_template = ViewPageTemplateFile(
         "templates/contents_table.pt")
     contents_table_template_view = ViewPageTemplateFile(
@@ -302,7 +304,7 @@ class AjaxListingView(BrowserView):
     def get_folderitems(self):
         """This method calls the folderitems method
         """
-        # workaround for `pagesize` handling in BikaListing
+        # workaround for `pagesize` handling
         pagesize = self.get_pagesize()
         self.pagesize = pagesize
 
@@ -497,11 +499,6 @@ class AjaxListingView(BrowserView):
 
         return updated_objects
 
-    def get_children_hook(self, parent_uid, child_uids=None):
-        """Custom hook to be implemented by subclass
-        """
-        raise NotImplementedError("Must be implemented by subclass")
-
     @readonly_transaction
     @set_application_json_header
     @returns_safe_json
@@ -621,22 +618,18 @@ class AjaxListingView(BrowserView):
         parent_uid = payload.get("parent_uid")
         child_uids = payload.get("child_uids", [])
 
-        try:
-            children = self.get_children_hook(
-                parent_uid, child_uids=child_uids)
-        except NotImplementedError:
-            # lookup by catalog search
-            self.contentFilter = {"UID": child_uids}
-            children = self.get_folderitems()
-            # ensure the children have a reference to the parent
-            for child in children:
-                child["parent"] = parent_uid
-
+        # get the child folderitems adapter
+        adapter = getMultiAdapter(
+            (self, self.context, self.request), IChildFolderItems)
+        # fetch the child folderitems from the adapter
+        children = adapter.get_children(parent_uid, child_uids=child_uids)
+        # ensure the children have a reference to the parent
+        for child in children:
+            child["parent"] = parent_uid
         # prepare the response object
         data = {
             "children": children
         }
-
         return data
 
     @set_application_json_header

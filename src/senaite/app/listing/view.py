@@ -823,6 +823,40 @@ class ListingView(AjaxListingView):
         value = self.resolve_value_for_column(column_id, item) or value
         return get_link(url, value=value)
 
+    def make_empty_folderitem(self, **kw):
+        """Create a new empty folderitem
+        """
+        item = {
+            "obj": None,
+            "id": "",
+            "uid": "",
+            "url": "",
+            "title": "",
+            "disabled": False,
+            "state_title": "",
+            "state_class": "",
+            "review_state": "",
+            "portal_type": "",
+            # a list of names of fields that may be edited on this item
+            "allow_edit": [],
+            # a dict where the column name works as a key and the value is
+            # the name of the field related with the column. It is used
+            # when the name given to the column and the content field it
+            # represents diverges. bika_listing_table_items.pt defines an
+            # attribute for each item, this attribute is named 'field' and
+            # the system fills it taking advantage of this dictionary or
+            # the name of the column if it isn't defined in the dict.
+            "field": {},
+            "before": {},
+            "after": {},
+            "replace": {},
+            "choices": {},
+            "class": {},
+            "tabindex": {},
+        }
+        item.update(**kw)
+        return item
+
     def folderitems(self):
         """This function returns an array of dictionaries where each dictionary
         contains the columns data to render the list.
@@ -861,27 +895,8 @@ class ListingView(AjaxListingView):
                 self.total -= 1  # correct the total number of results
                 continue
 
-            # Building the dictionary with basic items
-            item = {
-                # a list of names of fields that may be edited on this item
-                "allow_edit": [],
-                # a dict where the column name works as a key and the value is
-                # the name of the field related with the column. It is used
-                # when the name given to the column and the content field it
-                # represents diverges. bika_listing_table_items.pt defines an
-                # attribute for each item, this attribute is named 'field' and
-                # the system fills it taking advantage of this dictionary or
-                # the name of the column if it isn't defined in the dict.
-                "field": {},
-                "before": {},
-                "after": {},
-                "replace": {},
-                "choices": {},
-                "class": {},
-                "tabindex": {},
-            }
-            # Update with the base item info
-            item.update(self.get_item_info(obj))
+            # create a new folderitem
+            item = self.make_empty_folderitem(**self.get_item_info(obj))
 
             # Search for values for all columns in obj
             for key in self.columns.keys():

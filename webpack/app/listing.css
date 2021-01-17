@@ -122,20 +122,42 @@
 .ajax-contents-table tr.contentrow.collapsed td:first-child:before,
 .ajax-contents-table tr.contentrow.expanded td:first-child:before,
 .ajax-contents-table tr.contentrow.child td:first-child:before {
+    line-height: normal;
     padding-right: 0.5rem;
     vertical-align: bottom;
     color: #555;
     cursor: pointer;
     float: left;
 }
-.ajax-contents-table tr.contentrow.collapsed td:first-child:before {
+.ajax-contents-table tr.contentrow.child.level-1 td:first-child:before {
+    padding-left: 1em;
+}
+.ajax-contents-table tr.contentrow.child.level-2 td:first-child:before {
+    padding-left: 2em;
+}
+.ajax-contents-table tr.contentrow.child.level-3 td:first-child:before {
+    padding-left: 3em;
+}
+.ajax-contents-table tr.contentrow.child.level-4 td:first-child:before {
+    padding-left: 4em;
+}
+.ajax-contents-table tr.contentrow.child.level-5 td:first-child:before {
+    padding-left: 5em;
+}
+.ajax-contents-table tr.contentrow.collapsed td:first-child::before {
     content: "▶";
 }
-.ajax-contents-table tr.contentrow.expanded td:first-child:before {
+.ajax-contents-table tr.contentrow.expanded td:first-child::before {
     content: "▼";
 }
-.ajax-contents-table tr.contentrow.child td:first-child:before {
+.ajax-contents-table tr.contentrow.child td:first-child::before {
     content: "⋯";
+}
+.ajax-contents-table tr.contentrow.child.collapsed td:first-child::before {
+    content: "▶";
+}
+.ajax-contents-table tr.contentrow.child.expanded td:first-child::before {
+    content: "▼";
 }
 
 /* Remark Rows */

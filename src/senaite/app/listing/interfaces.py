@@ -42,3 +42,12 @@ class IListingViewAdapter(Interface):
     def folder_item(self, obj, item, index):
         """folder_item hook
         """
+
+
+class IChildFolderItems(Interface):
+    """Adapter to retrieve the child folderitems
+    """
+
+    def get_children(parent_uid, child_uids=None):
+        """Return the child folderitems
+        """
