@@ -1,6 +1,7 @@
 2.0.0 (unreleased)
 ------------------
 
+- #50 Support child folder items to any depth
 - #49 Set ajax folderitems to a readonly transaction
 
 
