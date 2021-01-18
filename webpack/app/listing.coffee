@@ -552,10 +552,14 @@ class ListingController extends React.Component
   ###
   filterByState: (review_state="default") ->
     console.debug "ListingController::filterByState: review_state=#{review_state}"
-    @set_state
+    state = @get_review_state_by_id review_state
+    # allow to update the listing config per state
+    state_listing_config = state.listing_config or {}
+    @set_state Object.assign
       review_state: review_state
       pagesize: @pagesize  # reset to the initial pagesize on state change
       limit_from: 0
+    , state_listing_config
     return true
 
   ###*
