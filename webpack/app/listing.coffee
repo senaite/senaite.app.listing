@@ -1110,7 +1110,7 @@ class ListingController extends React.Component
       #
       # This is needed e.g. in "Manage Analyses" when the users searches for
       # analyses to add. Keeping only the UID is there not sufficient, because
-      #      we would lose the Mix/Max values.
+      #      we would loose the Min/Max values.
       #
       # TODO refactor this logic
       # -------------------------------8<--------------------------------------
