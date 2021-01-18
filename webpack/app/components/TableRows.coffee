@@ -80,10 +80,9 @@ class TableRows extends React.Component
 
     # child/parent
     if @is_child_item item
-      level = item.child_level or 1
-      cls.push "child level-#{level}"
+      cls.push "child"
     else
-      cls.push "parent level-0"
+      cls.push "parent"
 
     # expandable
     if @has_item_children item

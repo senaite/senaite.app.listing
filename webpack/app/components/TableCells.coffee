@@ -67,9 +67,9 @@ class TableCells extends React.Component
     item = @get_item()
     uid = @get_uid()
     remarks = @props.remarks  # True if this row follows a remarks row
-
+    level = item.node_level or 0
     cell = (
-      <td key={uid}>
+      <td key={uid} className="level-#{level}">
         <Checkbox
           name={checkbox_name}
           value={uid}
