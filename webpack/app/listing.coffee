@@ -552,10 +552,14 @@ class ListingController extends React.Component
   ###
   filterByState: (review_state="default") ->
     console.debug "ListingController::filterByState: review_state=#{review_state}"
-    @set_state
+    state = @get_review_state_by_id review_state
+    # allow to update the listing config per state
+    state_listing_config = state.listing_config or {}
+    @set_state Object.assign
       review_state: review_state
       pagesize: @pagesize  # reset to the initial pagesize on state change
       limit_from: 0
+    , state_listing_config
     return true
 
   ###*
@@ -1110,7 +1114,7 @@ class ListingController extends React.Component
       #
       # This is needed e.g. in "Manage Analyses" when the users searches for
       # analyses to add. Keeping only the UID is there not sufficient, because
-      #      we would lose the Mix/Max values.
+      #      we would loose the Min/Max values.
       #
       # TODO refactor this logic
       # -------------------------------8<--------------------------------------
@@ -1170,10 +1174,10 @@ class ListingController extends React.Component
     # lookup child_uids from the folderitem
     if not child_uids
       by_uid = @group_by_uid()
-      folderitem = by_uid[parent_uid]
-      if not folderitem
-        throw "No folderitem could be found for UID #{uid}"
-      child_uids = folderitem.children or []
+      child_uids = []
+      if parent_uid of by_uid
+        folderitem = by_uid[parent_uid]
+        child_uids = folderitem.children or []
 
     # fetch the children from the server
     promise = @api.fetch_children
