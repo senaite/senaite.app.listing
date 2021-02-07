@@ -98,9 +98,6 @@ class ListingController extends React.Component
       form_id: @form_id
 
     # request parameters
-    @selected_uids = @api.get_url_parameter("selected_uids")
-    if @selected_uids
-      @selected_uids = @selected_uids.split(",")
     @filter = @api.get_url_parameter("filter")
     @pagesize = parseInt(@api.get_url_parameter("pagesize")) or @pagesize
     @sort_on = @api.get_url_parameter("sort_on")
@@ -147,7 +144,7 @@ class ListingController extends React.Component
       total: 0
       # UIDs of selected rows are stored in selected_uids.
       # These are sent when a transition action is clicked.
-      selected_uids: @selected_uids or []
+      selected_uids: []
       # The possible transition buttons
       transitions: []
       # The available catalog indexes for sorting
@@ -1333,17 +1330,14 @@ class ListingController extends React.Component
   update_location_hash: (options) ->
     options ?= {}
     params = []
+    allowed = ["filter", "pagesize", "review_state", "sort_on", "sort_order"]
     for key, value of options
+      if allowed.indexOf(key) == -1
+        continue
       name = @api.to_form_name key
       params = params.concat "#{name}=#{value}"
     hash = params.join("&")
-    if not hash
-      return
-    if history.pushState
-      # state, title, url
-      history.pushState {options: options}, null, "##{hash}"
-    else
-      location.hash = hash
+    location.hash = "#?#{hash}"
 
   ###*
    * EVENT HANDLERS
