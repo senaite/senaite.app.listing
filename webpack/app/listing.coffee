@@ -74,14 +74,10 @@ class ListingController extends React.Component
     @toggleRemarks = @toggleRemarks.bind @
     @toggleRow = @toggleRow.bind @
     @updateEditableField = @updateEditableField.bind @
-    @on_hash_change = @on_hash_change.bind @
+    @on_popstate = @on_popstate.bind @
 
     # root element
     @root_el = @props.root_el
-
-    # variable is set by fetch_folderitems to handle URL hash change
-    # when the browser back button is clicked
-    @fetched_url = ""
 
     # get initial configuration data from the HTML attribute
     @api_url = @root_el.dataset.api_url
@@ -101,6 +97,16 @@ class ListingController extends React.Component
       on_api_error: @on_api_error
       form_id: @form_id
 
+    # request parameters
+    @selected_uids = @api.get_url_parameter("selected_uids")
+    if @selected_uids
+      @selected_uids = @selected_uids.split(",")
+    @filter = @api.get_url_parameter("filter")
+    @pagesize = parseInt(@api.get_url_parameter("pagesize")) or @pagesize
+    @sort_on = @api.get_url_parameter("sort_on")
+    @sort_order = @api.get_url_parameter("sort_order")
+    @review_state = @api.get_url_parameter("review_state") or "default"
+
     @state =
       # alert messages
       messages: []
@@ -110,11 +116,11 @@ class ListingController extends React.Component
       show_column_config: no
       # filter, pagesize, sort_on, sort_order and review_state are initially set
       # from the request to allow bookmarks to specific searches
-      filter: @api.get_url_parameter("filter")
-      pagesize: parseInt(@api.get_url_parameter("pagesize")) or @pagesize
-      sort_on: @api.get_url_parameter("sort_on")
-      sort_order: @api.get_url_parameter("sort_order")
-      review_state: @api.get_url_parameter("review_state") or "default"
+      filter: @filter
+      pagesize: @pagesize
+      sort_on: @sort_on
+      sort_order: @sort_order
+      review_state: @review_state
       # The query string is computed on the server and allows to bookmark listings
       query_string: ""
       # The API URL to call
@@ -141,7 +147,7 @@ class ListingController extends React.Component
       total: 0
       # UIDs of selected rows are stored in selected_uids.
       # These are sent when a transition action is clicked.
-      selected_uids: []
+      selected_uids: @selected_uids or []
       # The possible transition buttons
       transitions: []
       # The available catalog indexes for sorting
@@ -238,14 +244,14 @@ class ListingController extends React.Component
    * Fetches the initial folderitems
   ###
   componentDidMount: ->
-    window.addEventListener("hashchange", @on_hash_change, false);
+    window.addEventListener("popstate", @on_popstate, false);
     @fetch_folderitems()
 
   ###*
    * ReactJS event handler when the component unmounts
   ###
   componentWillUnmount: ->
-    window.removeEventListener("hashchange", @on_hash_change, false);
+    window.removeEventListener("popstate", @on_popstate, false);
 
   ###*
    * componentDidUpdate(prevProps, prevState, snapshot)
@@ -573,8 +579,6 @@ class ListingController extends React.Component
       pagesize: @pagesize  # reset to the initial pagesize on state change
       limit_from: 0
     , state_listing_config
-    # remember the parameter in the location hash
-    @api.set_hash_parameter("review_state", review_state)
     return true
 
   ###*
@@ -591,8 +595,6 @@ class ListingController extends React.Component
       filter: filter
       pagesize: @pagesize  # reset to the initial pagesize on search
       limit_from: 0
-    # remember the parameter in the location hash
-    @api.set_hash_parameter("filter", filter)
     return true
 
   ###*
@@ -611,10 +613,6 @@ class ListingController extends React.Component
       sort_order: sort_order
       pagesize: @get_item_count() # keep the current number of items on sort
       limit_from: 0
-
-    # remember the parameter in the hash
-    @api.set_hash_parameter("sort_on", sort_on)
-    @api.set_hash_parameter("sort_order", sort_order)
     return true
 
   ###*
@@ -648,8 +646,6 @@ class ListingController extends React.Component
           new_folderitems = folderitems.concat data.folderitems
           me.setState
             folderitems: new_folderitems
-          # remember the parameter in the location hash
-          me.api.set_hash_parameter("pagesize", new_folderitems.length)
     return true
 
   ###
@@ -1103,8 +1099,14 @@ class ListingController extends React.Component
     # turn loader on
     @toggle_loader on
 
+    # get the request options
+    options = @getRequestOptions()
+
+    # update the location hash
+    @update_location_hash options
+
     # fetch the transitions from the server
-    promise = @api.fetch_transitions @getRequestOptions()
+    promise = @api.fetch_transitions options
 
     me = this
     promise.then (data) ->
@@ -1125,11 +1127,14 @@ class ListingController extends React.Component
     # turn loader on
     @toggle_loader on
 
-    # remember the fetched URL
-    @fetched_url = location.href
+    # get the request options
+    options = @getRequestOptions()
+
+    # update the location hash
+    @update_location_hash options
 
     # fetch the folderitems from the server
-    promise = @api.fetch_folderitems @getRequestOptions()
+    promise = @api.fetch_folderitems options
 
     me = this
     promise.then (data) ->
@@ -1322,6 +1327,25 @@ class ListingController extends React.Component
       folderitems: new_folderitems
 
   ###*
+   * Update the location hash with the given object
+   *
+  ###
+  update_location_hash: (options) ->
+    options ?= {}
+    params = []
+    for key, value of options
+      name = @api.to_form_name key
+      params = params.concat "#{name}=#{value}"
+    hash = params.join("&")
+    if not hash
+      return
+    if history.pushState
+      # state, title, url
+      history.pushState {options: options}, null, "##{hash}"
+    else
+      location.hash = hash
+
+  ###*
    * EVENT HANDLERS
    *
    * N.B. All `event` objects are ReactJS events
@@ -1360,12 +1384,23 @@ class ListingController extends React.Component
     console.debug "°°° ListingController::on_reload:event=", event
     @fetch_folderitems()
 
-  on_hash_change: (event) ->
-    console.debug "°°° ListingController::on_hash_change:event=", event
-    # full page reload when the back button of the browser was used
-    # (otherwise the selected buttons/filters are not correctly set)
-    if event.newURL != @fetched_url
-      location.reload()
+  on_popstate: (event) ->
+    console.debug "°°° ListingController::on_popstate:event=", event
+    params = @api.parse_hash location.hash
+    for idx, param of params
+      [key, value] = param.split("=")
+      # skip parameters that does not belong to our listing
+      if not key.startsWith @form_id
+        continue
+      name = key.replace("#{@form_id}_", "")
+      if name not of @state
+        continue
+      if value != @state[name]
+        @state[name] = value
+        reload = yes
+    if reload
+      @fetch_folderitems()
+
 
   ###*
    * Renders the listing table

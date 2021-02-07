@@ -50,22 +50,17 @@ class ListingAPI
     return decodeURIComponent(results[1].replace(/\+/g, ' '))
 
   ###*
-   * Set a new parameter to the location hash
+   * parse the hash location from a given string
    *
-   * @param name {string} The name of the parameter
-   * @param value {string} The value of the parameter
+   * @param s {string} string
   ###
-  set_hash_parameter: (name, value) ->
-    name = @to_form_name name
-    hash = location.hash.replace("#", "").replace("?", "")
-    params = []
-    if hash.length > 0
-      params = hash.split("&")
-    params = params.filter (item) ->
-      not item.startsWith name
-    params = params.concat "#{name}=#{value}"
-    new_hash = params.join("&")
-    location.hash = "?#{new_hash}"
+  parse_hash: (loc) ->
+    index = loc.indexOf("#")
+    if index == -1
+      return []
+    pairs = []
+    hash = loc.substring(index).replace("#", "").replace("?", "")
+    return hash.split("&")
 
   get_json: (endpoint, options) ->
     ###
