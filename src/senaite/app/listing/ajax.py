@@ -534,6 +534,7 @@ class AjaxListingView(BrowserView):
         # Process selected UIDs and their allowed transitions
         uids_to_keep = payload.get("selected_uids")
         selected_uids = self.get_selected_uids(folderitems, uids_to_keep)
+        selected_uids = filter(api.is_uid, selected_uids)
         transitions = self.get_allowed_transitions_for(selected_uids)
 
         # get the view config

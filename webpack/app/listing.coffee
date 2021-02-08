@@ -74,6 +74,7 @@ class ListingController extends React.Component
     @toggleRemarks = @toggleRemarks.bind @
     @toggleRow = @toggleRow.bind @
     @updateEditableField = @updateEditableField.bind @
+    @on_popstate = @on_popstate.bind @
 
     # root element
     @root_el = @props.root_el
@@ -94,6 +95,14 @@ class ListingController extends React.Component
     @api = new ListingAPI
       api_url: @api_url
       on_api_error: @on_api_error
+      form_id: @form_id
+
+    # request parameters
+    @filter = @api.get_url_parameter("filter")
+    @pagesize = parseInt(@api.get_url_parameter("pagesize")) or @pagesize
+    @sort_on = @api.get_url_parameter("sort_on")
+    @sort_order = @api.get_url_parameter("sort_order")
+    @review_state = @api.get_url_parameter("review_state") or "default"
 
     @state =
       # alert messages
@@ -104,11 +113,11 @@ class ListingController extends React.Component
       show_column_config: no
       # filter, pagesize, sort_on, sort_order and review_state are initially set
       # from the request to allow bookmarks to specific searches
-      filter: @api.get_url_parameter("#{@form_id}_filter")
-      pagesize: parseInt(@api.get_url_parameter("#{@form_id}_pagesize")) or @pagesize
-      sort_on: @api.get_url_parameter("#{@form_id}_sort_on")
-      sort_order: @api.get_url_parameter("#{@form_id}_sort_order")
-      review_state: @api.get_url_parameter("#{@form_id}_review_state") or "default"
+      filter: @filter
+      pagesize: @pagesize
+      sort_on: @sort_on
+      sort_order: @sort_order
+      review_state: @review_state
       # The query string is computed on the server and allows to bookmark listings
       query_string: ""
       # The API URL to call
@@ -232,7 +241,14 @@ class ListingController extends React.Component
    * Fetches the initial folderitems
   ###
   componentDidMount: ->
+    window.addEventListener("popstate", @on_popstate, false);
     @fetch_folderitems()
+
+  ###*
+   * ReactJS event handler when the component unmounts
+  ###
+  componentWillUnmount: ->
+    window.removeEventListener("popstate", @on_popstate, false);
 
   ###*
    * componentDidUpdate(prevProps, prevState, snapshot)
@@ -1080,8 +1096,14 @@ class ListingController extends React.Component
     # turn loader on
     @toggle_loader on
 
+    # get the request options
+    options = @getRequestOptions()
+
+    # update the location hash
+    @update_location_hash options
+
     # fetch the transitions from the server
-    promise = @api.fetch_transitions @getRequestOptions()
+    promise = @api.fetch_transitions options
 
     me = this
     promise.then (data) ->
@@ -1102,8 +1124,14 @@ class ListingController extends React.Component
     # turn loader on
     @toggle_loader on
 
+    # get the request options
+    options = @getRequestOptions()
+
+    # update the location hash
+    @update_location_hash options
+
     # fetch the folderitems from the server
-    promise = @api.fetch_folderitems @getRequestOptions()
+    promise = @api.fetch_folderitems options
 
     me = this
     promise.then (data) ->
@@ -1296,6 +1324,22 @@ class ListingController extends React.Component
       folderitems: new_folderitems
 
   ###*
+   * Update the location hash with the given object
+   *
+  ###
+  update_location_hash: (options) ->
+    options ?= {}
+    params = []
+    allowed = ["filter", "pagesize", "review_state", "sort_on", "sort_order"]
+    for key, value of options
+      if allowed.indexOf(key) == -1
+        continue
+      name = @api.to_form_name key
+      params = params.concat "#{name}=#{value}"
+    hash = params.join("&")
+    location.hash = "#?#{hash}"
+
+  ###*
    * EVENT HANDLERS
    *
    * N.B. All `event` objects are ReactJS events
@@ -1333,6 +1377,23 @@ class ListingController extends React.Component
   on_reload: (event) ->
     console.debug "°°° ListingController::on_reload:event=", event
     @fetch_folderitems()
+
+  on_popstate: (event) ->
+    console.debug "°°° ListingController::on_popstate:event=", event
+    params = @api.parse_hash location.hash
+    for idx, param of params
+      [key, value] = param.split("=")
+      # skip parameters that does not belong to our listing
+      if not key.startsWith @form_id
+        continue
+      name = key.replace("#{@form_id}_", "")
+      if name not of @state
+        continue
+      if value != @state[name]
+        @state[name] = value
+        reload = yes
+    if reload
+      @fetch_folderitems()
 
 
   ###*

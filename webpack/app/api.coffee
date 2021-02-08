@@ -7,7 +7,9 @@ class ListingAPI
   constructor: (props) ->
     console.debug "ListingAPI::constructor"
     @api_url = props.api_url
+    @form_id = props.form_id or "list"
     @on_api_error = props.on_api_error or (response) ->
+      return
     return @
 
   get_api_url: (endpoint) ->
@@ -18,16 +20,47 @@ class ListingAPI
     ###
     return "#{@api_url}/#{endpoint}#{location.search}"
 
+  ###*
+   * Prefix the name with the form_id
+   *
+   * @param name {string} The name to be prefixed
+   * @returns {string}
+  ###
+  to_form_name: (name) ->
+    if name.startsWith(@form_id)
+      return name
+    return "#{@form_id}_#{name}"
+
+  ###*
+   * Get the name parameter either from the search or hash location
+   *
+   * @param name {string} The parameter name
+   * @returns {string}
+  ###
   get_url_parameter: (name) ->
     ###
      * Parse a request parameter by name
     ###
+    name = @to_form_name name
     name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]')
     regex = new RegExp('[\\?&]' + name + '=([^&#]*)')
-    results = regex.exec(location.search)
+    results = regex.exec(location.search) or regex.exec(location.hash)
     if results == null
       return ""
     return decodeURIComponent(results[1].replace(/\+/g, ' '))
+
+  ###*
+   * parse the hash location from a given string
+   *
+   * @param s {string} string
+  ###
+  parse_hash: (loc) ->
+    index = loc.indexOf("#")
+    if index == -1
+      return []
+    pairs = []
+    hash = loc.substring(index).replace("#", "").replace("?", "")
+    return hash.split("&")
 
   get_json: (endpoint, options) ->
     ###
