@@ -1389,10 +1389,14 @@ class ListingController extends React.Component
       name = key.replace("#{@form_id}_", "")
       if name not of @state
         continue
-      if value != @state[name]
+      # workaround for string/number comparison
+      if name == "pagesize"
+        value = parseInt(value)
+      if value isnt @state[name]
         @state[name] = value
         reload = yes
     if reload
+      console.debug "+++ RELOAD after popstate +++"
       @fetch_folderitems()
 
 
