@@ -25,13 +25,9 @@ import urllib
 import six
 
 from bika.lims import api
-from bika.lims import logger
 from bika.lims.browser import BrowserView
-from bika.lims.interfaces import IReferenceAnalysis
-from bika.lims.interfaces import IRoutineAnalysis
 from plone.memoize import view
 from Products.Archetypes.event import ObjectEditedEvent
-from Products.Archetypes.utils import mapply
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from senaite.app.listing.decorators import inject_runtime
 from senaite.app.listing.decorators import returns_safe_json
@@ -40,8 +36,10 @@ from senaite.app.listing.decorators import translate
 from senaite.app.listing.interfaces import IAjaxListingView
 from senaite.app.listing.interfaces import IChildFolderItems
 from senaite.core.decorators import readonly_transaction
+from senaite.core.interfaces import IDataManager
 from zope import event
 from zope.component import getMultiAdapter
+from zope.component import queryAdapter
 from zope.interface import implementer
 from zope.lifecycleevent import modified
 from zope.publisher.interfaces import IPublishTraverse
