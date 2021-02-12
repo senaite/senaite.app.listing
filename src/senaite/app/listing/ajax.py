@@ -377,117 +377,19 @@ class AjaxListingView(BrowserView):
                          self.columns.items())
         return map(lambda item: item[0], columns)
 
-    def recalculate_results(self, obj, recalculated=None):
-        """Recalculate the result of the object and its dependents
-
-        :returns: List of recalculated objects
-        """
-
-        if recalculated is None:
-            recalculated = set()
-
-        # avoid double recalculation in recursion
-        if obj in recalculated:
-            return set()
-
-        # recalculate own result
-        if obj.calculateResult(override=True):
-            # append object to the list of recalculated results
-            recalculated.add(obj)
-        # recalculate dependent analyses
-        for dep in obj.getDependents():
-            if dep.calculateResult(override=True):
-                # TODO the `calculateResult` method should return False here!
-                if dep.getResult() in ["NA", "0/0"]:
-                    continue
-                recalculated.add(dep)
-            # recalculate dependents of dependents
-            for ddep in dep.getDependents():
-                recalculated.update(
-                    self.recalculate_results(
-                        ddep, recalculated=recalculated))
-        return recalculated
-
-    def is_analysis(self, obj):
-        """Check if the object is an analysis
-        """
-        if IRoutineAnalysis.providedBy(obj):
-            return True
-        if IReferenceAnalysis.providedBy(obj):
-            return True
-        return False
-
-    def lookup_schema_field(self, obj, fieldname):
-        """Lookup  a schema field by name
-
-        :returns: Schema field or None
-        """
-        # Lookup the field by the given name
-        field = obj.getField(fieldname)
-        if field is None:
-            # strip "get" from the fieldname
-            if fieldname.startswith("get"):
-                fieldname = fieldname.lstrip("get")
-                field = obj.get(fieldname)
-        return field
-
-    def is_field_writeable(self, obj, field):
-        """Checks if the field is writeable
-        """
-        if isinstance(field, six.string_types):
-            field = obj.getField(field)
-        return field.writeable(obj)
-
     def set_field(self, obj, name, value):
         """Set the value
 
         :returns: List of updated/changed objects
         """
 
-        # set of updated objects
-        updated_objects = set()
+        # query the datamanager
+        datamanager = queryAdapter(obj, interface=IDataManager)
+        if datamanager is None:
+            return []
 
-        # lookup the schema field
-        field = self.lookup_schema_field(obj, name)
-
-        # field exists, set it with the value
-        if field:
-
-            # Check the permission of the field
-            if not self.is_field_writeable(obj, field):
-                logger.error("Field '{}' not writeable!".format(name))
-                return []
-
-            # get the field mutator (works only for AT content types)
-            if hasattr(field, "getMutator"):
-                mutator = field.getMutator(obj)
-                mapply(mutator, value)
-            else:
-                # Set the value on the field directly
-                field.set(obj, value)
-
-            updated_objects.add(obj)
-
-        # check if the object is an analysis and has an interim
-        if self.is_analysis(obj):
-
-            interims = obj.getInterimFields()
-            interim_keys = map(lambda i: i.get("keyword"), interims)
-            interims_writable = self.is_field_writeable(obj, "InterimFields")
-            if name in interim_keys and interims_writable:
-                for interim in interims:
-                    if interim.get("keyword") == name:
-                        interim["value"] = value
-                # set the new interim fields
-                obj.setInterimFields(interims)
-
-            # recalculate dependent results for result and interim fields
-            if name == "Result" or name in interim_keys:
-                updated_objects.add(obj)
-                updated_objects.update(self.recalculate_results(obj))
-
-        # unify the list of updated objects
-        updated_objects = list(updated_objects)
+        # set the value with the datamanager
+        updated_objects = datamanager.set(name, value)
 
         # reindex the objects
         map(lambda obj: obj.reindexObject(), updated_objects)
