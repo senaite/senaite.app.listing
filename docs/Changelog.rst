@@ -2,6 +2,7 @@
 ------------------
 
 - #54 Improve fetch performance by marking readonly transactions explicitly
+- #53 Integrate data managers to set field values
 - #51 Browser history aware listings
 - #50 Support child folder items to any depth
 - #49 Set ajax folderitems to a readonly transaction
