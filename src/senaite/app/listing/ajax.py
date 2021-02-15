@@ -455,6 +455,7 @@ class AjaxListingView(BrowserView):
 
         return data
 
+    @readonly_transaction
     @set_application_json_header
     @returns_safe_json
     @inject_runtime
@@ -501,6 +502,7 @@ class AjaxListingView(BrowserView):
 
         return data
 
+    @readonly_transaction
     @set_application_json_header
     @returns_safe_json
     @inject_runtime
@@ -533,6 +535,7 @@ class AjaxListingView(BrowserView):
         }
         return data
 
+    @readonly_transaction
     @set_application_json_header
     @returns_safe_json
     @inject_runtime
