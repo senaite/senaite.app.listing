@@ -9,6 +9,7 @@ import CalculatedField from "./CalculatedField.coffee"
 import ReadonlyField from "./ReadonlyField.coffee"
 import Select from "./Select.coffee"
 import StringField from "./StringField.coffee"
+import DateTime from "./DateTime.coffee"
 
 
 class TableCell extends React.Component
@@ -25,6 +26,7 @@ class TableCell extends React.Component
       "multichoice": ":list"
       "numeric": ":records"
       "string": ":records"
+      "datetime": ":records"
       "readonly": ""
       "default": ":records"
     }
@@ -254,7 +256,7 @@ class TableCell extends React.Component
     if @is_interimfield()
       return "interim"
 
-    # check if the field is a string field
+    # check if the field is a string or datetime field
     if resultfield
       return item.result_type or "numeric"
 
@@ -442,6 +444,54 @@ class TableCell extends React.Component
         disabled={disabled}
         required={required}
         className={css_class}
+        after={unit}
+        update_editable_field={@props.update_editable_field}
+        save_editable_field={@props.save_editable_field}
+        tabIndex={@props.tabIndex}
+        {...props}
+        />)
+
+  ###*
+   * Creates a datetime field component
+   * @param props {object} properties passed to the component
+   * @returns DateTime component
+  ###
+  create_datetime_field: ({props}={}) ->
+    column_key = @get_column_key()
+    item = @get_item()
+    props ?= {}
+
+    name = @get_name()
+    value = @get_value()
+    formatted_value = @get_formatted_value()
+    unit = @get_formatted_unit()
+    uid = @get_uid()
+    converter = @ZPUBLISHER_CONVERTER["string"]
+    fieldname = name + converter
+    title = @props.column.title or column_key
+    selected = @is_selected()
+    disabled = @is_disabled()
+    required = @is_required()
+    css_class = "form-control input-sm"
+    if required then css_class += " required"
+    result_type = "date"
+
+    return (
+      <DateTime
+        key={name}
+        uid={uid}
+        item={item}
+        name={fieldname}
+        defaultValue={value}
+        column_key={column_key}
+        title={title}
+        formatted_value={formatted_value}
+        placeholder={title}
+        selected={selected}
+        disabled={disabled}
+        required={required}
+        className={css_class}
+        results_type={result_type}
         after={unit}
         update_editable_field={@props.update_editable_field}
         save_editable_field={@props.save_editable_field}
@@ -668,6 +718,8 @@ class TableCell extends React.Component
       field = field.concat @create_numeric_field()
     else if type == "string"
       field = field.concat @create_string_field()
+    else if type == "datetime"
+      field = field.concat @create_datetime_field()
 
     return field
 
