@@ -1,6 +1,7 @@
 2.0.0 (unreleased)
 ------------------
 
+- #57 Set CSS selector only on select column
 - #54 Improve fetch performance by marking readonly transactions explicitly
 - #53 Integrate data managers to set field values
 - #51 Browser history aware listings
