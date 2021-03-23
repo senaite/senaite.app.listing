@@ -91,7 +91,7 @@ class TableHeaderRow extends React.Component
       show_select_all_checkbox = @props.show_select_all_checkbox
 
       cells.push(
-        <th key="select_all">
+        <th className="select-column" key="select_all">
           {show_select_all_checkbox and
             <Checkbox
               name={checkbox_name}
