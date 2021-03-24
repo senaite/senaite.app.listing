@@ -13,6 +13,7 @@ import FilterBar from "./components/FilterBar.coffee"
 import ListingAPI from "./api.coffee"
 import Loader from "./components/Loader.coffee"
 import Messages from "./components/Messages.coffee"
+import Modal from "./components/Modal.coffee"
 import Pagination from "./components/Pagination.coffee"
 import SearchBox from "./components/SearchBox.coffee"
 import Table from "./components/Table.coffee"
@@ -716,6 +717,47 @@ class ListingController extends React.Component
       cells.push cell
     cells.join(',')
 
+
+  ###*
+   * Load modal popup
+   *
+   * This method renders a modal window with the HTML loaded from the URL
+   *
+   * @param url {string} The form action URL
+   * @param event {object} ReactJS event object
+  ###
+  loadModal: (url) ->
+    el = $("#modal_#{@form_id}")
+
+    url = new URL(url)
+    url.searchParams.append("uids", this.state.selected_uids)
+
+    on_submit = (event) =>
+      event.preventDefault()
+      form = event.target
+      if form.action
+        fetch form.action,
+          method: "POST",
+          body: new FormData(form)
+        .then (response) =>
+          if not response.ok
+            return Promise.reject(response)
+          @fetch_folderitems()
+          el.modal("hide")
+        .catch (error) =>
+          console.error(error)
+          el.modal("hide")
+
+    request = new Request(url)
+    fetch(request)
+    .then (response) ->
+      return response.text()
+      .then (text) ->
+        el.empty()
+        el.append(text)
+        el.one "submit", on_submit
+        el.modal("show")
+
   ###*
    * Submit form
    *
@@ -726,6 +768,10 @@ class ListingController extends React.Component
    * @returns form submission
   ###
   doAction: (id, url) ->
+
+    # load action in modal popup if id starts with `modal`
+    if id.startsWith("modal")
+      return @loadModal url
 
     # handle clear button separate
     if id == "clear_selection"
@@ -1417,6 +1463,7 @@ class ListingController extends React.Component
 
     return (
       <div className="listing-container">
+        <Modal className="modal fade" id="modal_#{@form_id}" />
         <Messages on_dismiss_message={@dismissMessage} id="messages" className="messages" messages={@state.messages} />
         {@state.loading and <div id="table-overlay"/>}
         {not render_toolbar_top and @state.loading and <Loader loading={@state.loading} />}

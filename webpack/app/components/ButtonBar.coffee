@@ -154,7 +154,7 @@ class ButtonBar extends React.Component
 
       # Add bootstrap-confirmation data toggle
       # http://bootstrap-confirmation.js.org/#options
-      attrs = {}
+      attrs = transition.attrs or {}
       if id in @confirm_transitions or id in review_state_confirm_transitions
         attrs["data-toggle"] = "confirmation"
         attrs["data-title"] = "#{title}?"
