@@ -769,9 +769,10 @@ class ListingController extends React.Component
   ###
   doAction: (id, url) ->
 
-    # load action in modal popup if id starts with `modal`
-    if id.startsWith("modal")
-      return @loadModal url
+    # load action in modal popup if id starts/ends with `modal`
+    if id.startsWith("modal") or id.endsWith("modal_transition")
+      @loadModal url
+      return
 
     # handle clear button separate
     if id == "clear_selection"
