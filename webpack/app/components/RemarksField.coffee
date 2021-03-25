@@ -15,6 +15,14 @@ class RemarksField extends React.Component
     # Bind events to local context
     @on_blur = @on_blur.bind @
     @on_change = @on_change.bind @
+    @state =
+      value: props.value
+
+  componentDidUpdate: (prevProps) ->
+    console.info "RemarksField::componentDidUpdate"
+    if @props.value isnt prevProps.value
+      @setState
+        value: @props.value
 
   ###*
    * Event handler when the mouse left the textarea
@@ -46,6 +54,8 @@ class RemarksField extends React.Component
     name = el.getAttribute("column_key") or el.name
     # Extract the value of the textarea
     value = el.value
+    @setState
+      value: value
     console.debug "RemarksField:on_change: value=#{value}"
 
     # Call the *update* field handler with the UID, name, value
@@ -99,12 +109,11 @@ class RemarksField extends React.Component
     uid = @props.uid
     column_key = @props.column_key
     name = "#{column_key}.#{uid}:records"
-    value = @props.value
 
     if not @can_edit()
       field = (
         <span className="remarksfield"
-              dangerouslySetInnerHTML={{__html: value}}/>)
+              dangerouslySetInnerHTML={{__html: @state.value}}/>)
     else
       field = (
         <textarea
@@ -116,7 +125,7 @@ class RemarksField extends React.Component
           name={name}
           onBlur={@props.onBlur or @on_blur}
           onChange={@props.onChange or @on_change}
-          defaultValue={value}
+          value={@state.value}
           tabIndex={@props.tabIndex}
           {...@props.attrs}>
         </textarea>)
