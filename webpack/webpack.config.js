@@ -66,7 +66,7 @@ module.exports = {
             drop_console: true,
             passes: 2,
           }
-	      },
+	    },
       }),
       // https://webpack.js.org/plugins/css-minimizer-webpack-plugin/
       new CssMinimizerPlugin({
