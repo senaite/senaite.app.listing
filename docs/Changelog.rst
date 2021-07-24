@@ -1,9 +1,10 @@
-1.5.3 (unreleased)
+1.5.3 (2021-07-24)
 ------------------
 
 - #44 Add "Export" button next to Pagination
 - #36 Fix unpredictable ZPublisher's AttributeError on MultiSelect submit
 - #31 Dismiss items if cleared by subscribers
+- updated resources
 
 
 1.5.2 (2020-08-05)
