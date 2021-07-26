@@ -1,14 +1,15 @@
-2.0.0 (unreleased)
+2.0.0 (2021-07-26)
 ------------------
 
+- #56 Added component DateTime field
 - #58 Allow modal popups from workflow buttons
 - #57 Set CSS selector only on select column
 - #54 Improve fetch performance by marking readonly transactions explicitly
 - #53 Integrate data managers to set field values
+- #52 Fix double fetch of folderitems when the location hash changes
 - #51 Browser history aware listings
 - #50 Support child folder items to any depth
 - #49 Set ajax folderitems to a readonly transaction
-- #56 Added support for DateTime fields
 
 
 2.0.0rc3 (2021-01-04)
