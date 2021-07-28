@@ -1,6 +1,8 @@
 2.0.1 (unreleased)
 ------------------
 
+- #59 Fix column not added when neither after nor before params are set
+- #59 Fix review state not added when neither after nor before params are set
 
 
 2.0.0 (2021-07-26)

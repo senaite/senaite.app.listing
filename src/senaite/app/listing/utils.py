@@ -36,6 +36,10 @@ def add_review_state(listing, review_state, before=None, after=None):
     if review_state["id"] in ids:
         return False
 
+    # If neither before nor after are set, add the review state at the end
+    if not any([before, after]):
+        after = ids[-1]
+
     if before and before not in ids:
         raise ValueError("Review state '{}' does not exist".format(before))
 
@@ -65,6 +69,10 @@ def add_column(listing, column_id, column_values, before=None, after=None,
     if column_id in ids:
         listing.columns[column_id].update(column_values)
         return True
+
+    # If neither before nor after are set, add the column at the end
+    if not any([before, after]):
+        after = ids[-1]
 
     if before and before not in ids:
         raise ValueError("Column '{}' does not exist".format(before))
