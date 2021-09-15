@@ -200,13 +200,22 @@ class TableTransposedCell extends TableCell
           props:
             before: "<span>#{result_column_title}</span>"
             after: "<span>#{item.Unit or ''}</span>"
+      else if type in ["select", "choices"]
+        fields = fields.concat @create_select_field()
+      else if type in ["multichoice"]
+        fields = fields.concat @create_multichoice_field()
+      else if type in ["multiselect", "multiselect_duplicates" ]
+        fields = fields.concat @create_multiselect_field()
+      else if type == "boolean"
+        fields = fields.concat @create_checkbox_field()
+      else if type == "numeric"
+        fields = fields.concat @create_numeric_field()
+      else if type == "string"
+        fields = fields.concat @create_string_field()
+      else if type == "datetime"
+        fields = fields.concat @create_datetime_field()
       else
-        # editable choices field
-        if column_key of @get_choices()
-          fields = fields.concat @create_select_field()
-        else
-          # editable numeric field
-          fields = fields.concat @create_numeric_field()
+        fields = fields.concat @create_numeric_field()
 
     # Append Remarks field(s)
     for column_key, column_index in @get_remarks_columns()

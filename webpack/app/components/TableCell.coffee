@@ -233,6 +233,10 @@ class TableCell extends React.Component
     if resultfield and item.calculation
       return "calculated"
 
+    # check if the field is a string or datetime field
+    if resultfield and item.result_type
+      return item.result_type
+
     # type definition of the column has precedence
     column = @props.column or {}
     if "type" of column
@@ -255,10 +259,6 @@ class TableCell extends React.Component
     # check if the field is an interim
     if @is_interimfield()
       return "interim"
-
-    # check if the field is a string or datetime field
-    if resultfield
-      return item.result_type or "numeric"
 
     # the default
     return "numeric"
@@ -720,6 +720,8 @@ class TableCell extends React.Component
       field = field.concat @create_string_field()
     else if type == "datetime"
       field = field.concat @create_datetime_field()
+    else
+      field = field.concat @create_numeric_field()
 
     return field
 
