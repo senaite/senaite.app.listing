@@ -27,6 +27,7 @@ import six
 from bika.lims import api
 from bika.lims import logger
 from bika.lims.browser import BrowserView
+from bika.lims.decorators import readonly_transaction
 from bika.lims.interfaces import IReferenceAnalysis
 from bika.lims.interfaces import IRoutineAnalysis
 from plone.memoize import view
@@ -496,6 +497,7 @@ class AjaxListingView(BrowserView):
         """
         raise NotImplementedError("Must be implemented by subclass")
 
+    @readonly_transaction
     @set_application_json_header
     @returns_safe_json
     @inject_runtime
@@ -550,6 +552,7 @@ class AjaxListingView(BrowserView):
 
         return data
 
+    @readonly_transaction
     @set_application_json_header
     @returns_safe_json
     @inject_runtime
@@ -596,6 +599,7 @@ class AjaxListingView(BrowserView):
 
         return data
 
+    @readonly_transaction
     @set_application_json_header
     @returns_safe_json
     @inject_runtime
@@ -632,6 +636,7 @@ class AjaxListingView(BrowserView):
 
         return data
 
+    @readonly_transaction
     @set_application_json_header
     @returns_safe_json
     @inject_runtime

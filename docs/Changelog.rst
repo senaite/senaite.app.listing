@@ -1,3 +1,8 @@
+1.5.4 (unreleased)
+------------------
+
+- #61 Make ajax functions to use readonly transactions (ports #49 and #54)
+
 1.5.3 (2021-07-24)
 ------------------
 
