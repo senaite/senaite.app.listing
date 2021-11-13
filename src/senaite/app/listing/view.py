@@ -418,7 +418,7 @@ class ListingView(AjaxListingView):
         if value is Missing.Value:
             return u""
         if api.is_uid(value):
-            return u""
+            return api.get_title(value)
         if isinstance(value, (bool)):
             return u""
         if isinstance(value, (list, tuple)):
