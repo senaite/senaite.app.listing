@@ -1,6 +1,7 @@
 2.0.1 (unreleased)
 ------------------
 
+- #62 Compatibility with Senaite catalog migration
 - #60 Fix alphanumeric result entries in WS transposed view
 - #59 Fix column not added when neither after nor before params are set
 - #59 Fix review state not added when neither after nor before params are set
