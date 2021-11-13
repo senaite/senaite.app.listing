@@ -31,10 +31,6 @@ from AccessControl import getSecurityManager
 from bika.lims import api
 from bika.lims import bikaMessageFactory as _
 from bika.lims import logger
-from bika.lims.catalog import CATALOG_ANALYSIS_LISTING
-from bika.lims.catalog import CATALOG_ANALYSIS_REQUEST_LISTING
-from bika.lims.catalog import CATALOG_AUDITLOG
-from bika.lims.catalog import CATALOG_WORKSHEET_LISTING
 from bika.lims.utils import get_link
 from bika.lims.utils import getFromString
 from plone.memoize import view
@@ -45,6 +41,10 @@ from senaite.app.listing.ajax import AjaxListingView
 from senaite.app.listing.interfaces import IListingView
 from senaite.app.listing.interfaces import IListingViewAdapter
 from senaite.app.supermodel import SuperModel
+from senaite.core.catalog import ANALYSIS_CATALOG
+from senaite.core.catalog import AUDITLOG_CATALOG
+from senaite.core.catalog import SAMPLE_CATALOG
+from senaite.core.catalog import WORKSHEET_CATALOG
 from zope.component import subscribers
 from zope.interface import implements
 
@@ -255,13 +255,13 @@ class ListingView(AjaxListingView):
             key = "AnalysisRequestsListing"
         elif isinstance(portal_type, six.string_types):
             key = portal_type
-        elif self.catalog == CATALOG_ANALYSIS_REQUEST_LISTING:
+        elif self.catalog == SAMPLE_CATALOG:
             key = "AnalysisRequest"
-        elif self.catalog == CATALOG_ANALYSIS_LISTING:
+        elif self.catalog == ANALYSIS_CATALOG:
             key = "Analysis"
-        elif self.catalog == CATALOG_WORKSHEET_LISTING:
+        elif self.catalog == WORKSHEET_CATALOG:
             key = "Worksheet"
-        elif self.catalog == CATALOG_AUDITLOG:
+        elif self.catalog == AUDITLOG_CATALOG:
             key = "Auditlog"
         else:
             return view_name
