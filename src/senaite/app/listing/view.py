@@ -31,10 +31,6 @@ from AccessControl import getSecurityManager
 from bika.lims import api
 from bika.lims import bikaMessageFactory as _
 from bika.lims import logger
-from bika.lims.catalog import CATALOG_ANALYSIS_LISTING
-from bika.lims.catalog import CATALOG_ANALYSIS_REQUEST_LISTING
-from bika.lims.catalog import CATALOG_AUDITLOG
-from bika.lims.catalog import CATALOG_WORKSHEET_LISTING
 from bika.lims.utils import get_link
 from bika.lims.utils import getFromString
 from plone.memoize import view
@@ -45,6 +41,10 @@ from senaite.app.listing.ajax import AjaxListingView
 from senaite.app.listing.interfaces import IListingView
 from senaite.app.listing.interfaces import IListingViewAdapter
 from senaite.app.supermodel import SuperModel
+from senaite.core.catalog import ANALYSIS_CATALOG
+from senaite.core.catalog import AUDITLOG_CATALOG
+from senaite.core.catalog import SAMPLE_CATALOG
+from senaite.core.catalog import WORKSHEET_CATALOG
 from zope.component import subscribers
 from zope.interface import implements
 
@@ -255,13 +255,13 @@ class ListingView(AjaxListingView):
             key = "AnalysisRequestsListing"
         elif isinstance(portal_type, six.string_types):
             key = portal_type
-        elif self.catalog == CATALOG_ANALYSIS_REQUEST_LISTING:
+        elif self.catalog == SAMPLE_CATALOG:
             key = "AnalysisRequest"
-        elif self.catalog == CATALOG_ANALYSIS_LISTING:
+        elif self.catalog == ANALYSIS_CATALOG:
             key = "Analysis"
-        elif self.catalog == CATALOG_WORKSHEET_LISTING:
+        elif self.catalog == WORKSHEET_CATALOG:
             key = "Worksheet"
-        elif self.catalog == CATALOG_AUDITLOG:
+        elif self.catalog == AUDITLOG_CATALOG:
             key = "Auditlog"
         else:
             return view_name
@@ -418,7 +418,7 @@ class ListingView(AjaxListingView):
         if value is Missing.Value:
             return u""
         if api.is_uid(value):
-            return u""
+            return api.get_title(value)
         if isinstance(value, (bool)):
             return u""
         if isinstance(value, (list, tuple)):
@@ -690,27 +690,21 @@ class ListingView(AjaxListingView):
         # Filtered brains by searchterm -> metadata match
         return filter(match, brains)
 
-    def ng3_index_search(self, catalog, query, searchterm):
+    def text_index_search(self, catalog, index, query, searchterm):
         """Searches given catalog by query and also looks for a keyword in the
         specific index called "listing_searchable_text"
 
-        #REMEMBER TextIndexNG indexes are the only indexes that wildcards can
-        be used in the beginning of the string.
-        http://zope.readthedocs.io/en/latest/zope2book/SearchingZCatalog.html#textindexng
-
         :param catalog: catalog to search
-        :param query:
-        :param searchterm: a keyword to look for in "listing_searchable_text"
+        :param query: catalog query dict
+        :param searchterm: the search term
         :return: brains matching the search result
         """
-        logger.info(u"ListingView::search: Prepare NG3 index query for '{}'"
+        logger.info(u"ListingView::search: Text index query for '{}'"
                     .format(self.catalog))
         # Remove quotation mark
         searchterm = searchterm.replace('"', '')
-        # If the keyword is not encoded in searches, TextIndexNG3 encodes by
-        # default encoding which we cannot always trust
-        searchterm = searchterm.encode("utf-8")
-        query["listing_searchable_text"] = "*" + searchterm + "*"
+        searchterm = api.safe_unicode(searchterm).encode("utf-8")
+        query[index] = searchterm
         return catalog(query)
 
     def _fetch_brains(self, idxfrom=0):
@@ -725,6 +719,24 @@ class ListingView(AjaxListingView):
         if idxfrom and len(brains) > idxfrom:
             return brains[idxfrom:self.pagesize + idxfrom]
         return brains[:self.pagesize]
+
+    def get_search_index(self, catalog):
+        """Returns the searchable text index to use
+
+        :returns: name of the searchable text index
+        """
+        index = None
+        indexes = catalog.indexes()
+        portal_type = self.contentFilter.get("portal_type", "")
+        default_index = "listing_searchable_text"
+        custom_type_index = "%s_searchable_text" % portal_type.lower()
+
+        if custom_type_index in indexes:
+            index = custom_type_index
+        elif default_index in indexes:
+            index = default_index
+
+        return index
 
     def search(self, searchterm="", ignorecase=True):
         """Search the catalog tool
@@ -753,15 +765,19 @@ class ListingView(AjaxListingView):
         # search the catalog
         catalog = api.get_tool(self.catalog)
 
+        # get the searchable text index for this type
+        search_index = self.get_search_index(catalog)
+
         # return the unfiltered catalog results if no searchterm
         if not searchterm:
             brains = catalog(query)
 
-        # check if there is ng3 index in the catalog to query by wildcards
-        elif "listing_searchable_text" in catalog.indexes():
+        # check if there is a searchable text index in the catalog
+        elif search_index:
             # Always expand all categories if we have a searchterm
             self.expand_all_categories = True
-            brains = self.ng3_index_search(catalog, query, searchterm)
+            brains = self.text_index_search(
+                catalog, search_index, query, searchterm)
 
         else:
             self.expand_all_categories = True
