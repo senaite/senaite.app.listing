@@ -728,6 +728,10 @@ class ListingView(AjaxListingView):
         index = None
         indexes = catalog.indexes()
         portal_type = self.contentFilter.get("portal_type", "")
+        if isinstance(portal_type, (list, tuple)):
+            portal_types = map(lambda pt: pt.lower(), portal_type)
+            portal_type = "_".join(sorted(portal_types))
+
         default_index = "listing_searchable_text"
         custom_type_index = "%s_searchable_text" % portal_type.lower()
 
