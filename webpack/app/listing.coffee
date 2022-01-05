@@ -1507,7 +1507,7 @@ class ListingController extends React.Component
                 on_column_toggle_click={@toggleColumn}
                 on_columns_order_change={@setColumnsOrder}/>}
             <Table
-              className="contentstable table table-condensed table-hover small"
+              className="contentstable table table-hover small"
               allow_edit={@state.allow_edit}
               on_header_column_click={@sortBy}
               on_select_checkbox_checked={@on_select_checkbox_checked}
