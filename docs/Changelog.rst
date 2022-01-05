@@ -1,4 +1,4 @@
-2.0.1 (unreleased)
+2.1.0 (2022-01-05)
 ------------------
 
 - #62 Compatibility with Senaite catalog migration
