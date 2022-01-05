@@ -91,6 +91,8 @@ The skeleton of the subscriber adapter may look like follows:
 from bika.lims import api
 from senaite.app.listing.interfaces import IListingView
 from senaite.app.listing.interfaces import IListingViewAdapter
+from senaite.app.listing.utils import add_column
+from senaite.app.listing.utils import add_review_state
 from zope.component import adapts
 from zope.component import implements
 
@@ -104,9 +106,16 @@ class SamplesListingViewAdapter(object):
         self.context = context
 
     def before_render(self):
-        self.listing.columns["MyColumn"] = {
-            "title": "My new column",
-        }
+        # Add new column for all available states
+        states = map(lambda r: r["id"], self.listing.review_states)
+        add_column(
+            listing=self.listing,
+            column_id="MyColumn",
+            column_values={
+                "title": "My new column",
+                "sortable": False,
+            },
+            review_states=states)
 
     def folder_item(self, obj, item, index):
         item["MyColumn"] = api.get_object(obj).getMyColumnValue()
