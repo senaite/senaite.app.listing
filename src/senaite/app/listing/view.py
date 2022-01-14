@@ -654,8 +654,16 @@ class ListingView(AjaxListingView):
         """
         form_id = self.get_form_id()
         key = "{}_filter".format(form_id)
-        # we need to ensure unicode here
-        return safe_unicode(self.request.form.get(key, ""))
+        return self.request.form.get(key, "")
+
+    def to_searchterm(self, q):
+        """generate a wildcard searchterm
+        """
+        term = api.safe_unicode(q)
+        tokens = re.split(r"[^\w]", term, flags=re.U | re.I)
+        tokens = filter(None, tokens)
+        tokens = map(lambda t: t + "*", tokens)
+        return " AND ".join(tokens)
 
     def metadata_search(self, catalog, query, searchterm, ignorecase=True):
         """ Retrieves all the brains from given catalog and returns the ones
@@ -755,10 +763,7 @@ class ListingView(AjaxListingView):
         # start the timer for performance checks
         start = time.time()
 
-        # strip whitespaces off the searchterm
-        searchterm = searchterm.strip()
-        # Strip illegal characters of the searchterm
-        searchterm = searchterm.strip(u"*.!$%&/()=-+:'`´^")
+        searchterm = self.to_searchterm(searchterm)
         logger.info(u"ListingView::search:searchterm='{}'".format(searchterm))
 
         # create a catalog query
