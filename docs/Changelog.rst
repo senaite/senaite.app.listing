@@ -1,7 +1,7 @@
 2.2.0 (unreleased)
 ------------------
 
-- no changes yet
+- #64 Improved listing search for queries containing non alphanumeric characters
 
 
 2.1.0 (2022-01-05)
