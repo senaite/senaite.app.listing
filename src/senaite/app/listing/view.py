@@ -41,6 +41,7 @@ from senaite.app.listing.ajax import AjaxListingView
 from senaite.app.listing.interfaces import IListingView
 from senaite.app.listing.interfaces import IListingViewAdapter
 from senaite.app.supermodel import SuperModel
+from senaite.core.api.catalog import to_searchable_text_qs
 from senaite.core.catalog import ANALYSIS_CATALOG
 from senaite.core.catalog import AUDITLOG_CATALOG
 from senaite.core.catalog import SAMPLE_CATALOG
@@ -656,15 +657,6 @@ class ListingView(AjaxListingView):
         key = "{}_filter".format(form_id)
         return self.request.form.get(key, "")
 
-    def to_searchterm(self, q):
-        """generate a wildcard searchterm
-        """
-        term = api.safe_unicode(q)
-        tokens = re.split(r"[^\w]", term, flags=re.U | re.I)
-        tokens = filter(None, tokens)
-        tokens = map(lambda t: t + "*", tokens)
-        return " AND ".join(tokens)
-
     def metadata_search(self, catalog, query, searchterm, ignorecase=True):
         """ Retrieves all the brains from given catalog and returns the ones
         with at least one metadata containing the search term
@@ -763,7 +755,7 @@ class ListingView(AjaxListingView):
         # start the timer for performance checks
         start = time.time()
 
-        searchterm = self.to_searchterm(searchterm)
+        searchterm = to_searchable_text_qs(searchterm)
         logger.info(u"ListingView::search:searchterm='{}'".format(searchterm))
 
         # create a catalog query
