@@ -1,6 +1,7 @@
 2.2.0 (unreleased)
 ------------------
 
+- #65 Use searchable text index converter from catalog API
 - #64 Improved listing search for queries containing non alphanumeric characters
 
 
