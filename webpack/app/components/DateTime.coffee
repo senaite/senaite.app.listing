@@ -32,6 +32,14 @@ class DateTime extends React.Component
     @on_change = @on_change.bind @
 
   ###*
+   * Returns the current date as a string
+  ###
+  get_current_date: () ->
+    today = new Date()
+    isodate = today.toISOString()
+    return isodate.split("T")[0]
+
+  ###*
    * componentDidUpdate(prevProps, prevState, snapshot)
    * This is invoked immediately after updating occurs.
    * This method is not called for the initial render.
@@ -49,6 +57,14 @@ class DateTime extends React.Component
     # extract the current date and time values
     dt_date = @dt_date.current.value
     dt_time = @dt_time.current.value
+
+    # ensure both components are set
+    if dt_date and not dt_time
+      dt_time = "00:00"
+    else if dt_time and not dt_date
+      today = new Date()
+      dt_date = @get_current_date()
+
     # set the concatenated date and time to the hidden field
     value = "#{dt_date} #{dt_time}"
 
