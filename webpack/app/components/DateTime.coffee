@@ -16,6 +16,17 @@ class DateTime extends React.Component
     # remember the initial value
     @state =
       value: props.defaultValue
+      date_value: ""
+      time_value: ""
+
+    if props.defaultValue
+      parts = props.defaultValue.split(" ")
+      @state["date_value"] = if parts.length > 0 then parts[0] else ""
+      @state["time_value"] = if parts.length > 1 then parts[1] else ""
+
+    @dt_date = React.createRef()
+    @dt_time = React.createRef()
+    @dt_hidden = React.createRef()
 
     # bind event handler to the current context
     @on_change = @on_change.bind @
@@ -34,17 +45,26 @@ class DateTime extends React.Component
    * @param event {object} ReactJS event object
   ###
   on_change: (event) ->
-    el = event.currentTarget
+
+    # extract the current date and time values
+    dt_date = @dt_date.current.value
+    dt_time = @dt_time.current.value
+    # set the concatenated date and time to the hidden field
+    value = "#{dt_date} #{dt_time}"
+
+    this.setState
+      value: value
+      date_value: dt_date
+      time_value: dt_time
+
+    # extract the field values from the hidden field
+    el = @dt_hidden.current
     # Extract the UID attribute
     uid = el.getAttribute("uid")
     # Extract the column_key attribute
     name = el.getAttribute("column_key") or el.name
     # Extract the value of the datetime field
     value = el.value
-
-    # store the new value
-    @setState
-      value: value
 
     console.debug "DateTime::on_change: value=#{value}"
 
@@ -55,20 +75,38 @@ class DateTime extends React.Component
   render: ->
     <span className="form-group">
       {@props.before and <span className="before_field" dangerouslySetInnerHTML={{__html: @props.before}}></span>}
-      <input type="datetime-local"
-             size={@props.size or 20}
-             uid={@props.uid}
-             name={@props.name}
-             value={@state.value}
-             column_key={@props.column_key}
-             title={@props.title}
-             disabled={@props.disabled}
-             required={@props.required}
-             className={@props.className}
-             placeholder={@props.placeholder}
-             onChange={@props.onChange or @on_change}
-             tabIndex={@props.tabIndex}
-             {...@props.attrs}/>
+      <div className="input-group flex-nowrap d-inline-flex w-auto datetimewidget">
+        <input type="date"
+               ref={@dt_date}
+               name="#{@props.name}-date"
+               title={@props.title}
+               className={@props.className}
+               disabled={@props.disabled}
+               required={@props.required}
+               onChange={@props.onChange or @on_change}
+               tabIndex={@props.tabIndex}
+               value={@state.date_value}
+               {...@props.attrs}/>
+        <input type="time"
+               ref={@dt_time}
+               name="#{@props.name}-time"
+               className={@props.className}
+               title={@props.title}
+               disabled={@props.disabled}
+               required={@props.required}
+               onChange={@props.onChange or @on_change}
+               tabIndex={@props.tabIndex}
+               value={@state.time_value}
+               {...@props.attrs}/>
+      </div>
+      <input
+        type="hidden"
+        ref={@dt_hidden}
+        uid={@props.uid}
+        name={@props.name}
+        column_key={@props.column_key}
+        value={@state.value} />
+
       {@props.after and <span className="after_field" dangerouslySetInnerHTML={{__html: @props.after}}></span>}
     </span>
 
