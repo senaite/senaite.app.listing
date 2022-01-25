@@ -31,6 +31,9 @@ class TableCell extends React.Component
       "default": ":records"
     }
 
+  get_column: ->
+    return @props.column
+
   get_item: ->
     return @props.item
 
@@ -459,6 +462,7 @@ class TableCell extends React.Component
   create_datetime_field: ({props}={}) ->
     column_key = @get_column_key()
     item = @get_item()
+    column = @get_column()
     props ?= {}
 
     name = @get_name()
@@ -475,6 +479,15 @@ class TableCell extends React.Component
     css_class = "form-control form-control-sm"
     if required then css_class += " required"
     result_type = "date"
+
+    # min/max dates
+    min = column.min or null
+    max = column.max or null
+
+    if min
+      [min_date, min_time] = min.split(" ")
+    if max
+      [max_date, max_time] = max.split(" ")
 
     return (
       <DateTime
@@ -496,6 +509,10 @@ class TableCell extends React.Component
         update_editable_field={@props.update_editable_field}
         save_editable_field={@props.save_editable_field}
         tabIndex={@props.tabIndex}
+        min_date={min_date}
+        max_date={max_date}
+        min_time={min_time}
+        max_time={max_time}
         {...props}
         />)
 

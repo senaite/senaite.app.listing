@@ -94,6 +94,8 @@ class DateTime extends React.Component
                onChange={@props.onChange or @on_change}
                tabIndex={@props.tabIndex}
                value={@state.date_value}
+               min={@props.min_date}
+               max={@props.max_date}
                {...@props.attrs}/>
         <input type="time"
                ref={@dt_time}
@@ -105,6 +107,8 @@ class DateTime extends React.Component
                onChange={@props.onChange or @on_change}
                tabIndex={@props.tabIndex}
                value={@state.time_value}
+               min={@props.min_time}
+               max={@props.max_time}
                {...@props.attrs}/>
       </div>
       <input
