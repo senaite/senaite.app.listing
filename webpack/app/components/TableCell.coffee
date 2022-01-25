@@ -308,7 +308,7 @@ class TableCell extends React.Component
     title = @props.column.title or column_key
     selected = @is_selected()
     required = @is_required()
-    css_class = "form-control input-sm calculated"
+    css_class = "form-control form-control-sm calculated"
     if required then css_class += " required"
 
     return (
@@ -379,7 +379,7 @@ class TableCell extends React.Component
     disabled = @is_disabled()
     required = @is_required()
     size = @get_size()
-    css_class = "form-control input-sm"
+    css_class = "form-control form-control-sm"
     if required then css_class += " required"
 
     return (
@@ -426,7 +426,7 @@ class TableCell extends React.Component
     selected = @is_selected()
     disabled = @is_disabled()
     required = @is_required()
-    css_class = "form-control input-sm"
+    css_class = "form-control form-control-sm"
     if required then css_class += " required"
 
     return (
@@ -472,7 +472,7 @@ class TableCell extends React.Component
     selected = @is_selected()
     disabled = @is_disabled()
     required = @is_required()
-    css_class = "form-control input-sm"
+    css_class = "form-control form-control-sm"
     if required then css_class += " required"
     result_type = "date"
 
@@ -520,7 +520,7 @@ class TableCell extends React.Component
     selected = @is_selected()
     disabled = @is_disabled()
     required = @is_required()
-    css_class = "form-control input-sm"
+    css_class = "form-control form-control-sm"
     if required then css_class += " required"
 
     return (
@@ -573,7 +573,7 @@ class TableCell extends React.Component
     selected = @is_selected()
     disabled = @is_disabled()
     required = @is_required()
-    css_class = "form-control input-sm"
+    css_class = "form-control form-control-sm"
     if required then css_class += " required"
 
     return (
@@ -617,7 +617,7 @@ class TableCell extends React.Component
     disabled = @is_disabled()
     required = @is_required()
     duplicates = item.result_type == "multiselect_duplicates"
-    css_class = "form-control input-sm"
+    css_class = "form-control form-control-sm"
     if required then css_class += " required"
 
     return (

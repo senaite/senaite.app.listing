@@ -127,7 +127,7 @@ class TableTransposedCell extends TableCell
 
       if @is_edit_allowed()
         # add a numeric field per interim
-        props.className = "form-control input-sm interim"
+        props.className = "form-control form-control-sm interim"
         fields = fields.concat @create_numeric_field props: props
       else
         props.className = "readonly interim"
