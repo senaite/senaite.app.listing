@@ -1,6 +1,7 @@
 2.2.0 (unreleased)
 ------------------
 
+- #67 Allow to hook listings with Ajax edit form adapters
 - #66 Change datetime component to separate date and time fields
 - #65 Use searchable text index converter from catalog API
 - #64 Improved listing search for queries containing non alphanumeric characters
