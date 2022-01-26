@@ -31,6 +31,9 @@ class TableCell extends React.Component
       "default": ":records"
     }
 
+  get_column: ->
+    return @props.column
+
   get_item: ->
     return @props.item
 
@@ -308,7 +311,7 @@ class TableCell extends React.Component
     title = @props.column.title or column_key
     selected = @is_selected()
     required = @is_required()
-    css_class = "form-control input-sm calculated"
+    css_class = "form-control form-control-sm calculated"
     if required then css_class += " required"
 
     return (
@@ -379,7 +382,7 @@ class TableCell extends React.Component
     disabled = @is_disabled()
     required = @is_required()
     size = @get_size()
-    css_class = "form-control input-sm"
+    css_class = "form-control form-control-sm"
     if required then css_class += " required"
 
     return (
@@ -426,7 +429,7 @@ class TableCell extends React.Component
     selected = @is_selected()
     disabled = @is_disabled()
     required = @is_required()
-    css_class = "form-control input-sm"
+    css_class = "form-control form-control-sm"
     if required then css_class += " required"
 
     return (
@@ -459,6 +462,7 @@ class TableCell extends React.Component
   create_datetime_field: ({props}={}) ->
     column_key = @get_column_key()
     item = @get_item()
+    column = @get_column()
     props ?= {}
 
     name = @get_name()
@@ -472,9 +476,18 @@ class TableCell extends React.Component
     selected = @is_selected()
     disabled = @is_disabled()
     required = @is_required()
-    css_class = "form-control input-sm"
+    css_class = "form-control form-control-sm"
     if required then css_class += " required"
     result_type = "date"
+
+    # min/max dates
+    min = column.min or null
+    max = column.max or null
+
+    if min
+      [min_date, min_time] = min.split(" ")
+    if max
+      [max_date, max_time] = max.split(" ")
 
     return (
       <DateTime
@@ -496,6 +509,10 @@ class TableCell extends React.Component
         update_editable_field={@props.update_editable_field}
         save_editable_field={@props.save_editable_field}
         tabIndex={@props.tabIndex}
+        min_date={min_date}
+        max_date={max_date}
+        min_time={min_time}
+        max_time={max_time}
         {...props}
         />)
 
@@ -520,7 +537,7 @@ class TableCell extends React.Component
     selected = @is_selected()
     disabled = @is_disabled()
     required = @is_required()
-    css_class = "form-control input-sm"
+    css_class = "form-control form-control-sm"
     if required then css_class += " required"
 
     return (
@@ -573,7 +590,7 @@ class TableCell extends React.Component
     selected = @is_selected()
     disabled = @is_disabled()
     required = @is_required()
-    css_class = "form-control input-sm"
+    css_class = "form-control form-control-sm"
     if required then css_class += " required"
 
     return (
@@ -617,7 +634,7 @@ class TableCell extends React.Component
     disabled = @is_disabled()
     required = @is_required()
     duplicates = item.result_type == "multiselect_duplicates"
-    css_class = "form-control input-sm"
+    css_class = "form-control form-control-sm"
     if required then css_class += " required"
 
     return (
