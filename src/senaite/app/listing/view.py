@@ -113,6 +113,13 @@ class ListingView(AjaxListingView):
     # form_id must be unique for each listing table.
     form_id = "list"
 
+    # CSS classes to append to the listing form
+    additional_form_class = ""
+
+    # Form adapter name that is called when the values are edited.
+    # see: `senaite.core.browser.form.adapters` for examples.
+    form_adapter_name = ""
+
     # This is an override and a switch, but it does not guarantee allow_edit.
     # This can be used to turn it off, regardless of settings in place by
     # individual items/fields, but if it is turned on, ultimate control

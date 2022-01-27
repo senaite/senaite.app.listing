@@ -6,14 +6,22 @@
         method="post"
         i18n:domain="senaite.core"
         tal:omit-tag="view/omit_form"
+        tal:define="form_adapter_name view/form_adapter_name|nothing;
+                    ajax_form_class python:'senaite-ajax-form' if form_adapter_name else '';
+                    additional_form_class python:view.additional_form_class"
         tal:attributes="id python:view.form_id;
+                        class string:form form-inline ${ajax_form_class} ${additional_form_class};
                         action python:view.getPOSTAction()">
 
-    <input tal:condition="not: view/omit_form"
-           tal:replace="structure context/@@authenticator/authenticator"/>
+    <tal:has-form condition="not:view/omit_form">
+      <input tal:replace="structure context/@@authenticator/authenticator"/>
 
-    <input tal:condition="not: view/omit_form"
-           type="hidden" name="submitted" value="1"/>
+      <input type="hidden" name="submitted" value="1"/>
+
+      <input tal:condition="form_adapter_name"
+             type="hidden" name="form_adapter_name" value=""
+             tal:attributes="value form_adapter_name" />
+    </tal:has-form>
 
     <!-- ReactJS managed component -->
     <div class="ajax-contents-table w-100"
