@@ -627,6 +627,46 @@ class AjaxListingView(BrowserView):
 
         return data
 
+    @set_application_json_header
+    @returns_safe_json
+    @inject_runtime
+    def ajax_on_change(self):
+        """Callback for changes in the listing
+
+        The POST Payload needs to provide the following data:
+        """
+
+        # Get the HTTP POST JSON Payload
+        payload = self.get_json()
+
+        required = ["handler", "data"]
+        if not all(map(lambda k: k in payload, required)):
+            return self.json_message("Payload needs to provide the keys {}"
+                                     .format(", ".join(required)), status=400)
+
+        handler = payload.get("handler")
+        data = payload.get("data")
+
+        method = getattr(self, handler, None)
+        if method is None:
+            return self.json_message("Method '{}' not defined in class '{}'"
+                                     .format(handler, self.__class__.__name__),
+                                     status=400)
+
+        folderitems = method(**data)
+        if not isinstance(folderitems, (dict, list)):
+            return {}
+        if isinstance(folderitems, dict):
+            folderitems = [folderitems]
+
+        # prepare the response object
+        data = {
+            "count": len(folderitems),
+            "folderitems": folderitems,
+        }
+
+        return data
+
     def notify_edited(self, obj):
         """Notify object edited event
         """

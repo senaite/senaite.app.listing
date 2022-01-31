@@ -901,6 +901,16 @@ class ListingController extends React.Component
       , ->
         if column.autosave
           me.ajax_save()
+
+    # call the on_change handler
+    handler = column.on_change
+    if handler
+      @ajax_on_change handler,
+        uid: uid
+        name: name
+        value: value
+        item: item
+
     return true
 
   ###*
@@ -1323,6 +1333,32 @@ class ListingController extends React.Component
       # toggle loader off
       me.toggle_loader off
     return promise
+
+
+  ajax_on_change: (handler, data) ->
+    console.debug "ListingController::ajax_on_change:handler=#{handler}, data=", data
+
+    # turn loader on
+    @toggle_loader on
+
+    promise = @api.on_change
+      handler: handler
+      data: data
+
+    me = this
+    promise.then (data) ->
+      console.debug "ListingController::ajax_on_change: GOT DATA=", data
+
+      # folderitems of the updated objects and their dependencies
+      folderitems = data.folderitems or []
+
+      # update the existing folderitems
+      me.update_existing_folderitems_with folderitems
+
+      # toggle loader off
+      me.toggle_loader off
+    return promise
+
 
   ###*
    * Update existing folderitems

@@ -1,6 +1,7 @@
 2.2.0 (unreleased)
 ------------------
 
+- #68 Added support for `on_change` hooks for changed folderitems
 - #67 Allow to hook listings with Ajax edit form adapters
 - #66 Change datetime component to separate date and time fields
 - #65 Use searchable text index converter from catalog API

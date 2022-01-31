@@ -106,6 +106,16 @@ class ListingAPI
       method: "POST"
     return @get_json "set_fields", options
 
+  on_change: (data) ->
+    ###
+     * Call the on_change handler to refresh the data
+     * @returns {Promise}
+    ###
+    options =
+      data: data or {}
+      method: "POST"
+    return @get_json "on_change", options
+
   query_folderitems: (data) ->
     ###
      * Query folderitems
