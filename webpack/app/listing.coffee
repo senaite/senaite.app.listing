@@ -788,25 +788,34 @@ class ListingController extends React.Component
     action = id.split("_transition")[0]
 
     # inject workflow action id for `BikaListing._get_form_workflow_action`
-    input = document.createElement "input"
-    input.setAttribute "type", "hidden"
-    input.setAttribute "id", id
-    input.setAttribute "name", "workflow_action_id"
-    input.setAttribute "value", action
+    input = @create_input_element "hidden", id,  "workflow_action_id", action
     form.appendChild input
 
     # inject the id of the form
-    input = document.createElement "input"
-    input.setAttribute "type", "hidden"
-    input.setAttribute "id", "form_id"
-    input.setAttribute "name", "form_id"
-    input.setAttribute "value", @state.form_id
+    input = @create_input_element "hidden", "form_id", "form_id", @state.form_id
     form.appendChild input
 
     # Override the form action when a custom URL is given
     if url then form.action = url
 
     return form.submit()
+
+  ###*
+   * Creates an input element with the attributes passed-in
+   *
+   * @param type {string} The type of the input element
+   * @param id {string} The id of the input element
+   * @param name {string} The name of the input element
+   * @param value {string} The value of the input element
+   * @returns {object} html input element
+  ###
+  create_input_element: (type, id, name, value) ->
+    input = document.createElement "input"
+    input.setAttribute "type", type
+    input.setAttribute "id", id
+    input.setAttribute "name", name
+    input.setAttribute "value", value
+    return input
 
   ###*
    * Select a row checkbox by UID
