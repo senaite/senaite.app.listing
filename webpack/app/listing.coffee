@@ -795,6 +795,14 @@ class ListingController extends React.Component
     input.setAttribute "value", action
     form.appendChild input
 
+    # inject the id of the form as the anchor_id
+    input = document.createElement "input"
+    input.setAttribute "type", "hidden"
+    input.setAttribute "id", "anchor_id"
+    input.setAttribute "name", "anchor_id"
+    input.setAttribute "value", @state.form_id
+    form.appendChild input
+
     # Override the form action when a custom URL is given
     if url then form.action = url
 
