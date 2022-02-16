@@ -1,7 +1,7 @@
 2.2.0 (unreleased)
 ------------------
 
-- #69 Inject the form id as `anchor_id` on workflow action's POST
+- #69 Inject the form id into workflow action's POST
 - #68 Added support for `on_change` hooks for changed folderitems
 - #67 Allow to hook listings with Ajax edit form adapters
 - #66 Change datetime component to separate date and time fields

@@ -795,11 +795,11 @@ class ListingController extends React.Component
     input.setAttribute "value", action
     form.appendChild input
 
-    # inject the id of the form as the anchor_id
+    # inject the id of the form
     input = document.createElement "input"
     input.setAttribute "type", "hidden"
-    input.setAttribute "id", "anchor_id"
-    input.setAttribute "name", "anchor_id"
+    input.setAttribute "id", "form_id"
+    input.setAttribute "name", "form_id"
     input.setAttribute "value", @state.form_id
     form.appendChild input
 
