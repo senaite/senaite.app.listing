@@ -20,9 +20,10 @@
 
 import inspect
 import json
-import urllib
+from functools import cmp_to_key
 
 import six
+from six.moves.urllib.parse import urlencode
 
 from bika.lims import api
 from bika.lims.browser import BrowserView
@@ -37,6 +38,7 @@ from senaite.app.listing.interfaces import IAjaxListingView
 from senaite.app.listing.interfaces import IChildFolderItems
 from senaite.core.decorators import readonly_transaction
 from senaite.core.interfaces import IDataManager
+from senaite.core.p3compat import cmp
 from zope import event
 from zope.component import getMultiAdapter
 from zope.component import queryAdapter
@@ -243,7 +245,7 @@ class AjaxListingView(BrowserView):
         all_transition_ids = common_tids.union(custom_tids)
 
         def sort_transitions(a, b):
-            transition_weights = {
+            default_weights = {
                 "invalidate": 100,
                 "retract": 90,
                 "reject": 90,
@@ -258,11 +260,13 @@ class AjaxListingView(BrowserView):
                 "receive": 20,
                 "submit": 10,
             }
-            w1 = transition_weights.get(a, 0)
-            w2 = transition_weights.get(b, 0)
+            w1 = transitions_by_tid[a].get(
+                "weight", default_weights.get(a, 0))
+            w2 = transitions_by_tid[b].get(
+                "weight", default_weights.get(b, 0))
             return cmp(w1, w2)
 
-        for tid in sorted(all_transition_ids, cmp=sort_transitions):
+        for tid in sorted(all_transition_ids, key=cmp_to_key(sort_transitions)):
             transition = transitions_by_tid.get(tid)
             transitions.append(transition)
 
@@ -426,7 +430,7 @@ class AjaxListingView(BrowserView):
         self.request.other.update(form_data)
 
         # generate a query string from the form data
-        query_string = urllib.urlencode(form_data)
+        query_string = urlencode(form_data)
 
         # get the folder items
         folderitems = self.get_folderitems()

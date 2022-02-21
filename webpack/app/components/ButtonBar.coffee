@@ -70,14 +70,17 @@ class ButtonBar extends React.Component
       container: "body"
       singleton: yes
 
-  get_button_css: (id) ->
+  get_button_css: (id, transition={}) ->
     # calculate the button CSS
     cls = "btn btn-sm mr-1 mb-1"
 
     # append additional button styles
     additional_cls = @css_mapping[id]
+    transition_cls = transition.css_class
     if additional_cls
       cls += " #{additional_cls}"
+    else if transition_cls?
+      cls += " #{transition_cls}"
     else
       cls += " btn-outline-secondary"
 
@@ -142,7 +145,7 @@ class ButtonBar extends React.Component
       url = transition.url
       title = _t(transition.title)
       help = _t(transition.help)
-      cls = @get_button_css id
+      cls = @get_button_css(id, transition)
       btn_id = "#{id}_transition"
 
       # append custom css class
