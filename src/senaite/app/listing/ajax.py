@@ -37,6 +37,7 @@ from senaite.app.listing.interfaces import IAjaxListingView
 from senaite.app.listing.interfaces import IChildFolderItems
 from senaite.core.decorators import readonly_transaction
 from senaite.core.interfaces import IDataManager
+from senaite.core.p3compat import cmp
 from zope import event
 from zope.component import getMultiAdapter
 from zope.component import queryAdapter
