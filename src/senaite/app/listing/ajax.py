@@ -20,10 +20,10 @@
 
 import inspect
 import json
-import urllib
 from functools import cmp_to_key
 
 import six
+from six.moves.urllib.parse import urlencode
 
 from bika.lims import api
 from bika.lims.browser import BrowserView
@@ -430,7 +430,7 @@ class AjaxListingView(BrowserView):
         self.request.other.update(form_data)
 
         # generate a query string from the form data
-        query_string = urllib.urlencode(form_data)
+        query_string = urlencode(form_data)
 
         # get the folder items
         folderitems = self.get_folderitems()

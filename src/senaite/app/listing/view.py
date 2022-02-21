@@ -22,6 +22,7 @@ import collections
 import copy
 import re
 import time
+from functools import cmp_to_key
 
 import six
 
@@ -653,7 +654,7 @@ class ListingView(AjaxListingView):
             # Compare the two values
             return cmp(a, b)
 
-        return sorted(brains, cmp=metadata_sort, reverse=reverse)
+        return sorted(brains, key=cmp_to_key(metadata_sort), reverse=reverse)
 
     def get_searchterm(self):
         """Get the user entered search value from the request
