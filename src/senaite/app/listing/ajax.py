@@ -21,6 +21,7 @@
 import inspect
 import json
 import urllib
+from functools import cmp_to_key
 
 import six
 
@@ -244,7 +245,7 @@ class AjaxListingView(BrowserView):
         all_transition_ids = common_tids.union(custom_tids)
 
         def sort_transitions(a, b):
-            transition_weights = {
+            default_weights = {
                 "invalidate": 100,
                 "retract": 90,
                 "reject": 90,
@@ -259,11 +260,13 @@ class AjaxListingView(BrowserView):
                 "receive": 20,
                 "submit": 10,
             }
-            w1 = transition_weights.get(a, 0)
-            w2 = transition_weights.get(b, 0)
+            w1 = transitions_by_tid[a].get(
+                "weight", default_weights.get(a, 0))
+            w2 = transitions_by_tid[b].get(
+                "weight", default_weights.get(b, 0))
             return cmp(w1, w2)
 
-        for tid in sorted(all_transition_ids, cmp=sort_transitions):
+        for tid in sorted(all_transition_ids, key=cmp_to_key(sort_transitions)):
             transition = transitions_by_tid.get(tid)
             transitions.append(transition)
 
