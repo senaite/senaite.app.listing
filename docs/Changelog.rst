@@ -1,6 +1,7 @@
 2.2.0 (unreleased)
 ------------------
 
+- #71 Allow URL redirect after Modal form submit
 - #70 Allow custom transition sorting weights
 - #69 Inject the form id into workflow action's POST
 - #68 Added support for `on_change` hooks for changed folderitems
