@@ -732,27 +732,37 @@ class ListingController extends React.Component
     url = new URL(url)
     url.searchParams.append("uids", this.state.selected_uids)
 
+    # submit callback
     on_submit = (event) =>
       event.preventDefault()
       form = event.target
-      if form.action
-        fetch form.action,
-          method: "POST",
-          body: new FormData(form)
-        .then (response) =>
-          if not response.ok
-            return Promise.reject(response)
-          @fetch_folderitems()
-          el.modal("hide")
-        .catch (error) =>
-          console.error(error)
-          el.modal("hide")
+      # always hide the modal on submit
+      el.modal("hide")
+
+      if not form.action
+        console.error "Modal form has no action defined"
+        return
+
+      # process form submit
+      fetch form.action,
+        method: "POST",
+        body: new FormData(form)
+      .then (response) =>
+        if not response.ok
+          return Promise.reject(response)
+        return response.text().then (text) =>
+          # allow redirects when the modal form returns an URL
+          if text.startsWith("http")
+            window.location = text
+          else
+            @fetch_folderitems()
+      .catch (error) =>
+        console.error(error)
 
     request = new Request(url)
     fetch(request)
     .then (response) ->
-      return response.text()
-      .then (text) ->
+      return response.text().then (text) ->
         el.empty()
         el.append(text)
         el.one "submit", on_submit
