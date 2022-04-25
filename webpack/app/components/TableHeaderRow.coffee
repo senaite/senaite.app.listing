@@ -112,6 +112,7 @@ class TableHeaderRow extends React.Component
       index = column.index or key
 
       title = column.title
+      alt = column.alt or title
       # sort_on is the current sort index/metadata
       sort_on = @props.sort_on or "created"
       sort_order = @props.sort_order or "ascending"
@@ -134,6 +135,7 @@ class TableHeaderRow extends React.Component
           key={key}  # internal key
           {...@props}  # pass in all properties from the table component
           title={title}
+          alt={alt}
           index={index}
           sort_order={sort_order}
           className={cls}

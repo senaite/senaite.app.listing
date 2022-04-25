@@ -10,7 +10,7 @@ class TableHeaderCell extends React.Component
     super(props)
 
   render: ->
-    <th title={@props.title}
+    <th title={@props.alt}
         index={@props.index}
         sort_order={@props.sort_order}
         className={@props.className}
