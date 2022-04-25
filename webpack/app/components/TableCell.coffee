@@ -257,6 +257,12 @@ class TableCell extends React.Component
       default_type = "select"
       if resultfield
         return item.result_type or default_type
+      # Maybe is an interim field
+      if @is_interimfield()
+        column_key = @get_column_key()
+        interim = item[column_key]
+        if interim
+          return interim.result_type or default_type
       return default_type
 
     # check if the field is an interim
