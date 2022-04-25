@@ -1,6 +1,7 @@
 2.2.0 (unreleased)
 ------------------
 
+- #72 Multiselect/Multichoice support for interim fields
 - #71 Allow URL redirect after Modal form submit
 - #70 Allow custom transition sorting weights
 - #69 Inject the form id into workflow action's POST
