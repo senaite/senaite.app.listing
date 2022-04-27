@@ -691,7 +691,6 @@ class TableCell extends React.Component
     selected = @is_selected()
     disabled = @is_disabled()
     required = @is_required()
-    duplicates = item.result_type == "multiselect_duplicates"
     css_class = "form-control form-control-sm"
     if required then css_class += " required"
 
