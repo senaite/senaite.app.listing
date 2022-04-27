@@ -1,6 +1,7 @@
 2.2.0 (unreleased)
 ------------------
 
+- #74 Multivalue support
 - #73 Alternative text support for column headers
 - #72 Multiselect/Multichoice support for interim fields
 - #71 Allow URL redirect after Modal form submit
