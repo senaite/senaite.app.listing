@@ -4,6 +4,7 @@ import Checkbox from "./Checkbox.coffee"
 import HiddenField from "./HiddenField.coffee"
 import MultiChoice from "./MultiChoice.coffee"
 import MultiSelect from "./MultiSelect.coffee"
+import MultiValue from "./MultiValue.coffee"
 import NumericField from "./NumericField.coffee"
 import CalculatedField from "./CalculatedField.coffee"
 import ReadonlyField from "./ReadonlyField.coffee"
@@ -24,6 +25,7 @@ class TableCell extends React.Component
       "choices": ":records"
       "multiselect": ":list"
       "multichoice": ":list"
+      "multivalue": ":list"
       "numeric": ":records"
       "string": ":records"
       "datetime": ":records"
@@ -267,7 +269,12 @@ class TableCell extends React.Component
 
     # check if the field is an interim
     if @is_interimfield()
-      return "interim"
+      default_type = "interim"
+      column_key = @get_column_key()
+      interim = item[column_key]
+      if interim
+        return interim.result_type or default_type
+      return default_type
 
     # the default
     return "numeric"
@@ -666,6 +673,49 @@ class TableCell extends React.Component
         />)
 
   ###*
+   * Creates a multivalue field component
+   * @param props {object} properties passed to the component
+   * @returns MultiValue component
+  ###
+  create_multivalue_field: ({props}={}) ->
+    column_key = @get_column_key()
+    item = @get_item()
+    props ?= {}
+
+    uid = @get_uid()
+    name = @get_name()
+    value = @get_value()
+    converter = @ZPUBLISHER_CONVERTER["multivalue"]
+    fieldname = name + converter
+    title = @props.column.title or column_key
+    selected = @is_selected()
+    disabled = @is_disabled()
+    required = @is_required()
+    duplicates = item.result_type == "multiselect_duplicates"
+    css_class = "form-control form-control-sm"
+    if required then css_class += " required"
+
+    return (
+      <MultiValue
+        key={name}
+        uid={uid}
+        item={item}
+        name={fieldname}
+        defaultValue={value}
+        value={value}
+        column_key={column_key}
+        title={title}
+        disabled={disabled}
+        selected={selected}
+        required={required}
+        className={css_class}
+        update_editable_field={@props.update_editable_field}
+        save_editable_field={@props.save_editable_field}
+        tabIndex={@props.tabIndex}
+        {...props}
+        />)
+
+  ###*
    * Creates a checkbox field component
    * @param props {object} properties passed to the component
    * @returns Checkbox component
@@ -733,8 +783,10 @@ class TableCell extends React.Component
       field = field.concat @create_select_field()
     else if type in ["multichoice"]
       field = field.concat @create_multichoice_field()
-    else if type in ["multiselect", "multiselect_duplicates" ]
+    else if type in ["multiselect", "multiselect_duplicates"]
       field = field.concat @create_multiselect_field()
+    else if type in ["multivalue"]
+      field = field.concat @create_multivalue_field()
     else if type == "boolean"
       field = field.concat @create_checkbox_field()
     else if type == "numeric"
