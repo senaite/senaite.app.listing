@@ -90,7 +90,6 @@ Installation Requirements
 
 The following versions are required for SENAITE.APP.LISTING:
 
--  Plone 5.2.6
 -  senaite.lims >= 2.1.0
 
 
