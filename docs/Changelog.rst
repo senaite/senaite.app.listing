@@ -1,7 +1,7 @@
 2.3.0 (unreleased)
 ------------------
 
-- no changes yet
+- #75 Reduce logging
 
 
 2.2.0 (2022-06-10)
