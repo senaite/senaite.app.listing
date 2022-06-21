@@ -208,7 +208,7 @@ class ListingView(AjaxListingView):
     def __call__(self):
         """Handle request parameters and render the form
         """
-        logger.info(u"ListingView::__call__")
+        logger.debug(u"ListingView::__call__")
 
         self.portal = api.get_portal()
         self.mtool = api.get_tool("portal_membership")
@@ -231,14 +231,14 @@ class ListingView(AjaxListingView):
     def update(self):
         """Update the view state
         """
-        logger.info(u"ListingView::update")
+        logger.debug(u"ListingView::update")
         self.limit_from = self.get_limit_from()
         self.pagesize = self.get_pagesize()
 
     def before_render(self):
         """Before render hook
         """
-        logger.info(u"ListingView::before_render")
+        logger.debug(u"ListingView::before_render")
         for subscriber in self.get_listing_view_adapters():
             logger.info(u"ListingView::before_render::{}.{}".format(
                 subscriber.__module__, subscriber.__class__.__name__))
@@ -410,7 +410,7 @@ class ListingView(AjaxListingView):
         state_title = wf.getTitleForStateOnType(state, portal_type)
         translated_state = ts.translate(
             _(state_title or state), context=self.request)
-        logger.info(u"ListingView:translate_review_state: {} -> {} -> {}"
+        logger.debug(u"ListingView:translate_review_state: {} -> {} -> {}"
                     .format(state, state_title, translated_state))
         return translated_state
 
@@ -764,7 +764,7 @@ class ListingView(AjaxListingView):
         start = time.time()
 
         searchterm = to_searchable_text_qs(searchterm)
-        logger.info(u"ListingView::search:searchterm='{}'".format(searchterm))
+        logger.debug(u"ListingView::search:searchterm='{}'".format(searchterm))
 
         # create a catalog query
         logger.info(u"ListingView::search: Prepare catalog query for '{}'"
