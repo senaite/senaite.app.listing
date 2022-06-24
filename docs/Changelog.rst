@@ -1,6 +1,7 @@
 2.3.0 (unreleased)
 ------------------
 
+- #76 Fix multiselect allows duplicates when ResultValue is not a string
 - #75 Reduce logging
 
 
