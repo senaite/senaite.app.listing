@@ -62,7 +62,7 @@ class MultiSelect extends React.Component
 
     # Exclude some options
     props_options = props_options.filter (option) ->
-      option.ResultValue not in exclude_values
+      option.ResultValue.toString() not in exclude_values
 
     # Add an empty option to be displayed by default, but only when no empty
     # option does not exist yet
@@ -129,7 +129,6 @@ class MultiSelect extends React.Component
 
     # Build the selectors
     selectors = []
-    exclude_values = []
     for selected_value in values
       console.log "MultiSelect::build_selectors:value='#{selected_value}'"
       excluded = excluded_values.filter (value) -> value isnt selected_value
