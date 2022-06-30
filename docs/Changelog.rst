@@ -1,6 +1,7 @@
 2.3.0 (unreleased)
 ------------------
 
+- #77 Fix items count in pagination when items are filtered programmatically
 - #76 Fix multiselect allows duplicates when ResultValue is not a string
 - #75 Reduce logging
 
