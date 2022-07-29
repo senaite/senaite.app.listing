@@ -22,6 +22,13 @@
       <input tal:condition="form_adapter_name"
              type="hidden" name="form_adapter_name" value=""
              tal:attributes="value form_adapter_name" />
+
+      <!-- additional hidden fields -->
+      <input
+        type="hidden"
+        tal:repeat="input_attrs python:view.additional_hidden_fields"
+        tal:attributes="python:input_attrs"/>
+
     </tal:has-form>
 
     <!-- ReactJS managed component -->

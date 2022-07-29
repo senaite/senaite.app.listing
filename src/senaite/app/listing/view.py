@@ -120,6 +120,12 @@ class ListingView(AjaxListingView):
     # CSS classes to append to the listing form
     additional_form_class = ""
 
+    # List of dictionaries containing attributes for additional hidden fields.
+    # The keys `name` and `value` must be present, but may also contain other
+    # valid HTML attributes for input fields.
+    # Example: [{"name": "my_parameter", "value": "my_value"}]
+    additional_hidden_fields = []
+
     # Form adapter name that is called when the values are edited.
     # see: `senaite.core.browser.form.adapters` for examples.
     form_adapter_name = ""
