@@ -1,6 +1,7 @@
 1.5.4 (unreleased)
 ------------------
 
+- #78 Fix items count when items are filtered programmatically (#77 port)
 - #61 Make ajax functions to use readonly transactions (ports #49 and #54)
 
 1.5.3 (2021-07-24)

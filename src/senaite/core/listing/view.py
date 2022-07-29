@@ -767,6 +767,9 @@ class ListingView(AjaxListingView):
             brains = self.metadata_search(
                 catalog, query, searchterm, ignorecase)
 
+        # Filter manually?
+        brains = filter(lambda brain: self.isItemAllowed(brain), brains)
+
         # Sort manually?
         if self.manual_sort_on:
             brains = self.sort_brains(brains, sort_on=self.manual_sort_on)
@@ -854,10 +857,6 @@ class ListingView(AjaxListingView):
                 # Maximum number of items to be shown reached!
                 self.show_more = True
                 break
-
-            # check if the item must be rendered
-            if not obj or not self.isItemAllowed(obj):
-                continue
 
             # Building the dictionary with basic items
             item = {
