@@ -114,6 +114,9 @@ class ListingView(AjaxListingView):
     # form_id must be unique for each listing table.
     form_id = "list"
 
+    # Allow manual override with this value, otherwise form_id is used
+    form_name = None
+
     # CSS classes to append to the listing form
     additional_form_class = ""
 
@@ -243,6 +246,18 @@ class ListingView(AjaxListingView):
             logger.info(u"ListingView::before_render::{}.{}".format(
                 subscriber.__module__, subscriber.__class__.__name__))
             subscriber.before_render()
+
+    def get_form_name(self):
+        """Return the name of the form
+
+        NOTE: it must be unique when multiple forms are used, otherwise the
+              values will be combined in the request!
+
+        :returns: The `form_name` attribute of the `form_id` attribute
+        """
+        if self.form_name is None:
+            return self.form_id
+        return self.form_name
 
     @property
     @view.memoize

@@ -2,7 +2,7 @@
   define="portal context/@@plone_portal_state/portal;">
 
   <form name="listing_form"
-        class="form form-inline"
+        class="listing_form form form-inline"
         method="post"
         i18n:domain="senaite.core"
         tal:omit-tag="view/omit_form"
@@ -10,6 +10,7 @@
                     ajax_form_class python:'senaite-ajax-form' if form_adapter_name else '';
                     additional_form_class python:view.additional_form_class"
         tal:attributes="id python:view.form_id;
+                        name python:view.get_form_name();
                         class string:form form-inline ${ajax_form_class} ${additional_form_class};
                         action python:view.getPOSTAction()">
 
