@@ -337,6 +337,7 @@ class AjaxListingView(BrowserView):
 
         config = {
             "form_id": self.form_id,
+            "form_name": self.get_form_name(),
             "review_states": self.get_review_states(),
             "columns": self.get_columns(),
             "content_filter": self.contentFilter,
