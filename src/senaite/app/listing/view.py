@@ -902,6 +902,9 @@ class ListingView(AjaxListingView):
             "choices": {},
             "class": {},
             "tabindex": {},
+            # allows to set a per column help text, e.g.
+            # item["help"]["result"] = _("Some help text for the result")
+            "help": {},
         }
         item.update(**kw)
         return item
