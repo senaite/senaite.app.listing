@@ -106,9 +106,10 @@ class NumericField extends React.Component
    * @param value {string} a numeric string value
   ###
   get_field_size_for: (value) ->
-    if value.length < @props.size
+    length = value.toString().length
+    if length < @props.size
       return @props.size
-    return value.length
+    return length
 
 
   ###*
