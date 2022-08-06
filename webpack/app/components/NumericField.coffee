@@ -46,7 +46,7 @@ class NumericField extends React.Component
     # Remove any trailing dots
     value = value.replace(/\.*$/, "")
     # Validate if the entered value can be converted to a Number
-    if not @is_number(value)
+    if not @validate(value)
       value = ""
     # Set the sanitized value back to the field
     el.value = value
@@ -112,11 +112,13 @@ class NumericField extends React.Component
 
 
   ###*
-   * Checks if a value is a number
-   * @param value {string} the float value to validate
+   * Checks if the entered value is valid
+   * @param value {string} the value
   ###
-  is_number: (value) ->
-    return not Number.isNaN(Number(value))
+  validate: (value) ->
+    # strip off detection limits
+    number = value.replace /(^[<,>]?)(.*)/, "$2"
+    return not Number.isNaN(Number(number))
 
 
   render: ->
