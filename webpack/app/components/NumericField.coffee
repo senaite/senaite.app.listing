@@ -16,6 +16,7 @@ class NumericField extends React.Component
     # remember the initial value
     @state =
       value: props.defaultValue
+      size: @get_field_size_for(props.defaultValue)
 
     # bind event handler to the current context
     @on_blur = @on_blur.bind @
@@ -44,9 +45,15 @@ class NumericField extends React.Component
     value = el.value
     # Remove any trailing dots
     value = value.replace(/\.*$/, "")
+    # Validate if the entered value can be converted to a Number
+    if not @is_number(value)
+      value = ""
     # Set the sanitized value back to the field
     el.value = value
-
+    # store the sanitized value in the state
+    @setState
+      value: value
+      size: @get_field_size_for(value)
     console.debug "NumericField::on_blur: value=#{value}"
 
     # Call the *save* field handler with the UID, name, value
@@ -69,10 +76,10 @@ class NumericField extends React.Component
     value = @to_float value
     # Set the float value back to the field
     el.value = value
-
     # store the new value
     @setState
       value: value
+      size: @get_field_size_for(value)
 
     console.debug "NumericField::on_change: value=#{value}"
 
@@ -94,11 +101,29 @@ class NumericField extends React.Component
     value = value.replace(",", ".")
     return value
 
+  ###*
+   * Calculate the field size for the given value to make all digits visble
+   * @param value {string} a numeric string value
+  ###
+  get_field_size_for: (value) ->
+    if value.legth < @props.size
+      return @props.size
+    return value.legth
+
+
+  ###*
+   * Checks if a value is a number
+   * @param value {string} the float value to validate
+  ###
+  is_number: (value) ->
+    return not Number.isNaN(Number(value))
+
+
   render: ->
     <span className="form-group">
       {@props.before and <span className="before_field" dangerouslySetInnerHTML={{__html: @props.before}}></span>}
       <input type="text"
-             size={@props.size or 5}
+             size={@state.size}
              uid={@props.uid}
              name={@props.name}
              value={@state.value}
