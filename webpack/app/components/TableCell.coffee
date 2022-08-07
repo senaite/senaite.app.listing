@@ -391,6 +391,7 @@ class TableCell extends React.Component
     converter = @ZPUBLISHER_CONVERTER["numeric"]
     fieldname = name + converter
     title = @props.column.title or column_key
+    help = item.help.result
     selected = @is_selected()
     disabled = @is_disabled()
     required = @is_required()
@@ -407,6 +408,7 @@ class TableCell extends React.Component
         defaultValue={value}
         column_key={column_key}
         title={title}
+        help={help}
         formatted_value={formatted_value}
         placeholder={title}
         selected={selected}

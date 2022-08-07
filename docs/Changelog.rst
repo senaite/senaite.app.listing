@@ -1,6 +1,7 @@
 2.3.0 (unreleased)
 ------------------
 
+- #81 Allow scientific notation for numeric results
 - #80 Allow additional hidden fields in listing form
 - #79 Avoid duplicate listing form names
 - #77 Fix items count in pagination when items are filtered programmatically
