@@ -1,6 +1,7 @@
 1.5.4 (unreleased)
 ------------------
 
+- #83 Allow custom confirmation messages for transitions (#82 port)
 - #78 Fix items count when items are filtered programmatically (#77 port)
 - #61 Make ajax functions to use readonly transactions (ports #49 and #54)
 
