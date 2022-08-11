@@ -1,6 +1,7 @@
 2.3.0 (unreleased)
 ------------------
 
+- #82 Allow custom confirmation messages for transitions
 - #81 Allow scientific notation for numeric results
 - #80 Allow additional hidden fields in listing form
 - #79 Avoid duplicate listing form names
