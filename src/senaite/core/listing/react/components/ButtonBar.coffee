@@ -151,6 +151,11 @@ class ButtonBar extends React.Component
         attrs["data-toggle"] = "confirmation"
         attrs["data-title"] = "#{title}?"
 
+        confirm_messages = @props.review_state.confirm_messages or {}
+        confirm_message = _(confirm_messages[id])
+        if confirm_message
+          attrs["data-content"] = "#{confirm_message}"
+
       buttons.push(
         <li key={transition.id}>
           <Button
