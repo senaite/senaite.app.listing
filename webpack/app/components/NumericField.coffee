@@ -97,7 +97,7 @@ class NumericField extends React.Component
     # Non Valid: -.5.5; 0,5,5; ...;
     #
     # New in version 2.3: Allow exponential notation, e.g. 1e-5 for 0.00005 or 1e5 for 10000
-    value = value.replace /(^[-,<,>]?)(\d*)([e][-,\+]?\d*|[\.,\,]?\d*)(.*)/, "$1$2$3"
+    value = value.replace /(^[-,<,>]?)(\d*)([e,E][-,\+]?\d*|[\.,\,]?\d*)(.*)/, "$1$2$3"
     value = value.replace(",", ".")
     return value
 

@@ -1,6 +1,7 @@
 2.3.0 (unreleased)
 ------------------
 
+- #84 Support capital "E" for scientific notation
 - #82 Allow custom confirmation messages for transitions
 - #81 Allow scientific notation for numeric results
 - #80 Allow additional hidden fields in listing form
