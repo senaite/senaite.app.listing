@@ -381,7 +381,9 @@ class TableCell extends React.Component
   create_numeric_field: ({props}={}) ->
     column_key = @get_column_key()
     item = @get_item()
+    column = @get_column()
     props ?= {}
+    item.help ?= {}
 
     name = @get_name()
     value = @get_value()
@@ -391,7 +393,7 @@ class TableCell extends React.Component
     converter = @ZPUBLISHER_CONVERTER["numeric"]
     fieldname = name + converter
     title = @props.column.title or column_key
-    help = item.help.result
+    help = item.help[column_key] or column.help
     selected = @is_selected()
     disabled = @is_disabled()
     required = @is_required()
