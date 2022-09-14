@@ -173,6 +173,8 @@ class ListingController extends React.Component
       show_table_footer: no
       fetch_transitions_on_select: yes
       show_export: yes
+      # signal full folderitems refetch in ajax_save
+      refetch: false
 
 
   ###*
@@ -925,6 +927,7 @@ class ListingController extends React.Component
       @setState
         show_ajax_save: yes
         ajax_save_queue: ajax_save_queue
+        refetch: column.refetch or false
       , ->
         if column.autosave
           me.ajax_save()
@@ -1116,7 +1119,8 @@ class ListingController extends React.Component
     # expand all categories for searches
     if @state.filter
       return [].concat @state.categories
-    return []
+    # return the current expanded categories
+    return @state.expanded_categories
 
   ###*
    * Create a mapping of UID -> folderitem
@@ -1342,20 +1346,24 @@ class ListingController extends React.Component
       # ensure that all updated UIDs are also selected
       uids.map (uid, index) -> me.selectUID uid, yes
 
-      # folderitems of the updated objects and their dependencies
-      folderitems = data.folderitems or []
-
-      # update the existing folderitems
-      me.update_existing_folderitems_with folderitems
-
-      # fetch all possible transitions
-      if me.state.fetch_transitions_on_select
-        me.fetch_transitions()
+      # refetch or update folderitems
+      if me.state.refetch
+        # refetch all folderitems
+        me.fetch_folderitems()
+      else
+        # folderitems of the updated objects and their dependencies
+        folderitems = data.folderitems or []
+        # update the existing folderitems
+        me.update_existing_folderitems_with folderitems
+        # fetch all possible transitions
+        if me.state.fetch_transitions_on_select
+          me.fetch_transitions()
 
       # empty the ajax save queue and hide the save button
       me.setState
         show_ajax_save: no
         ajax_save_queue: {}
+        refetch: false
 
       # toggle loader off
       me.toggle_loader off
