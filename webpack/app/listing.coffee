@@ -848,7 +848,16 @@ class ListingController extends React.Component
       @toggle_loader off
       # refetch folderitems w/o keeping missing items from the current folderitems.
       # E.g. we do not want a retracted analysis to be displayed as editable in the listing.
-      @fetch_folderitems false
+      promise = @fetch_folderitems false
+      promise.then (data) =>
+        # send event to update e.g. the transition menu
+        event = new CustomEvent "listing:submit",
+          detail:
+            data: data
+            folderitems: data.folderitems
+            form: form
+            action: form.action
+        document.body.dispatchEvent event
     .catch (error) =>
       @toggle_loader off
       console.error(error)
