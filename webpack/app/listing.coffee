@@ -88,6 +88,7 @@ class ListingController extends React.Component
     @pagesize = parseInt @root_el.dataset.pagesize
     @review_states = JSON.parse @root_el.dataset.review_states
     @show_column_toggles = JSON.parse @root_el.dataset.show_column_toggles
+    @enable_ajax_transitions = JSON.parse @root_el.dataset.enable_ajax_transitions
 
     # bind event handlers
     @root_el.addEventListener "reload", @on_reload
@@ -800,17 +801,53 @@ class ListingController extends React.Component
     action = id.split("_transition")[0]
 
     # inject workflow action id for `BikaListing._get_form_workflow_action`
-    input = @create_input_element "hidden", id,  "workflow_action_id", action
-    form.appendChild input
+    action_id_input = @create_input_element "hidden", id,  "workflow_action_id", action
+    form.appendChild action_id_input
 
     # inject the id of the form
-    input = @create_input_element "hidden", "form_id", "form_id", @state.form_id
-    form.appendChild input
+    form_id_input = @create_input_element "hidden", "form_id", "form_id", @state.form_id
+    form.appendChild form_id_input
 
     # Override the form action when a custom URL is given
     if url then form.action = url
 
-    return form.submit()
+    if @enable_ajax_transitions
+      # ajax form submit
+      @ajax_post_form(form)
+      # cleanup hidden fields
+      form.removeChild action_id_input
+      form.removeChild form_id_input
+    else
+      # do a classic form submit
+      form.submit()
+
+  ###*
+   * Submit form via ajax
+   *
+   * @param form {element} The form to post
+  ###
+  ajax_post_form: (form) ->
+    # turn loader on
+    @toggle_loader on
+    # process form submit
+    fetch form.action,
+      method: "POST",
+      body: new FormData(form)
+    .then (response) =>
+      if not response.ok
+        return Promise.reject(response)
+      if response.redirected
+        url = response.url or location.href
+        # only redirect to different URLs
+        if not location.href.startsWith(url)
+         location.href = url
+      return response.text()
+    .then (text) =>
+      @toggle_loader off
+      @fetch_folderitems()
+    .catch (error) =>
+      @toggle_loader off
+      console.error(error)
 
   ###*
    * Creates an input element with the attributes passed-in
