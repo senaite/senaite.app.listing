@@ -159,21 +159,6 @@ class TableCell extends React.Component
     return size
 
   ###*
-   *  Returns the unit of the interimfield or of the folderitem
-  ###
-  get_formatted_unit: ->
-    column_key = @get_column_key()
-    item = @get_item()
-    unit = item.Unit
-    # extract the unit from the interim field
-    # {value: "", keyword: "", formatted_value: "", unit: "", title: ""}
-    if @is_interimfield()
-      unit = item[column_key].unit
-    if not unit
-      return ""
-    return "<span class='unit'>#{unit}</span>"
-
-  ###*
    * Create a mapping of interim keyword -> interim field
    *
    * Interim fields are record fields with a format like this:
@@ -205,21 +190,11 @@ class TableCell extends React.Component
   get_formatted_value: ->
     column_key = @get_column_key()
     item = @get_item()
-
     # replacement html or plain value of the current column
     formatted_value = item.replace[column_key] or @get_value()
-
     # use the formatted result
     if @is_result_column()
       formatted_value = item.formatted_result or formatted_value
-      # Append the unit to the formatted value
-      if formatted_value
-        formatted_value += @get_formatted_unit()
-    else if @is_interimfield()
-      # Append the unit to the formatted value
-      if formatted_value
-        formatted_value += @get_formatted_unit()
-
     return formatted_value
 
   get_type: ->
@@ -319,7 +294,6 @@ class TableCell extends React.Component
     name = @get_name()
     value = @get_value()
     formatted_value = @get_formatted_value()
-    unit = @get_formatted_unit()
     uid = @get_uid()
     title = @props.column.title or column_key
     selected = @is_selected()
@@ -341,7 +315,6 @@ class TableCell extends React.Component
         selected={selected}
         required={required}
         className={css_class}
-        after={unit}
         update_editable_field={@props.update_editable_field}
         save_editable_field={@props.save_editable_field}
         {...props}
@@ -388,7 +361,6 @@ class TableCell extends React.Component
     name = @get_name()
     value = @get_value()
     formatted_value = @get_formatted_value()
-    unit = @get_formatted_unit()
     uid = @get_uid()
     converter = @ZPUBLISHER_CONVERTER["numeric"]
     fieldname = name + converter
@@ -417,7 +389,6 @@ class TableCell extends React.Component
         disabled={disabled}
         required={required}
         className={css_class}
-        after={unit}
         update_editable_field={@props.update_editable_field}
         save_editable_field={@props.save_editable_field}
         tabIndex={@props.tabIndex}
@@ -438,7 +409,6 @@ class TableCell extends React.Component
     name = @get_name()
     value = @get_value()
     formatted_value = @get_formatted_value()
-    unit = @get_formatted_unit()
     uid = @get_uid()
     converter = @ZPUBLISHER_CONVERTER["string"]
     fieldname = name + converter
@@ -464,7 +434,6 @@ class TableCell extends React.Component
         disabled={disabled}
         required={required}
         className={css_class}
-        after={unit}
         update_editable_field={@props.update_editable_field}
         save_editable_field={@props.save_editable_field}
         tabIndex={@props.tabIndex}
@@ -485,7 +454,6 @@ class TableCell extends React.Component
     name = @get_name()
     value = @get_value()
     formatted_value = @get_formatted_value()
-    unit = @get_formatted_unit()
     uid = @get_uid()
     converter = @ZPUBLISHER_CONVERTER["string"]
     fieldname = name + converter
@@ -522,7 +490,6 @@ class TableCell extends React.Component
         required={required}
         className={css_class}
         results_type={result_type}
-        after={unit}
         update_editable_field={@props.update_editable_field}
         save_editable_field={@props.save_editable_field}
         tabIndex={@props.tabIndex}
