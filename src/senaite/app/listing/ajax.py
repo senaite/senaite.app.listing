@@ -39,6 +39,7 @@ from senaite.app.listing.interfaces import IChildFolderItems
 from senaite.core.decorators import readonly_transaction
 from senaite.core.interfaces import IDataManager
 from senaite.core.p3compat import cmp
+from senaite.core.registry import get_registry_record
 from zope import event
 from zope.component import getMultiAdapter
 from zope.component import queryAdapter
@@ -308,8 +309,7 @@ class AjaxListingView(BrowserView):
         """
         if self.enable_ajax_transitions in [True, False]:
             return self.enable_ajax_transitions
-        # TODO: Lookup value registry/setup
-        return True
+        return get_registry_record("listing_enable_ajax_transitions", False)
 
     @translate
     def get_folderitems(self):
