@@ -191,7 +191,11 @@ class TableCell extends React.Component
     column_key = @get_column_key()
     item = @get_item()
     # replacement html or plain value of the current column
-    return item.replace[column_key] or @get_value()
+    formatted_value = item.replace[column_key] or @get_value()
+    # use the formatted result
+    if @is_result_column()
+      formatted_value = item.formatted_result or formatted_value
+    return formatted_value
 
   get_type: ->
     column_key = @get_column_key()
