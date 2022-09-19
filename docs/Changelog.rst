@@ -1,6 +1,7 @@
 2.3.0 (unreleased)
 ------------------
 
+- #86 Do not inject unit implicitly for fields
 - #85 Support to refetch all folderitems on save
 - #84 Support capital "E" for scientific notation
 - #82 Allow custom confirmation messages for transitions
