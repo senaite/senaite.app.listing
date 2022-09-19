@@ -151,6 +151,9 @@ class ListingView(AjaxListingView):
     # Automatically fetch all possible transitions for selected items.
     fetch_transitions_on_select = True
 
+    # Submit transitions via ajax
+    enable_ajax_transitions = None
+
     # Allow to show/hide columns by right-clicking on the column header.
     show_column_toggles = True
 

@@ -302,6 +302,15 @@ class AjaxListingView(BrowserView):
         """
         return self.show_column_toggles
 
+    @returns_safe_json
+    def ajax_transitions_enabled(self):
+        """Returns wether transitions should be submitted via ajax
+        """
+        if self.enable_ajax_transitions in [True, False]:
+            return self.enable_ajax_transitions
+        # TODO: Lookup value registry/setup
+        return True
+
     @translate
     def get_folderitems(self):
         """This method calls the folderitems method

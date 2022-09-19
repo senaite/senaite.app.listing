@@ -35,6 +35,7 @@
     <div class="ajax-contents-table w-100"
          tal:attributes="data-form_id python:view.form_id;
                          data-listing_identifier python:view.listing_identifier;
+                         data-enable_ajax_transitions python:view.ajax_transitions_enabled();
                          data-pagesize python:view.pagesize;
                          data-api_url python:view.get_api_url();
                          data-columns python:view.ajax_columns();
