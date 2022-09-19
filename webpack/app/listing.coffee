@@ -812,11 +812,13 @@ class ListingController extends React.Component
     if url then form.action = url
 
     if @enable_ajax_transitions
-      # ajax form submit
-      @ajax_post_form(form)
-      # cleanup hidden fields
-      form.removeChild action_id_input
-      form.removeChild form_id_input
+      # always save pending items of the save_queue
+      @saveAjaxQueue().then (data) =>
+        # ajax form submit
+        @ajax_post_form(form)
+        # cleanup hidden fields
+        form.removeChild action_id_input
+        form.removeChild form_id_input
     else
       # do a classic form submit
       form.submit()
@@ -844,7 +846,9 @@ class ListingController extends React.Component
       return response.text()
     .then (text) =>
       @toggle_loader off
-      @fetch_folderitems()
+      # refetch folderitems w/o keeping missing items from the current folderitems.
+      # E.g. we do not want a retracted analysis to be displayed as editable in the listing.
+      @fetch_folderitems false
     .catch (error) =>
       @toggle_loader off
       console.error(error)
@@ -933,7 +937,10 @@ class ListingController extends React.Component
   ###
   saveAjaxQueue: ->
     uids = Object.keys @state.ajax_save_queue
-    return false unless uids.length > 0
+    if uids.length == 0
+      promise = new Promise (resolve, reject) =>
+          resolve()
+      return promise
     return @ajax_save()
 
   ###*
@@ -1244,7 +1251,7 @@ class ListingController extends React.Component
    *
    * @returns {Promise} for the API fetch folderitems call
   ###
-  fetch_folderitems: ->
+  fetch_folderitems: (keep_selected=yes) ->
 
     # turn loader on
     @toggle_loader on
@@ -1280,6 +1287,8 @@ class ListingController extends React.Component
 
       # keep selected and potentially modified folderitems in the table
       for uid in me.state.selected_uids
+        if not keep_selected
+          continue
         # inject missing folderitems into the server sent folderitems
         if uid not of new_folderitems
           # get the missing folderitem from the current state
