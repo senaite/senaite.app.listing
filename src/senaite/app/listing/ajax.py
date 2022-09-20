@@ -47,6 +47,11 @@ from zope.interface import implementer
 from zope.lifecycleevent import modified
 from zope.publisher.interfaces import IPublishTraverse
 
+NO_AJAX_TRANSITION_TYPES = [
+    "Samples",  # all transition buttons are redirects
+    "AnalysisServices",  # copy action not working in Ajax mode
+]
+
 
 @implementer(IAjaxListingView, IPublishTraverse)
 class AjaxListingView(BrowserView):
@@ -307,6 +312,9 @@ class AjaxListingView(BrowserView):
     def ajax_transitions_enabled(self):
         """Returns wether transitions should be submitted via ajax
         """
+        portal_type = api.get_portal_type(self.context)
+        if portal_type in NO_AJAX_TRANSITION_TYPES:
+            return False
         if self.enable_ajax_transitions in [True, False]:
             return self.enable_ajax_transitions
         return get_registry_record("listing_enable_ajax_transitions", False)
