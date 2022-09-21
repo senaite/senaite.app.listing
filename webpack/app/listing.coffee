@@ -837,7 +837,9 @@ class ListingController extends React.Component
       body: new FormData(form)
     .then (response) =>
       if not response.ok
-        return Promise.reject(response)
+        Promise.reject(response)
+        # eventually display a status message
+        location.reload()
 
       if response.redirected
         url = response.url or location.href
