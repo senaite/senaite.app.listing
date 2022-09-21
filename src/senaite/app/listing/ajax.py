@@ -51,6 +51,7 @@ NO_AJAX_TRANSITION_TYPES = [
     "Samples",  # all transition buttons are redirects
     "AnalysisServices",  # copy action not working in Ajax mode
     "WorksheetFolder",  # delete action not working in Ajax mode
+    "Client",  # All WF actions redirect back to /cllient-id/analysisrequests
 ]
 
 NO_AJAX_TRANSITION_VIEWS = [
