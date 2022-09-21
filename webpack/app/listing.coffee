@@ -839,12 +839,11 @@ class ListingController extends React.Component
       if not response.ok
         return Promise.reject(response)
 
-      # handle URL actions or redirects
-      url = response.url or location.href
-      # only redirect to different URLs
-      if not location.href.startsWith(url)
-        location.href = url
-
+      if response.redirected
+        url = response.url or location.href
+        # only redirect to different URLs
+        if not location.href.startsWith(url)
+         location.href = url
       return response.text()
     .then (text) =>
       @toggle_loader off
