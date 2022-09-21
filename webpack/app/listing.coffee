@@ -1293,13 +1293,18 @@ class ListingController extends React.Component
       new_folderitems = me.group_by_uid data.folderitems
       # new categories from the server
       new_categories = data.categories or []
+      # list of new selected UIDs
+      selected_uids = [].concat me.state.selected_uids
 
       # keep selected and potentially modified folderitems in the table
       for uid in me.state.selected_uids
-        if not keep_selected
-          continue
         # inject missing folderitems into the server sent folderitems
         if uid not of new_folderitems
+          if not keep_selected
+            # remove UID from selected_uids
+            pos = selected_uids.indexOf uid
+            selected_uids.splice pos, 1
+            continue
           # get the missing folderitem from the current state
           folderitem = existing_folderitems[uid]
           # skip if the selected UID is not in the existing folderitems
@@ -1324,6 +1329,7 @@ class ListingController extends React.Component
         # calculate the new expanded categories and the internal folderitems mapping
         me.setState
           expanded_categories: me.get_expanded_categories()
+          selected_uids: selected_uids
         , ->
           console.debug "ListingController::fetch_folderitems: NEW STATE=", me.state
         # turn loader off
