@@ -50,6 +50,7 @@ from zope.publisher.interfaces import IPublishTraverse
 NO_AJAX_TRANSITION_TYPES = [
     "Samples",  # all transition buttons are redirects
     "AnalysisServices",  # copy action not working in Ajax mode
+    "WorksheetFolder",  # delete action not working in Ajax mode
 ]
 
 
