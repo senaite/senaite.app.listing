@@ -53,6 +53,11 @@ NO_AJAX_TRANSITION_TYPES = [
     "WorksheetFolder",  # delete action not working in Ajax mode
 ]
 
+NO_AJAX_TRANSITION_VIEWS = [
+    "reports_listing",  # download action not working in Ajax mode
+    "published_results",  # download action not working in Ajax mode
+]
+
 
 @implementer(IAjaxListingView, IPublishTraverse)
 class AjaxListingView(BrowserView):
@@ -313,8 +318,12 @@ class AjaxListingView(BrowserView):
     def ajax_transitions_enabled(self):
         """Returns wether transitions should be submitted via ajax
         """
+        # always disable ajax transitions for some types
         portal_type = api.get_portal_type(self.context)
         if portal_type in NO_AJAX_TRANSITION_TYPES:
+            return False
+        # always disable ajax transitions for some views
+        if self.__name__ in NO_AJAX_TRANSITION_VIEWS:
             return False
         if self.enable_ajax_transitions in [True, False]:
             return self.enable_ajax_transitions
