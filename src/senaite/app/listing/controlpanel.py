@@ -16,6 +16,7 @@ class IListingRegistry(ISenaiteRegistry):
         description=_("Configuration for listings"),
         fields=[
             "listing_enable_ajax_transitions",
+            "listing_ajax_transitions_blacklist",
         ],
     )
 
@@ -25,5 +26,22 @@ class IListingRegistry(ISenaiteRegistry):
             "Enable ajax form submission for transition buttons (Experimental)"
         ),
         default=False,
+        required=False,
+    )
+
+    listing_ajax_transitions_blacklist = schema.List(
+        title=_("Ajax Transitions Blacklist"),
+        description=_(
+            "Always disable ajax form submissions for the listed types/views"
+        ),
+        value_type=schema.ASCIILine(),
+        default=[
+            "AnalysisServices",  # copy action not working in Ajax mode
+            "Client",  # All WF actions redirect back to samples listing
+            "Samples",  # all transition buttons are redirects
+            "WorksheetFolder",  # delete action not working in Ajax mode
+            "published_results",  # download action not working in Ajax mode
+            "reports_listing",  # download action not working in Ajax mode
+        ],
         required=False,
     )
