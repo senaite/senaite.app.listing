@@ -47,18 +47,6 @@ from zope.interface import implementer
 from zope.lifecycleevent import modified
 from zope.publisher.interfaces import IPublishTraverse
 
-NO_AJAX_TRANSITION_TYPES = [
-    "Samples",  # all transition buttons are redirects
-    "AnalysisServices",  # copy action not working in Ajax mode
-    "WorksheetFolder",  # delete action not working in Ajax mode
-    "Client",  # All WF actions redirect back to /cllient-id/analysisrequests
-]
-
-NO_AJAX_TRANSITION_VIEWS = [
-    "reports_listing",  # download action not working in Ajax mode
-    "published_results",  # download action not working in Ajax mode
-]
-
 
 @implementer(IAjaxListingView, IPublishTraverse)
 class AjaxListingView(BrowserView):
@@ -315,20 +303,26 @@ class AjaxListingView(BrowserView):
         """
         return self.show_column_toggles
 
+    @view.memoize
     @returns_safe_json
     def ajax_transitions_enabled(self):
         """Returns wether transitions should be submitted via ajax
         """
-        # always disable ajax transitions for some types
-        portal_type = api.get_portal_type(self.context)
-        if portal_type in NO_AJAX_TRANSITION_TYPES:
+        # return immediately if disabled globally
+        enabled = get_registry_record("listing_enable_ajax_transitions", False)
+        if not enabled:
             return False
-        # always disable ajax transitions for some views
-        if self.__name__ in NO_AJAX_TRANSITION_VIEWS:
+        blist = get_registry_record("listing_ajax_transitions_blacklist", [])
+        # return immediately if the portal type is blacklisted
+        if api.get_portal_type(self.context) in blist:
             return False
-        if self.enable_ajax_transitions in [True, False]:
-            return self.enable_ajax_transitions
-        return get_registry_record("listing_enable_ajax_transitions", False)
+        # return immediately if the current view name is blacklisted
+        if self.__name__ in blist:
+            return False
+        # return immediately if the current view disabled ajax transitions
+        if self.enable_ajax_transitions is False:
+            return False
+        return True
 
     @translate
     def get_folderitems(self):
