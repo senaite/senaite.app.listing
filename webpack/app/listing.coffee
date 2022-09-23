@@ -88,6 +88,7 @@ class ListingController extends React.Component
     @pagesize = parseInt @root_el.dataset.pagesize
     @review_states = JSON.parse @root_el.dataset.review_states
     @show_column_toggles = JSON.parse @root_el.dataset.show_column_toggles
+    @enable_ajax_transitions = JSON.parse @root_el.dataset.enable_ajax_transitions
 
     # bind event handlers
     @root_el.addEventListener "reload", @on_reload
@@ -800,17 +801,69 @@ class ListingController extends React.Component
     action = id.split("_transition")[0]
 
     # inject workflow action id for `BikaListing._get_form_workflow_action`
-    input = @create_input_element "hidden", id,  "workflow_action_id", action
-    form.appendChild input
+    action_id_input = @create_input_element "hidden", id,  "workflow_action_id", action
+    form.appendChild action_id_input
 
     # inject the id of the form
-    input = @create_input_element "hidden", "form_id", "form_id", @state.form_id
-    form.appendChild input
+    form_id_input = @create_input_element "hidden", "form_id", "form_id", @state.form_id
+    form.appendChild form_id_input
 
     # Override the form action when a custom URL is given
     if url then form.action = url
 
-    return form.submit()
+    if @enable_ajax_transitions
+      # always save pending items of the save_queue
+      @saveAjaxQueue().then (data) =>
+        # ajax form submit
+        @ajax_post_form(form)
+        # cleanup hidden fields
+        form.removeChild action_id_input
+        form.removeChild form_id_input
+    else
+      # do a classic form submit
+      form.submit()
+
+  ###*
+   * Submit form via ajax
+   *
+   * @param form {element} The form to post
+  ###
+  ajax_post_form: (form) ->
+    # turn loader on
+    @toggle_loader on
+    # process form submit
+    fetch form.action,
+      method: "POST",
+      body: new FormData(form)
+    .then (response) =>
+      if not response.ok
+        Promise.reject(response)
+        # eventually display a status message
+        location.reload()
+
+      if response.redirected
+        url = response.url or location.href
+        # only redirect to different URLs
+        if not location.href.startsWith(url)
+         location.href = url
+      return response.text()
+    .then (text) =>
+      @toggle_loader off
+      # refetch folderitems w/o keeping missing items from the current folderitems.
+      # E.g. we do not want a retracted analysis to be displayed as editable in the listing.
+      promise = @fetch_folderitems false
+      promise.then (data) =>
+        # send event to update e.g. the transition menu
+        event = new CustomEvent "listing:submit",
+          detail:
+            data: data
+            folderitems: data.folderitems
+            form: form
+            action: form.action
+        document.body.dispatchEvent event
+    .catch (error) =>
+      @toggle_loader off
+      console.error(error)
 
   ###*
    * Creates an input element with the attributes passed-in
@@ -896,7 +949,10 @@ class ListingController extends React.Component
   ###
   saveAjaxQueue: ->
     uids = Object.keys @state.ajax_save_queue
-    return false unless uids.length > 0
+    if uids.length == 0
+      promise = new Promise (resolve, reject) =>
+          resolve()
+      return promise
     return @ajax_save()
 
   ###*
@@ -1207,7 +1263,7 @@ class ListingController extends React.Component
    *
    * @returns {Promise} for the API fetch folderitems call
   ###
-  fetch_folderitems: ->
+  fetch_folderitems: (keep_selected=yes) ->
 
     # turn loader on
     @toggle_loader on
@@ -1240,11 +1296,18 @@ class ListingController extends React.Component
       new_folderitems = me.group_by_uid data.folderitems
       # new categories from the server
       new_categories = data.categories or []
+      # list of new selected UIDs
+      selected_uids = [].concat me.state.selected_uids
 
       # keep selected and potentially modified folderitems in the table
       for uid in me.state.selected_uids
         # inject missing folderitems into the server sent folderitems
         if uid not of new_folderitems
+          if not keep_selected
+            # remove UID from selected_uids
+            pos = selected_uids.indexOf uid
+            selected_uids.splice pos, 1
+            continue
           # get the missing folderitem from the current state
           folderitem = existing_folderitems[uid]
           # skip if the selected UID is not in the existing folderitems
@@ -1269,6 +1332,7 @@ class ListingController extends React.Component
         # calculate the new expanded categories and the internal folderitems mapping
         me.setState
           expanded_categories: me.get_expanded_categories()
+          selected_uids: selected_uids
         , ->
           console.debug "ListingController::fetch_folderitems: NEW STATE=", me.state
         # turn loader off
