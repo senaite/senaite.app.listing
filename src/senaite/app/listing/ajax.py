@@ -39,6 +39,7 @@ from senaite.app.listing.interfaces import IChildFolderItems
 from senaite.core.decorators import readonly_transaction
 from senaite.core.interfaces import IDataManager
 from senaite.core.p3compat import cmp
+from senaite.core.registry import get_registry_record
 from zope import event
 from zope.component import getMultiAdapter
 from zope.component import queryAdapter
@@ -301,6 +302,27 @@ class AjaxListingView(BrowserView):
         """Returns the boolean value of the show_column_toggles attribute
         """
         return self.show_column_toggles
+
+    @view.memoize
+    @returns_safe_json
+    def ajax_transitions_enabled(self):
+        """Returns wether transitions should be submitted via ajax
+        """
+        # return immediately if disabled globally
+        enabled = get_registry_record("listing_enable_ajax_transitions", False)
+        if not enabled:
+            return False
+        blist = get_registry_record("listing_ajax_transitions_blacklist", [])
+        # return immediately if the portal type is blacklisted
+        if api.get_portal_type(self.context) in blist:
+            return False
+        # return immediately if the current view name is blacklisted
+        if self.__name__ in blist:
+            return False
+        # return immediately if the current view disabled ajax transitions
+        if self.enable_ajax_transitions is False:
+            return False
+        return True
 
     @translate
     def get_folderitems(self):

@@ -10,6 +10,7 @@
 
   <!-- package includes -->
   <include package=".adapters" />
+  <include package=".upgrades" />
 
   <!-- Static directory for js, css and image resources -->
   <plone:static
