@@ -1296,8 +1296,10 @@ class ListingController extends React.Component
       new_folderitems = me.group_by_uid data.folderitems
       # new categories from the server
       new_categories = data.categories or []
-      # list of new selected UIDs
-      selected_uids = [].concat me.state.selected_uids
+      # list of server side selected UIDs
+      server_selected_uids = data.selected_uids or []
+      # list of current selected UIDs
+      selected_uids = new Set(me.state.selected_uids)
 
       # keep selected and potentially modified folderitems in the table
       for uid in me.state.selected_uids
@@ -1305,8 +1307,7 @@ class ListingController extends React.Component
         if uid not of new_folderitems
           if not keep_selected
             # remove UID from selected_uids
-            pos = selected_uids.indexOf uid
-            selected_uids.splice pos, 1
+            selected_uids.delete uid
             continue
           # get the missing folderitem from the current state
           folderitem = existing_folderitems[uid]
@@ -1321,6 +1322,12 @@ class ListingController extends React.Component
             new_categories.push category
             # XXX unfortunately any sortKey sorting of the category get lost here
             new_categories.sort()
+
+      # append selected UIDs set from the server
+      for uid in server_selected_uids
+        selected_uids.add uid
+      # convert to array_
+      selected_uids = Array.from selected_uids
 
       # write back new categories
       data.categories = new_categories
