@@ -98,7 +98,12 @@ class NumericField extends React.Component
     #
     # New in version 2.3: Allow exponential notation
     # Valid: 1e-5 for 0.00005; 1e5 for 10000; 1.35e2 for 135
-    value = value.replace /(^[-,<,>]?)(\d*)([\.,\,]?[0-9]+?[e,E][-,\+]?\d*|[\.,\,]?\d*)(.*)/, "$1$2$3"
+    regex = new RegExp(
+        '(^[-,<,>]?)' +
+        '([-,\+]?\\d*)' +
+        '([e,E][-,\+]?\\d*|[\.,\,]?[0-9]+?[e,E][-,\+]?\\d*|[\.,\,]?\\d*)' +
+        '(.*)')
+    value = value.replace(regex, "$1$2$3")
     value = value.replace(",", ".")
     return value
 
