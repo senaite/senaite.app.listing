@@ -42,6 +42,7 @@ class IListingRegistry(ISenaiteRegistry):
             "WorksheetFolder",  # delete action not working in Ajax mode
             "published_results",  # download action not working in Ajax mode
             "reports_listing",  # download action not working in Ajax mode
+            "add_analyses",  # better to reload WS assign analyses
         ],
         required=False,
     )
