@@ -43,7 +43,7 @@ class IListingRegistry(ISenaiteRegistry):
             "published_results",  # download action not working in Ajax mode
             "reports_listing",  # download action not working in Ajax mode
             "add_analyses",  # reload after assigning analyses in worksheets
-            "manage_analyses",  # reload after adding analyses in samples
+            "analyses",  # reload after adding analyses in samples
         ],
         required=False,
     )
