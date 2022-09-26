@@ -1,6 +1,7 @@
 2.3.0 (unreleased)
 ------------------
 
+- #92 Add workflow state of view context to listing config
 - #87 Add support to submit transitions via Ajax
 - #86 Do not inject unit implicitly for fields
 - #85 Support to refetch all folderitems on save

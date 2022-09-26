@@ -388,6 +388,7 @@ class AjaxListingView(BrowserView):
             "sortable_columns": self.get_sortable_columns(),
             "show_search": self.show_search,
             "fetch_transitions_on_select": self.fetch_transitions_on_select,
+            "view_context_state": api.get_workflow_status_of(self.context),
         }
 
         return config
