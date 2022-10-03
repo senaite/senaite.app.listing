@@ -155,18 +155,23 @@ Used libraries:
 
 ### Prerequisites
 
-You need `node` and `npm` installed:
-
-    » npm --version
-    6.5.0
+You need `node` and `npm` and `yarn` installed:
 
     » node --version
-    v11.9.0
+    v18.10.0
+
+    » node --version
+    8.19.2
+
+    » yarn --version
+    1.21.1
+
 
 ### Installation of JS Dependencies
 
-Use `npm` (or `yarn`) to install the develoment dependencies:
+Use `yarn` (or `npm`) to install the develoment dependencies:
 
+    » cd webpack
     » yarn install
 
 This creates a local node_modules directory where all the dependencies are stored.
@@ -180,7 +185,8 @@ Print usage (output below is cutted):
 
     » node_modules/.bin/webpack --help
 
-    webpack-cli 3.2.1
+    webpack: 5.69.1
+    webpack-cli 4.9.2
     Usage: https://webpack.js.org/api/cli/
     Usage without config file: webpack <entry> [<entry>] --output [-o] <output>
 
@@ -205,8 +211,8 @@ The configuration for the used `webpack` command is located in `webpack.config.j
 
 Run this command to watch/rebuild the JavaScript for Development:
 
-    » npm run watch
+    » yarn watch
 
 Run this command to build the final JavaScript for Production:
 
-    » npm run build
+    » yarn build

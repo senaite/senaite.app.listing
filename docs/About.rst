@@ -75,7 +75,7 @@ the egg to the `eggs` list in the `[instance]` section rather than
 adding it in the `[buildout]` section.
 
 Also see this section of the Plone documentation for further details:
-https://docs.plone.org/4/en/manage/installing/installing_addons.html
+https://docs.plone.org/manage/installing/installing_addons.html
 
 **Important**
 
@@ -90,7 +90,7 @@ Installation Requirements
 
 The following versions are required for SENAITE.APP.LISTING:
 
--  senaite.lims >= 2.1.0
+-  senaite.lims >= 2.3.0
 
 
 .. _Plone 5: https://docs.plone.org/manage/installing/installation.html

@@ -1,4 +1,4 @@
-2.3.0 (unreleased)
+2.3.0 (2022-10-03)
 ------------------
 
 - #92 Add workflow state of view context to listing config
