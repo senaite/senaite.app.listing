@@ -222,9 +222,11 @@ class AjaxListingView(BrowserView):
             # TODO: Research how to avoid the object wakeup here
             obj = api.get_object_by_uid(uid)
             obj_transitions = self.get_transitions_for(obj)
-            # skip objects w/o transitions, e.g. retracted/rejected analyses
             if not obj_transitions:
-                continue
+                # no need to go any further, no shared transitions can exist
+                common_tids.clear()
+                break
+
             tids = []
             for transition in obj_transitions:
                 tid = transition.get("id")

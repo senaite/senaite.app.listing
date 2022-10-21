@@ -1,7 +1,7 @@
 2.4.0 (unreleased)
 ------------------
 
-- no changes yet
+- #94 Fix action buttons are displayed for items without allowed transitions
 
 
 2.3.0 (2022-10-03)
