@@ -218,13 +218,22 @@ class AjaxListingView(BrowserView):
         # transition ids all objects have in common
         common_tids = set()
 
+        # statuses to skip when no transitions are found
         for uid in uids:
             # TODO: Research how to avoid the object wakeup here
             obj = api.get_object_by_uid(uid)
             obj_transitions = self.get_transitions_for(obj)
-            # skip objects w/o transitions, e.g. retracted/rejected analyses
             if not obj_transitions:
-                continue
+                # skip retracted/rejected analyses because we do want users to
+                # be able to do transitions to selected analyses in worksheet
+                # context even when rejected and retracted are selected. This
+                # makes the worksheet more usable and reduces frustration
+                if api.get_review_status(obj) in ["rejected", "retracted"]:
+                    continue
+                # no need to go any further, no shared transitions can exist
+                common_tids.clear()
+                break
+
             tids = []
             for transition in obj_transitions:
                 tid = transition.get("id")
