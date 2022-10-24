@@ -224,7 +224,10 @@ class AjaxListingView(BrowserView):
             obj = api.get_object_by_uid(uid)
             obj_transitions = self.get_transitions_for(obj)
             if not obj_transitions:
-                # skip retracted/rejected analyses
+                # skip retracted/rejected analyses because we do want users to
+                # be able to do transitions to selected analyses in worksheet
+                # context even when rejected and retracted are selected. This
+                # makes the worksheet more usable and reduces frustration
                 if api.get_review_status(obj) in ["rejected", "retracted"]:
                     continue
                 # no need to go any further, no shared transitions can exist
