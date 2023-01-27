@@ -562,12 +562,10 @@ class ListingView(AjaxListingView):
         # Skip all further processing if explicit UIDs are requested.
         # This is required to render child-nodes properly.
         # https://github.com/senaite/senaite.core.listing/issues/12
-        if "UID" in query:
-            return query
-
-        # contentFilter is allowed in every self.review_state.
-        for k, v in self.review_state.get("contentFilter", {}).items():
-            query[k] = v
+        if "UID" not in query:
+            # contentFilter is allowed in every self.review_state.
+            for k, v in self.review_state.get("contentFilter", {}).items():
+                query[k] = v
 
         sort_on = self.get_sort_on()
         # check if the sort_on criteria is a valid search index
