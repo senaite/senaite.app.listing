@@ -8,7 +8,6 @@
       manager="plone.app.layout.viewlets.interfaces.IHtmlHead"
       class=".resources.ResourcesViewlet"
       permission="zope2.View"
-      template="../static/resources.pt"
       layer="senaite.core.interfaces.ISenaiteCore"
       />
 

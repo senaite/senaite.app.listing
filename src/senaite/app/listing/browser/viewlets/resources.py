@@ -5,6 +5,7 @@ from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 
 
 class ResourcesViewlet(ViewletBase):
+    template = ViewPageTemplateFile("../static/resources.pt")
 
     def index(self):
-        return ViewPageTemplateFile("../static/resources.pt")
+        return self.template()
