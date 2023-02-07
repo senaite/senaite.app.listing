@@ -1,0 +1,14 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser">
+
+  <!-- Static Resources Viewlet -->
+  <browser:viewlet
+      name="senaite.app.listing.static"
+      manager="plone.app.layout.viewlets.interfaces.IHtmlHead"
+      class=".resources.ResourcesViewlet"
+      permission="zope2.View"
+      layer="senaite.core.interfaces.ISenaiteCore"
+      />
+
+</configure>

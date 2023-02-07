@@ -10,24 +10,8 @@
 
   <!-- package includes -->
   <include package=".adapters" />
+  <include package=".browser" />
   <include package=".upgrades" />
-
-  <!-- Static directory for js, css and image resources -->
-  <plone:static
-      directory="static"
-      type="plone"
-      name="senaite.app.listing.static"
-      />
-
-  <!-- Static Resources Viewlet -->
-  <browser:viewlet
-      name="senaite.app.listing.static"
-      manager="plone.app.layout.viewlets.interfaces.IHtmlHead"
-      class="senaite.core.browser.viewlets.resources.ResourcesViewlet"
-      permission="zope2.View"
-      template="static/resources.pt"
-      layer="senaite.core.interfaces.ISenaiteCore"
-      />
 
   <!-- Generic Setup *INSTALL* Profile -->
   <genericsetup:registerProfile

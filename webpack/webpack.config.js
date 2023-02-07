@@ -30,7 +30,7 @@ module.exports = {
   output: {
     // filename: devMode ? "senaite.app.[name].js" : `senaite.app.[name]-${gitHash}.js`,
     filename: "senaite.app.[name].js",
-    path: path.resolve(__dirname, "../src/senaite/app/listing/static/bundles"),
+    path: path.resolve(__dirname, "../src/senaite/app/listing/browser/static/bundles"),
     publicPath: "++plone++senaite.app.listing.static/bundles"
   },
   module: {
