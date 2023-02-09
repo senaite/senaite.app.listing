@@ -1,6 +1,7 @@
 2.4.0 (unreleased)
 ------------------
 
+- #99 Fix TypeError for MultiValue fields when no Choices are set
 - #98 Fix left border gap for category rows
 - #97 Add own resource viewlet class
 - #95 Fix cannot sort when the query of the listing contains UID
