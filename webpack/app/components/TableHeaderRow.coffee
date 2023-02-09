@@ -101,6 +101,13 @@ class TableHeaderRow extends React.Component
         </th>
       )
 
+    # insert row dnd column
+    if @props.allow_row_dnd
+      cells.push(
+        <th className="dnd-column" key="dnd">
+        </th>
+      )
+
     # insert table columns in the right order
     for key in @props.visible_columns
 

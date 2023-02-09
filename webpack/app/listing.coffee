@@ -181,6 +181,8 @@ class ListingController extends React.Component
       show_export: yes
       # signal full folderitems refetch in ajax_save
       refetch: false
+      # allow to reorder table rows with drag&drop
+      allow_row_dnd: yes
 
 
   ###*
@@ -409,13 +411,14 @@ class ListingController extends React.Component
   ###*
    * Move the table row by the given indexes
   ###
-  moveRow: (index_from, index_to) ->
-    console.debug "Sort row #{index_from} -> #{index_to}"
+  moveRow: (index_from, index_to, silent=no) ->
     source_folderitem = @state.folderitems[index_from]
     folderitems = [].concat @state.folderitems
     target_folderitem = folderitems.splice(index_to, 1, source_folderitem)
     folderitems.splice(index_from, 1, target_folderitem[0])
     @setState {folderitems: folderitems}
+    if not silent
+      console.debug "TRIGGER MOVE ROW: #{index_from} -> #{index_to}"
 
   ###*
    * Update the order of all columns
@@ -1177,6 +1180,8 @@ class ListingController extends React.Component
     # add 1 if the select column is rendered
     if @state.show_select_column
       count += 1
+    if @state.allow_row_dnd
+        count += 1
     return count
 
   ###*
@@ -1698,7 +1703,8 @@ class ListingController extends React.Component
                 filter={@state.filter}
                 update_editable_field={@updateEditableField}
                 save_editable_field={@saveEditableField}
-                on_move_row={@moveRow}
+                on_row_order_changed={@moveRow}
+                allow_row_dnd={@state.allow_row_dnd}
               />
             </div>
           </div>

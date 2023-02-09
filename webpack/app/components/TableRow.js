@@ -1,38 +1,45 @@
-import React from "react"
-import { useRef } from 'react'
+import { useCallback, useRef } from "react"
 import TableCells from "./TableCells.coffee"
 import { ItemTypes } from "./Constants.coffee"
 import { useDrag } from "react-dnd";
 import { useDrop } from "react-dnd";
-
-
-const style = {
-  border: '1px dashed gray',
-  padding: '0.5rem 1rem',
-  marginBottom: '.5rem',
-  backgroundColor: 'white',
-  cursor: 'move',
-}
 
 /**Draggable table row
  *
  * */
 function TableRow(props) {
 
-  const ref = useRef(null)
+  const dragRef = useRef(null)
+  const dropRef = useRef(null)
 
-  const moveRow =
+  const moveRow = useCallback(
+    (from_index, to_index) => {
+      console.info(`TableRow::moveRow:${from_index} -> ${to_index}`)
+      if (props.on_row_order_changed) {
+        props.on_row_order_changed(from_index, to_index)
+      }
+    }
+  )
 
   // Drop Handler
-  const [{ handlerId }, drop] = useDrop({
+  const [{ handlerId, isOver, canDrop }, drop] = useDrop({
     accept: ItemTypes.ROW,
+    canDrop: (item, monitor) => {
+      if (item.catgory !== props.category) {
+        // prevent dropping in other categories
+        return false;
+      }
+      return true;
+    },
     collect(monitor) {
       return {
         handlerId: monitor.getHandlerId(),
+        isOver: !!monitor.isOver(),
+        // canDrop: !!monitor.canDrop()
       }
     },
     hover(item, monitor) {
-      if (!ref.current) {
+      if (!dragRef.current) {
         return
       }
       const dragIndex = item.index
@@ -42,7 +49,7 @@ function TableRow(props) {
         return
       }
       // Determine rectangle on screen
-      const hoverBoundingRect = ref.current?.getBoundingClientRect()
+      const hoverBoundingRect = dropRef.current.getBoundingClientRect()
       // Get vertical middle
       const hoverMiddleY =
         (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2
@@ -62,9 +69,7 @@ function TableRow(props) {
         return
       }
       // Time to actually perform the action
-      if (props.on_move_row) {
-        props.on_move_row(dragIndex, hoverIndex)
-      }
+      moveRow(dragIndex, hoverIndex)
       // Note: we're mutating the monitor item here!
       // Generally it's better to avoid mutations,
       // but it's good here for the sake of performance
@@ -73,31 +78,49 @@ function TableRow(props) {
     }
   })
 
-  const [{ isDragging }, drag] = useDrag({
+  const [{ isDragging }, drag, preview] = useDrag({
     type: ItemTypes.ROW,
     item: () => {
+      // dragged item data
       return {
         uid: props.uid,
+        category: props.category,
         index: props.row_index,
         item: props.item
       }
     },
+    options: {
+      dropEffect: "move"
+    },
+    canDrag: (monitor) => {
+      // allow/disallow dragging
+      return props.allow_row_dnd;
+    },
     collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
+      isDragging: !!monitor.isDragging()
     }),
+    end: (item, monitor) => {
+      console.log(`ITEM ${item.uid} dropped `)
+    }
   })
 
-  const opacity = isDragging ? 0.4 : 1
-  drag(drop(ref))
+  // calculate the CSS class
+  let css_class = props.className
+  if (isDragging) {
+    css_class += " dragging"
+  }
+
+  // references
+  preview(drop(dropRef))
+  drag(dragRef)
 
   return (
-    <tr className={props.className}
-        ref={ref}
-        style={{ ...style, opacity }}
+    <tr className={css_class}
+        ref={dropRef}
         onClick={props.onClick}
         category={props.category}
         uid={props.uid}>
-      <TableCells {...props}/>
+      <TableCells dragref={dragRef} {...props}/>
     </tr>
   )
 }
