@@ -1610,10 +1610,10 @@ class ListingController extends React.Component
 
   on_row_order_change: () ->
     console.debug "°°° ListingController::on_form_order_change"
-    event = new CustomEvent "listing:on_row_order_change",
+    event = new CustomEvent "listing:row_order_change",
       detail:
         folderitems: @state.folderitems
-    document.body.dispatchEvent event
+    window.dispatchEvent event
 
 
   ###*
