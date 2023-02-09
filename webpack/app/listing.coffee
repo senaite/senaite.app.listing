@@ -411,14 +411,12 @@ class ListingController extends React.Component
   ###*
    * Move the table row by the given indexes
   ###
-  moveRow: (index_from, index_to, silent=no) ->
+  moveRow: (index_from, index_to) ->
     source_folderitem = @state.folderitems[index_from]
     folderitems = [].concat @state.folderitems
     target_folderitem = folderitems.splice(index_to, 1, source_folderitem)
     folderitems.splice(index_from, 1, target_folderitem[0])
     @setState {folderitems: folderitems}
-    if not silent
-      console.debug "TRIGGER MOVE ROW: #{index_from} -> #{index_to}"
 
   ###*
    * Update the order of all columns
@@ -1703,7 +1701,7 @@ class ListingController extends React.Component
                 filter={@state.filter}
                 update_editable_field={@updateEditableField}
                 save_editable_field={@saveEditableField}
-                on_row_order_changed={@moveRow}
+                move_row={@moveRow}
                 allow_row_dnd={@state.allow_row_dnd}
               />
             </div>

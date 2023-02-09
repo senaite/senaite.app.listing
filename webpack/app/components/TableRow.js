@@ -15,8 +15,8 @@ function TableRow(props) {
   const moveRow = useCallback(
     (from_index, to_index) => {
       console.info(`TableRow::moveRow:${from_index} -> ${to_index}`)
-      if (props.on_row_order_changed) {
-        props.on_row_order_changed(from_index, to_index)
+      if (props.move_row) {
+        props.move_row(from_index, to_index)
       }
     }
   )
@@ -24,18 +24,11 @@ function TableRow(props) {
   // Drop Handler
   const [{ handlerId, isOver, canDrop }, drop] = useDrop({
     accept: ItemTypes.ROW,
-    canDrop: (item, monitor) => {
-      if (item.catgory !== props.category) {
-        // prevent dropping in other categories
-        return false;
-      }
-      return true;
-    },
     collect(monitor) {
       return {
         handlerId: monitor.getHandlerId(),
         isOver: !!monitor.isOver(),
-        // canDrop: !!monitor.canDrop()
+        canDrop: !!monitor.canDrop()
       }
     },
     hover(item, monitor) {
@@ -48,27 +41,6 @@ function TableRow(props) {
       if (dragIndex === hoverIndex) {
         return
       }
-      // Determine rectangle on screen
-      const hoverBoundingRect = dropRef.current.getBoundingClientRect()
-      // Get vertical middle
-      const hoverMiddleY =
-        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2
-      // Determine mouse position
-      const clientOffset = monitor.getClientOffset()
-      // Get pixels to the top
-      const hoverClientY = clientOffset.y - hoverBoundingRect.top
-      // Only perform the move when the mouse has crossed half of the items height
-      // When dragging downwards, only move when the cursor is below 50%
-      // When dragging upwards, only move when the cursor is above 50%
-      // Dragging downwards
-      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
-        return
-      }
-      // Dragging upwards
-      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
-        return
-      }
-      // Time to actually perform the action
       moveRow(dragIndex, hoverIndex)
       // Note: we're mutating the monitor item here!
       // Generally it's better to avoid mutations,
@@ -86,14 +58,10 @@ function TableRow(props) {
         uid: props.uid,
         category: props.category,
         index: props.row_index,
-        item: props.item
       }
     },
-    options: {
-      dropEffect: "move"
-    },
     canDrag: (monitor) => {
-      // allow/disallow dragging
+      // global allow/disallow dragging
       return props.allow_row_dnd;
     },
     collect: (monitor) => ({
@@ -101,18 +69,19 @@ function TableRow(props) {
     }),
     end: (item, monitor) => {
       console.log(`ITEM ${item.uid} dropped `)
+      moveRow(item.index, props.row_index)
     }
   })
+
+  // references
+  preview(drop(dropRef))
+  drag(dragRef)
 
   // calculate the CSS class
   let css_class = props.className
   if (isDragging) {
     css_class += " dragging"
   }
-
-  // references
-  preview(drop(dropRef))
-  drag(dragRef)
 
   return (
     <tr className={css_class}
