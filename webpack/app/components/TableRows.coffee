@@ -1,5 +1,5 @@
 import React from "react"
-import TableRow from "./TableRow.coffee"
+import TableRow from "./TableRow"
 import TableCategoryRow from "./TableCategoryRow.coffee"
 import TableRemarksRow from "./TableRemarksRow.coffee"
 

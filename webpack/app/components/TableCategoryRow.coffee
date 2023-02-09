@@ -1,5 +1,5 @@
 import React from "react"
-import TableRow from "./TableRow.coffee"
+import TableRow from "./TableRow"
 
 
 class TableCategoryRow extends React.Component
