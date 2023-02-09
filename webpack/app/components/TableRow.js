@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react"
+import { useCallback, useRef, memo } from "react"
 import TableCells from "./TableCells.coffee"
 import { ItemTypes } from "./Constants.coffee"
 import { useDrag } from "react-dnd";
@@ -7,16 +7,23 @@ import { useDrop } from "react-dnd";
 /**Draggable table row
  *
  * */
-function TableRow(props) {
+const TableRow = memo(function TableRow({...props}) {
 
   const dragRef = useRef(null)
   const dropRef = useRef(null)
 
   const moveRow = useCallback(
     (from_index, to_index) => {
-      console.info(`TableRow::moveRow:${from_index} -> ${to_index}`)
       if (props.move_row) {
         props.move_row(from_index, to_index)
+      }
+    }
+  )
+
+  const onRowOrderChange = useCallback(
+    () => {
+      if (props.on_row_order_change) {
+        props.on_row_order_change()
       }
     }
   )
@@ -68,8 +75,8 @@ function TableRow(props) {
       isDragging: !!monitor.isDragging()
     }),
     end: (item, monitor) => {
-      console.log(`ITEM ${item.uid} dropped `)
-      moveRow(item.index, props.row_index)
+      // notify the changed order
+      onRowOrderChange()
     }
   })
 
@@ -92,7 +99,7 @@ function TableRow(props) {
       <TableCells dragref={dragRef} {...props}/>
     </tr>
   )
-}
+})
 
 
 export default TableRow

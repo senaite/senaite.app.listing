@@ -81,6 +81,7 @@ class ListingController extends React.Component
     @updateEditableField = @updateEditableField.bind @
     @on_popstate = @on_popstate.bind @
     @moveRow = @moveRow.bind @
+    @on_row_order_change = @on_row_order_change.bind @
 
     # root element
     @root_el = @props.root_el
@@ -1607,6 +1608,13 @@ class ListingController extends React.Component
       console.debug "+++ RELOAD after popstate +++"
       @fetch_folderitems()
 
+  on_row_order_change: () ->
+    console.debug "°°° ListingController::on_form_order_change"
+    event = new CustomEvent "listing:on_row_order_change",
+      detail:
+        folderitems: @state.folderitems
+    document.body.dispatchEvent event
+
 
   ###*
    * Renders the listing table
@@ -1703,6 +1711,7 @@ class ListingController extends React.Component
                 save_editable_field={@saveEditableField}
                 move_row={@moveRow}
                 allow_row_dnd={@state.allow_row_dnd}
+                on_row_order_change={@on_row_order_change}
               />
             </div>
           </div>
