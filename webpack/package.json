@@ -26,8 +26,7 @@
     "plugins": [
       "react"
     ],
-    "rules": {
-    }
+    "rules": {}
   },
   "scripts": {
     "build": "mode=production webpack",
