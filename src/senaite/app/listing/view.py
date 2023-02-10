@@ -198,8 +198,12 @@ class ListingView(AjaxListingView):
     # => This will show an additional cell at the beginning of the row with a
     #    drag&drop handle to reorder the rows manually
     #
-    #    Fires a custom JS event on window called `listing:row_order_change`
-    #    with the reordered folderitems in the details.
+    #    Fires a custom JS event on the current root element which contains the
+    #    reordered list of folderitems in the details (see listing.js):
+    #
+    #    event = new CustomEvent(
+    #              "listing:row_order_change", detail: {folderitems: [...]})
+    #    root_el.dispatchEvent(event)
     allow_row_reorder = False
 
     def __init__(self, context, request):

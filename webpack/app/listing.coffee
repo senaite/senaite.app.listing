@@ -1613,7 +1613,11 @@ class ListingController extends React.Component
     event = new CustomEvent "listing:row_order_change",
       detail:
         folderitems: @state.folderitems
-    window.dispatchEvent event
+      , bubbles: yes
+      , cancelable: yes
+      , composed: no
+    # dispatch the event on table root element
+    @root_el.dispatchEvent event
 
 
   ###*
