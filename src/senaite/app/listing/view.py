@@ -194,6 +194,14 @@ class ListingView(AjaxListingView):
     # transition buttons.
     show_table_footer = True
 
+    # Allow to manually reorder the rows
+    # => This will show an additional cell at the beginning of the row with a
+    #    drag&drop handle to reorder the rows manually
+    #
+    #    Fires a custom JS event on window called `listing:row_order_change`
+    #    with the reordered folderitems in the details.
+    allow_row_reorder = False
+
     def __init__(self, context, request):
         super(ListingView, self).__init__(context, request)
         self.context = context
