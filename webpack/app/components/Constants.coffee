@@ -1,3 +1,0 @@
-export ItemTypes = {
-  ROW: "row"
-}
