@@ -96,7 +96,11 @@ class MultiSelect extends React.Component
       return []
     if Array.isArray(value)
       return value
-    return JSON.parse value
+    parsed = JSON.parse value
+    if not Array.isArray(parsed)
+      # This might happen when a default value is set, e.g. 0
+      return [parsed]
+    return parsed
 
   ###
    * Selectors list builder. Generates a list with as many select elements as
