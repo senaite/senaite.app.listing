@@ -182,7 +182,7 @@ class TableCells extends React.Component
     if @show_select()
       cells.push @create_select_cell()
 
-    if @props.allow_row_dnd
+    if @props.allow_row_reorder
       cells.push @create_dnd_cell()
 
     # insert visible columns in the right order

@@ -183,7 +183,7 @@ class ListingController extends React.Component
       # signal full folderitems refetch in ajax_save
       refetch: false
       # allow to reorder table rows with drag&drop
-      allow_row_dnd: yes
+      allow_row_reorder: yes
 
 
   ###*
@@ -1179,7 +1179,7 @@ class ListingController extends React.Component
     # add 1 if the select column is rendered
     if @state.show_select_column
       count += 1
-    if @state.allow_row_dnd
+    if @state.allow_row_reorder
         count += 1
     return count
 
@@ -1710,7 +1710,7 @@ class ListingController extends React.Component
                 update_editable_field={@updateEditableField}
                 save_editable_field={@saveEditableField}
                 move_row={@moveRow}
-                allow_row_dnd={@state.allow_row_dnd}
+                allow_row_reorder={@state.allow_row_reorder}
                 on_row_order_change={@on_row_order_change}
               />
             </div>

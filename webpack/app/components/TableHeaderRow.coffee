@@ -102,7 +102,7 @@ class TableHeaderRow extends React.Component
       )
 
     # insert row dnd column
-    if @props.allow_row_dnd
+    if @props.allow_row_reorder
       cells.push(
         <th className="dnd-column" key="dnd">
         </th>

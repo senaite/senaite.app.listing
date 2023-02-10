@@ -1,6 +1,6 @@
 import { useCallback, useRef, memo } from "react"
 import TableCells from "./TableCells.coffee"
-import { ItemTypes } from "./Constants.coffee"
+import { ItemTypes } from "./Constants"
 import { useDrag } from "react-dnd";
 import { useDrop } from "react-dnd";
 
@@ -69,7 +69,7 @@ const TableRow = memo(function TableRow({...props}) {
     },
     canDrag: (monitor) => {
       // global allow/disallow dragging
-      return props.allow_row_dnd;
+      return props.allow_row_reorder;
     },
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging()
