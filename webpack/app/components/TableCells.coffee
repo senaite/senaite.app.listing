@@ -158,12 +158,32 @@ class TableCells extends React.Component
         />)
     return cell
 
+
+  ###*
+   * Creates a Drag&Drop handler cell
+   *
+  ###
+  create_dnd_cell: () ->
+    item = @get_item()
+    uid = @get_uid()
+    level = item.node_level or 0
+    cell = (
+      <td ref={@props.dragref} key="dnd" className="level-#{level} dnd">
+        <i className="fas fa-sort"></i>
+      </td>
+    )
+    return cell
+
+
   build_cells: ->
     cells = []
 
     # insert select column
     if @show_select()
       cells.push @create_select_cell()
+
+    if @props.allow_row_reorder
+      cells.push @create_dnd_cell()
 
     # insert visible columns in the right order
     for column_key, column_index in @props.visible_columns
