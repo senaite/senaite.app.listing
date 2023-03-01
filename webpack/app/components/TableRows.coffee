@@ -37,6 +37,9 @@ class TableRows extends React.Component
   is_category_expanded: (category) ->
     return category in @props.expanded_categories
 
+  is_category_selected: (category) ->
+    return category in @props.selected_categories
+
   is_item_disabled: (item) ->
     return item.disabled or no
 
@@ -100,12 +103,14 @@ class TableRows extends React.Component
     if @props.show_categories
       for category in @props.categories
         expanded = @is_category_expanded category
+        selected = @is_category_selected category
         rows.push(
           <TableCategoryRow
             {...@props}
             key={category}
             category={category}
             expanded={expanded}
+            selected={selected}
             className="categoryrow"
             />)
         # concatenate the categorized rows in the right order

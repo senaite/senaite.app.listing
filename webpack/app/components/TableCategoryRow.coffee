@@ -8,38 +8,66 @@ class TableCategoryRow extends React.Component
     super(props)
     # Bind event handler to local context
     @on_category_click = @on_category_click.bind @
+    @on_category_select = @on_category_select.bind @
 
   on_category_click: (event) ->
-    el = event.currentTarget
-    category = el.getAttribute "category"
-    console.debug "TableCategoryRow::on_row_click: category #{category} clicked"
+    category = @props.category
+    console.debug "TableCategoryRow::on_category_click: category #{category} clicked"
 
     # notify parent event handler with the extracted values
     if @props.on_category_click
       # @param {string} category: The category title
       @props.on_category_click category
 
-  build_category: ->
-    # collaped css
-    cls = "collapsed"
-    icon_cls = "fas fa-caret-square-up"
+  on_category_select: (event) ->
+    category = @props.category
+    console.debug "TableCategoryRow::on_category_select: category #{category} selected"
 
-    # expanded css
-    if @props.expanded
+    # notify parent event handler with the extracted values
+    if @props.on_category_select
+      # @param {string} category: The category title
+      @props.on_category_select category
+
+  build_category: ->
+    cells = []
+
+    category = @props.category
+    show_select_column = @props.show_select_column
+    expanded = @props.expanded
+    selected = @props.selected
+    colspan = @props.columns_count
+
+    if expanded
       cls = "expanded"
       icon_cls = "fas fa-caret-square-down"
+    else
+      cls = "collapsed"
+      icon_cls = "fas fa-caret-square-up"
 
-    return (
+    if show_select_column
+      colspan -= 1
+      cells.push(
+        <td key="select">
+          <span onClick={@on_category_select}>
+            {selected and <i className="fas fa-check-circle"></i>}
+            {not selected and <i className="fas fa-dot-circle"></i>}
+          </span>
+        </td>
+      )
+
+    cells.push(
       <td key="toggle"
           className={cls}
-          colSpan={@props.columns_count}>
-        <span className={icon_cls}></span> {@props.category}
+          onClick={@on_category_click}
+          colSpan={colspan}>
+        <i className={icon_cls}></i> <span>{category}</span>
       </td>
     )
 
+    return cells
+
   render: ->
     <tr category={@props.category}
-        onClick={@on_category_click}
         className={@props.className}>
       {@build_category()}
     </tr>

@@ -144,6 +144,8 @@ class ListingController extends React.Component
       categories: []
       # Expanded categories
       expanded_categories: []
+      # selected categories
+      selected_categories: []
       # Expanded Rows (currently only Partitions)
       expanded_rows: []
       # Expanded Remarks Rows
@@ -1704,6 +1706,7 @@ class ListingController extends React.Component
                 show_select_all_checkbox={@state.show_select_all_checkbox}
                 categories={@state.categories}
                 expanded_categories={@state.expanded_categories}
+                selected_categories={@state.selected_categories}
                 expanded_rows={@state.expanded_rows}
                 expanded_remarks={@state.expanded_remarks}
                 show_categories={@state.show_categories}
