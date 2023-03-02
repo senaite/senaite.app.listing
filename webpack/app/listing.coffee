@@ -67,6 +67,8 @@ class ListingController extends React.Component
     @on_api_error = @on_api_error.bind @
     @on_column_config_click = @on_column_config_click.bind @
     @on_select_checkbox_checked = @on_select_checkbox_checked.bind @
+    @on_category_click = @on_category_click.bind @
+    @on_category_select = @on_category_select.bind @
     @on_reload = @on_reload.bind @
     @saveAjaxQueue = @saveAjaxQueue.bind @
     @saveEditableField = @saveEditableField.bind @
@@ -74,7 +76,6 @@ class ListingController extends React.Component
     @showMore = @showMore.bind @
     @export = @export.bind @
     @sortBy = @sortBy.bind @
-    @toggleCategory = @toggleCategory.bind @
     @toggleColumn = @toggleColumn.bind @
     @toggleRemarks = @toggleRemarks.bind @
     @toggleRow = @toggleRow.bind @
@@ -280,7 +281,7 @@ class ListingController extends React.Component
    * @returns {bool} true if the category was expanded, otherwise false
   ###
   toggleCategory: (category) ->
-    console.debug "ListingController::toggleCategory: column=#{category}"
+    console.debug "ListingController::toggleCategory: category=#{category}"
 
     # get the current expanded categories
     expanded = @state.expanded_categories
@@ -297,6 +298,31 @@ class ListingController extends React.Component
     # set the new expanded categories
     @setState {expanded_categories: expanded}
     return expanded.length > 0
+
+  ###*
+   * Select/Deselect all items within a category
+   *
+   * @param category {string} Title of the category
+   * @returns {bool} true if the category was selected, otherwise false
+  ###
+  selectCategory: (category) ->
+    console.debug "ListingController::selectCategory: category=#{category}"
+
+    # unique set of current selected category names
+    selected = new Set(@state.selected_categories)
+
+    if selected.has category
+      # remove the category
+      selected.delete category
+    else
+      # add the category
+      selected.add category
+
+    # set the new selected categories
+    @setState
+      selected_categories: Array.from(selected)
+
+    return selected.has category
 
   ###*
    * Expand/Collapse remarks
@@ -901,6 +927,40 @@ class ListingController extends React.Component
     input.setAttribute "name", name
     input.setAttribute "value", value
     return input
+
+  ###*
+   * Select items where the filter predicate returns true
+   *
+  ###
+  selectItems: (items, predicate, toggle) ->
+    items ?= @state.folderitems
+    predicate ?= (item) -> true
+    toggle ?= yes
+
+    # the current selected UIDs
+    selected_uids = new Set(@state.selected_uids)
+
+    # filter items to select/deselect
+    items = items.filter (item) ->
+      # always skip disabled items
+      if item.disabled
+        return false
+      return predicate(item)
+
+    # extract the UIDs
+    uids = items.map (item, index) -> item.uid
+
+    if toggle
+      # select the UIDs
+      uids.forEach (uid) -> selected_uids.add(uid)
+    else
+      # deselect the UIDs
+      uids.forEach (uid) -> selected_uids.delete(uid)
+
+    # return a promise which is resolved when the state was successfully set
+    return new Promise (resolve, reject) =>
+      @setState
+        selected_uids: Array.from(selected_uids), resolve
 
   ###*
    * Select a row checkbox by UID
@@ -1576,6 +1636,29 @@ class ListingController extends React.Component
         # fetch all possible transitions
         me.fetch_transitions()
 
+  on_category_click: (event) ->
+    console.debug "°°° ListingController::on_category_click"
+    me = this
+    el = event.currentTarget
+    category = el.getAttribute "category"
+    @toggleCategory category
+
+  on_category_select: (event) ->
+    console.debug "°°° ListingController::on_category_select"
+    me = this
+    el = event.currentTarget
+    # get the category of the target element
+    category = el.getAttribute "category"
+    # create predicate function that matches the given category
+    predicate = (item) -> return item.category == category
+    # select/deselect category
+    selected = @selectCategory category
+    # select/deselect all items of this category
+    @selectItems( null, predicate, selected).then () ->
+      if me.state.fetch_transitions_on_select
+        # fetch all possible transitions
+        me.fetch_transitions()
+
   on_api_error: (response) ->
     @toggle_loader off
     console.debug "°°° ListingController::on_api_error: GOT AN ERROR RESPONSE: ", response
@@ -1710,7 +1793,8 @@ class ListingController extends React.Component
                 expanded_rows={@state.expanded_rows}
                 expanded_remarks={@state.expanded_remarks}
                 show_categories={@state.show_categories}
-                on_category_click={@toggleCategory}
+                on_category_click={@on_category_click}
+                on_category_select={@on_category_select}
                 on_row_expand_click={@toggleRow}
                 on_remarks_expand_click={@toggleRemarks}
                 filter={@state.filter}
