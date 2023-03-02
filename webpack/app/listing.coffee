@@ -67,6 +67,8 @@ class ListingController extends React.Component
     @on_api_error = @on_api_error.bind @
     @on_column_config_click = @on_column_config_click.bind @
     @on_select_checkbox_checked = @on_select_checkbox_checked.bind @
+    @on_category_click = @on_category_click.bind @
+    @on_category_select = @on_category_select.bind @
     @on_reload = @on_reload.bind @
     @saveAjaxQueue = @saveAjaxQueue.bind @
     @saveEditableField = @saveEditableField.bind @
@@ -74,7 +76,6 @@ class ListingController extends React.Component
     @showMore = @showMore.bind @
     @export = @export.bind @
     @sortBy = @sortBy.bind @
-    @toggleCategory = @toggleCategory.bind @
     @toggleColumn = @toggleColumn.bind @
     @toggleRemarks = @toggleRemarks.bind @
     @toggleRow = @toggleRow.bind @
@@ -144,6 +145,8 @@ class ListingController extends React.Component
       categories: []
       # Expanded categories
       expanded_categories: []
+      # selected categories
+      selected_categories: []
       # Expanded Rows (currently only Partitions)
       expanded_rows: []
       # Expanded Remarks Rows
@@ -278,7 +281,7 @@ class ListingController extends React.Component
    * @returns {bool} true if the category was expanded, otherwise false
   ###
   toggleCategory: (category) ->
-    console.debug "ListingController::toggleCategory: column=#{category}"
+    console.debug "ListingController::toggleCategory: category=#{category}"
 
     # get the current expanded categories
     expanded = @state.expanded_categories
@@ -295,6 +298,31 @@ class ListingController extends React.Component
     # set the new expanded categories
     @setState {expanded_categories: expanded}
     return expanded.length > 0
+
+  ###*
+   * Select/Deselect all items within a category
+   *
+   * @param category {string} Title of the category
+   * @returns {bool} true if the category was selected, otherwise false
+  ###
+  selectCategory: (category) ->
+    console.debug "ListingController::selectCategory: category=#{category}"
+
+    # unique set of current selected category names
+    selected = new Set(@state.selected_categories)
+
+    if selected.has category
+      # remove the category
+      selected.delete category
+    else
+      # add the category
+      selected.add category
+
+    # set the new selected categories
+    @setState
+      selected_categories: Array.from(selected)
+
+    return selected.has category
 
   ###*
    * Expand/Collapse remarks
@@ -901,62 +929,89 @@ class ListingController extends React.Component
     return input
 
   ###*
-   * Select a row checkbox by UID
+   * Select folder items where the filter predicate returns true
    *
-   * This method executes an Ajax request to the server.
+   * This method also selects/deselects the categories of the toggled items
+   *
+   * @param items {Array} Array of folderitems
+   * @param predicate {Function} Filter function for folderitems to select/deselect
+   * @param toggle {bool} true for select, false for deselect
+   * @returns {Promise} Resolved when the state was sucessfully set
+  ###
+  selectItems: (items, predicate, toggle) ->
+    items ?= @state.folderitems
+    predicate ?= (item) -> true
+    toggle ?= yes
+
+    # the current selected UIDs
+    selected_uids = new Set(@state.selected_uids)
+    # the current selected Categories
+    selected_categories = new Set(@state.selected_categories)
+    # the current expanded Categories
+    expanded_categories = new Set(@state.expanded_categories)
+
+    # filter items to select/deselect
+    items = items.filter (item) ->
+      # always skip disabled/readonly items
+      if item.disabled or item.readonly
+        return false
+      return predicate(item)
+
+    # extract the UIDs
+    uids = items.map (item, index) -> item.uid
+    # extract the categories
+    categories = new Set(items.map (item, index) -> item.category or null)
+    # remove empty category
+    categories.delete(null)
+
+    if toggle
+      # select the UIDs
+      uids.forEach (uid) -> selected_uids.add(uid)
+      # select and expand the categories
+      categories.forEach (category) ->
+        selected_categories.add(category)
+        expanded_categories.add(category)
+    else
+      # deselect the UIDs
+      uids.forEach (uid) -> selected_uids.delete(uid)
+      # deselect the categories, but leave category expanded
+      categories.forEach (category) ->
+        selected_categories.delete(category)
+
+    # return a promise which is resolved when the state was successfully set
+    return new Promise (resolve, reject) =>
+      @setState
+        selected_uids: Array.from(selected_uids)
+        selected_categories: Array.from(selected_categories)
+        expanded_categories: Array.from(expanded_categories)
+      , resolve
+
+  ###*
+   * Select a row checkbox by UID
    *
    * @param uid {string} The UID of the row
    * @param toggle {bool} true for select, false for deselect
    * @returns {Promise} which is resolved when the state was sucessfully set
   ###
   selectUID: (uid, toggle) ->
-    # copy the selected UIDs from the state
-    #
-    # N.B. We use [].concat(@state.selected_uids) to get a copy, otherwise it
-    #      would be a reference of the state value!
-    selected_uids = [].concat @state.selected_uids
+    toggle ?= yes
+    predicate = (item) -> item.uid == uid
+
+    # the current selected UIDs
+    selected_uids = new Set(@state.selected_uids)
 
     if toggle is yes
-      # handle the select all checkbox
       if uid == "all"
-        # Do not select disabled items
-        items = @state.folderitems.filter (item) ->
-          return not item.disabled
-        # Get all uids from enabled items
-        all_uids = items.map (item) -> item.uid
-        # keep existing selected uids
-        for uid in all_uids
-          if uid not in selected_uids
-            selected_uids.push uid
-      else
-        if uid not in selected_uids
-          # push the uid into the list of selected_uids
-          selected_uids.push uid
+        # select all
+        return @selectItems null, null, yes
+      # select single item
+      return @selectItems null, predicate, yes
     else
-      # flush all selected UIDs when the select_all checkbox is deselected or
-      # when the deselect all button was clicked
       if uid == "all"
-        # Keep readonly items
-        by_uid = @group_by_uid @state.folderitems
-        selected_uids = selected_uids.filter (uid) ->
-          item = by_uid[uid]
-          return item.readonly
-      else
-        # remove the selected UID from the list of selected_uids
-        pos = selected_uids.indexOf uid
-        selected_uids.splice pos, 1
-
-    # Only set the state and refetch transitions if the selected UIDs changed
-    added = selected_uids.filter((uid) =>
-       @state.selected_uids.indexOf(uid)==-1).length > 0
-    removed = @state.selected_uids.filter((uid) =>
-       selected_uids.indexOf(uid)==-1).length > 0
-    return unless added or removed
-
-    # return a promise which is resolved when the state was successfully set
-    return new Promise (resolve, reject) =>
-      @setState
-        selected_uids: selected_uids, resolve
+        # deselect all
+        return @selectItems null, null, no
+      # deselect single item
+      return @selectItems null, predicate, no
 
   ###*
    * Save the values of the state's `ajax_save_queue`
@@ -1574,6 +1629,29 @@ class ListingController extends React.Component
         # fetch all possible transitions
         me.fetch_transitions()
 
+  on_category_click: (event) ->
+    console.debug "°°° ListingController::on_category_click"
+    me = this
+    el = event.currentTarget
+    category = el.getAttribute "category"
+    @toggleCategory category
+
+  on_category_select: (event) ->
+    console.debug "°°° ListingController::on_category_select"
+    me = this
+    el = event.currentTarget
+    # get the category of the target element
+    category = el.getAttribute "category"
+    # create predicate function that matches the given category
+    predicate = (item) -> return item.category == category
+    # select/deselect category
+    selected = @selectCategory category
+    # select/deselect all items of this category
+    @selectItems( null, predicate, selected).then () ->
+      if me.state.fetch_transitions_on_select
+        # fetch all possible transitions
+        me.fetch_transitions()
+
   on_api_error: (response) ->
     @toggle_loader off
     console.debug "°°° ListingController::on_api_error: GOT AN ERROR RESPONSE: ", response
@@ -1704,10 +1782,12 @@ class ListingController extends React.Component
                 show_select_all_checkbox={@state.show_select_all_checkbox}
                 categories={@state.categories}
                 expanded_categories={@state.expanded_categories}
+                selected_categories={@state.selected_categories}
                 expanded_rows={@state.expanded_rows}
                 expanded_remarks={@state.expanded_remarks}
                 show_categories={@state.show_categories}
-                on_category_click={@toggleCategory}
+                on_category_click={@on_category_click}
+                on_category_select={@on_category_select}
                 on_row_expand_click={@toggleRow}
                 on_remarks_expand_click={@toggleRemarks}
                 filter={@state.filter}
