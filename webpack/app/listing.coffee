@@ -113,6 +113,9 @@ class ListingController extends React.Component
     @sort_order = @api.get_url_parameter("sort_order")
     @review_state = @api.get_url_parameter("review_state") or "default"
 
+    # last selected item
+    @last_select = null
+
     @state =
       # alert messages
       messages: []
@@ -1013,6 +1016,28 @@ class ListingController extends React.Component
       # deselect single item
       return @selectItems null, predicate, no
 
+
+  ###*
+   * Select a range of UIDs
+   *
+   * @param start_uid {string} The UID of first selected item
+   * @param end_uid {string} The UID of the last selected item
+   * @param toggle {bool} true for select, false for deselect
+   * @returns {Promise} which is resolved when the state was sucessfully set
+  ###
+  selectUIDRange: (start_uid, end_uid, toggle) ->
+    # extract a list of all UIDs
+    uids = @state.folderitems.map (item, index) -> item.uid
+    start_idx = uids.indexOf(start_uid)
+    end_idx = uids.indexOf(end_uid)
+    range = uids.slice(start_idx, end_idx + 1)
+
+    predicate = (item) ->
+      item.uid in range
+
+    return @selectItems null, predicate, toggle
+
+
   ###*
    * Save the values of the state's `ajax_save_queue`
    *
@@ -1623,6 +1648,17 @@ class ListingController extends React.Component
     el = event.currentTarget
     uid = el.value
     checked = el.checked
+
+    # support multi-select over the shift-key
+    if event.nativeEvent.shiftKey and @last_select
+      start_uid = @last_select.uid
+      toggle = @last_select.checked
+      return @selectUIDRange start_uid, uid, toggle
+
+    # remember the last selected UID
+    @last_select =
+      uid: uid
+      checked: checked
 
     @selectUID(uid, checked).then ->
       if me.state.fetch_transitions_on_select
