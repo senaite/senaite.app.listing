@@ -929,8 +929,12 @@ class ListingController extends React.Component
     return input
 
   ###*
-   * Select items where the filter predicate returns true
+   * Select folder items where the filter predicate returns true
    *
+   * @param items {Array} Array of folderitems
+   * @param predicate {Function} Filter function for folderitems to select/deselect
+   * @param toggle {bool} true for select, false for deselect
+   * @returns {Promise} Resolved when the state was sucessfully set
   ###
   selectItems: (items, predicate, toggle) ->
     items ?= @state.folderitems
@@ -942,8 +946,8 @@ class ListingController extends React.Component
 
     # filter items to select/deselect
     items = items.filter (item) ->
-      # always skip disabled items
-      if item.disabled
+      # always skip disabled/readonly items
+      if item.disabled or item.readonly
         return false
       return predicate(item)
 
@@ -965,60 +969,32 @@ class ListingController extends React.Component
   ###*
    * Select a row checkbox by UID
    *
-   * This method executes an Ajax request to the server.
-   *
    * @param uid {string} The UID of the row
    * @param toggle {bool} true for select, false for deselect
    * @returns {Promise} which is resolved when the state was sucessfully set
   ###
   selectUID: (uid, toggle) ->
-    # copy the selected UIDs from the state
-    #
-    # N.B. We use [].concat(@state.selected_uids) to get a copy, otherwise it
-    #      would be a reference of the state value!
-    selected_uids = [].concat @state.selected_uids
+    toggle ?= yes
+
+    # the current selected UIDs
+    selected_uids = new Set(@state.selected_uids)
 
     if toggle is yes
       # handle the select all checkbox
       if uid == "all"
-        # Do not select disabled items
-        items = @state.folderitems.filter (item) ->
-          return not item.disabled
-        # Get all uids from enabled items
-        all_uids = items.map (item) -> item.uid
-        # keep existing selected uids
-        for uid in all_uids
-          if uid not in selected_uids
-            selected_uids.push uid
+        return @selectItems null, null, yes
       else
-        if uid not in selected_uids
-          # push the uid into the list of selected_uids
-          selected_uids.push uid
+        selected_uids.add uid
     else
-      # flush all selected UIDs when the select_all checkbox is deselected or
-      # when the deselect all button was clicked
       if uid == "all"
-        # Keep readonly items
-        by_uid = @group_by_uid @state.folderitems
-        selected_uids = selected_uids.filter (uid) ->
-          item = by_uid[uid]
-          return item.readonly
+        return @selectItems null, null, no
       else
-        # remove the selected UID from the list of selected_uids
-        pos = selected_uids.indexOf uid
-        selected_uids.splice pos, 1
-
-    # Only set the state and refetch transitions if the selected UIDs changed
-    added = selected_uids.filter((uid) =>
-       @state.selected_uids.indexOf(uid)==-1).length > 0
-    removed = @state.selected_uids.filter((uid) =>
-       selected_uids.indexOf(uid)==-1).length > 0
-    return unless added or removed
+        selected_uids.delete uid
 
     # return a promise which is resolved when the state was successfully set
     return new Promise (resolve, reject) =>
       @setState
-        selected_uids: selected_uids, resolve
+        selected_uids: Array.from(selected_uids), resolve
 
   ###*
    * Save the values of the state's `ajax_save_queue`
