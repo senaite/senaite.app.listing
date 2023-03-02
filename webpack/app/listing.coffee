@@ -1028,7 +1028,8 @@ class ListingController extends React.Component
   selectUIDRange: (start_uid, end_uid, toggle) ->
     items = []
 
-    if @state.categories
+    # sort the folderitems by their category if categorized
+    if @state.categories.length > 0
       for category in @state.categories
         categorized = @state.folderitems.filter (item) -> item.category == category
         items = items.concat categorized
