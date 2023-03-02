@@ -931,6 +931,8 @@ class ListingController extends React.Component
   ###*
    * Select folder items where the filter predicate returns true
    *
+   * This method also selects/deselects the categories of the toggled items
+   *
    * @param items {Array} Array of folderitems
    * @param predicate {Function} Filter function for folderitems to select/deselect
    * @param toggle {bool} true for select, false for deselect
@@ -943,6 +945,8 @@ class ListingController extends React.Component
 
     # the current selected UIDs
     selected_uids = new Set(@state.selected_uids)
+    # the current selected Categories
+    selected_categories = new Set(@state.selected_categories)
 
     # filter items to select/deselect
     items = items.filter (item) ->
@@ -953,18 +957,28 @@ class ListingController extends React.Component
 
     # extract the UIDs
     uids = items.map (item, index) -> item.uid
+    # extract the categories
+    categories = new Set(items.map (item, index) -> item.category or null)
+    # remove empty category
+    categories.delete(null)
 
     if toggle
       # select the UIDs
       uids.forEach (uid) -> selected_uids.add(uid)
+      # select the categories
+      categories.forEach (category) -> selected_categories.add(category)
     else
       # deselect the UIDs
       uids.forEach (uid) -> selected_uids.delete(uid)
+      # select the categories
+      categories.forEach (category) -> selected_categories.delete(category)
 
     # return a promise which is resolved when the state was successfully set
     return new Promise (resolve, reject) =>
       @setState
-        selected_uids: Array.from(selected_uids), resolve
+        selected_uids: Array.from(selected_uids)
+        selected_categories: Array.from(selected_categories)
+      , resolve
 
   ###*
    * Select a row checkbox by UID
@@ -975,26 +989,23 @@ class ListingController extends React.Component
   ###
   selectUID: (uid, toggle) ->
     toggle ?= yes
+    predicate = (item) -> item.uid == uid
 
     # the current selected UIDs
     selected_uids = new Set(@state.selected_uids)
 
     if toggle is yes
-      # handle the select all checkbox
       if uid == "all"
+        # select all
         return @selectItems null, null, yes
-      else
-        selected_uids.add uid
+      # select single item
+      return @selectItems null, predicate, yes
     else
       if uid == "all"
+        # deselect all
         return @selectItems null, null, no
-      else
-        selected_uids.delete uid
-
-    # return a promise which is resolved when the state was successfully set
-    return new Promise (resolve, reject) =>
-      @setState
-        selected_uids: Array.from(selected_uids), resolve
+      # deselect single item
+      return @selectItems null, predicate, no
 
   ###*
    * Save the values of the state's `ajax_save_queue`
