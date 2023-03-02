@@ -1,6 +1,7 @@
 2.4.0 (unreleased)
 ------------------
 
+- #101 Allow to select all items of a category
 - #100 Allow manual row reordering
 -  #99 Fix TypeError for MultiValue fields when no Choices are set
 -  #98 Fix left border gap for category rows
