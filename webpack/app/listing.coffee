@@ -1026,11 +1026,24 @@ class ListingController extends React.Component
    * @returns {Promise} which is resolved when the state was sucessfully set
   ###
   selectUIDRange: (start_uid, end_uid, toggle) ->
-    # extract a list of all UIDs
-    uids = @state.folderitems.map (item, index) -> item.uid
+    items = []
+
+    if @state.categories
+      for category in @state.categories
+        categorized = @state.folderitems.filter (item) -> item.category == category
+        items = items.concat categorized
+    else
+      items = @state.folderitems
+
+    # calculate the range of UIDs
+    uids =items.map (item, index) -> item.uid
     start_idx = uids.indexOf(start_uid)
     end_idx = uids.indexOf(end_uid)
-    range = uids.slice(start_idx, end_idx + 1)
+    if end_idx > start_idx
+      range = uids.slice(start_idx, end_idx + 1)
+    else
+      # support upwards select
+      range = uids.slice(end_idx, start_idx)
 
     predicate = (item) ->
       item.uid in range
