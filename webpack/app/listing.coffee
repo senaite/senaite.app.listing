@@ -947,6 +947,8 @@ class ListingController extends React.Component
     selected_uids = new Set(@state.selected_uids)
     # the current selected Categories
     selected_categories = new Set(@state.selected_categories)
+    # the current expanded Categories
+    expanded_categories = new Set(@state.expanded_categories)
 
     # filter items to select/deselect
     items = items.filter (item) ->
@@ -965,19 +967,23 @@ class ListingController extends React.Component
     if toggle
       # select the UIDs
       uids.forEach (uid) -> selected_uids.add(uid)
-      # select the categories
-      categories.forEach (category) -> selected_categories.add(category)
+      # select and expand the categories
+      categories.forEach (category) ->
+        selected_categories.add(category)
+        expanded_categories.add(category)
     else
       # deselect the UIDs
       uids.forEach (uid) -> selected_uids.delete(uid)
-      # select the categories
-      categories.forEach (category) -> selected_categories.delete(category)
+      # deselect the categories, but leave category expanded
+      categories.forEach (category) ->
+        selected_categories.delete(category)
 
     # return a promise which is resolved when the state was successfully set
     return new Promise (resolve, reject) =>
       @setState
         selected_uids: Array.from(selected_uids)
         selected_categories: Array.from(selected_categories)
+        expanded_categories: Array.from(expanded_categories)
       , resolve
 
   ###*
