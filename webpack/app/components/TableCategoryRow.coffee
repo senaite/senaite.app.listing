@@ -11,22 +11,17 @@ class TableCategoryRow extends React.Component
     @on_category_select = @on_category_select.bind @
 
   on_category_click: (event) ->
-    category = @props.category
-    console.debug "TableCategoryRow::on_category_click: category #{category} clicked"
-
+    console.debug "TableCategoryRow::on_category_click: #{@props.category}"
     # notify parent event handler with the extracted values
     if @props.on_category_click
-      # @param {string} category: The category title
-      @props.on_category_click category
+      @props.on_category_click event
 
   on_category_select: (event) ->
     category = @props.category
-    console.debug "TableCategoryRow::on_category_select: category #{category} selected"
-
+    console.debug "TableCategoryRow::on_category_select: #{@props.category}"
     # notify parent event handler with the extracted values
     if @props.on_category_select
-      # @param {string} category: The category title
-      @props.on_category_select category
+      @props.on_category_select event
 
   build_category: ->
     cells = []
@@ -48,7 +43,8 @@ class TableCategoryRow extends React.Component
       colspan -= 1
       cells.push(
         <td key="select">
-          <span onClick={@on_category_select}>
+          <span category={category}
+                onClick={@on_category_select}>
             {selected and <i className="fas fa-check-circle"></i>}
             {not selected and <i className="fas fa-dot-circle"></i>}
           </span>
@@ -57,6 +53,7 @@ class TableCategoryRow extends React.Component
 
     cells.push(
       <td key="toggle"
+          category={category}
           className={cls}
           onClick={@on_category_click}
           colSpan={colspan}>
