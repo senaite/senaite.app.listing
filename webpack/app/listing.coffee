@@ -932,6 +932,26 @@ class ListingController extends React.Component
     return input
 
   ###*
+   * Returns the folderitems of the state
+   *
+   * @returns {array} copy of folderitems
+  ###
+  get_folderitems: () ->
+    items = []
+
+    for folderitem in @state.folderitems
+      # regular folderitem
+      if not folderitem.transposed_keys
+        items = items.concat folderitem
+        continue
+      # transposed folderitem
+      for key in folderitem.transposed_keys
+        transposed = folderitem[key]
+        items = items.concat transposed
+
+    return items
+
+  ###*
    * Select folder items where the filter predicate returns true
    *
    * This method also selects/deselects the categories of the toggled items
@@ -942,7 +962,7 @@ class ListingController extends React.Component
    * @returns {Promise} Resolved when the state was sucessfully set
   ###
   selectItems: (items, predicate, toggle) ->
-    items ?= @state.folderitems
+    items ?= @get_folderitems()
     predicate ?= (item) -> true
     toggle ?= yes
 
@@ -1002,19 +1022,21 @@ class ListingController extends React.Component
 
     # the current selected UIDs
     selected_uids = new Set(@state.selected_uids)
+    # get the folderitems
+    items = @get_folderitems()
 
     if toggle is yes
       if uid == "all"
         # select all
-        return @selectItems null, null, yes
+        return @selectItems items, null, yes
       # select single item
-      return @selectItems null, predicate, yes
+      return @selectItems items, predicate, yes
     else
       if uid == "all"
         # deselect all
-        return @selectItems null, null, no
+        return @selectItems items, null, no
       # deselect single item
-      return @selectItems null, predicate, no
+      return @selectItems items, predicate, no
 
 
   ###*
@@ -1027,14 +1049,15 @@ class ListingController extends React.Component
   ###
   selectUIDRange: (start_uid, end_uid, toggle) ->
     items = []
+    folderitems = @get_folderitems()
 
     # sort the folderitems by their category if categorized
     if @state.categories.length > 0
       for category in @state.categories
-        categorized = @state.folderitems.filter (item) -> item.category == category
+        categorized = folderitems.filter (item) -> item.category == category
         items = items.concat categorized
     else
-      items = @state.folderitems
+      items = folderitems
 
     # calculate the range of UIDs
     uids =items.map (item, index) -> item.uid
