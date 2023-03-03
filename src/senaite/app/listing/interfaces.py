@@ -26,6 +26,25 @@ class IListingView(Interface):
     """
 
 
+class ITransposedListingView(IListingView):
+    """Marker interface for transposed listings
+
+    Transposed listings need to provide the key `transposed_keys` in each of
+    their transposed folderitems, that contains a list of keys (columns) where
+    to find the original folderitems.
+
+    Example:
+
+    If the items are transposed below the keys `X` and `Y`, the transposed_keys
+    would contain those references.
+
+    folderitems: [
+      {'X': {folderitem}, 'Y': {folderitem}, transposed_keys=['X', 'Y']},
+      ...
+    ]
+    """
+
+
 class IAjaxListingView(Interface):
     """Senaite Core Ajax Listing View
     """
