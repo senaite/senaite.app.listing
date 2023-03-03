@@ -1171,6 +1171,17 @@ class ListingController extends React.Component
     return uid in @state.selected_uids
 
   ###*
+   * Checks if all items are selected
+   *
+   * @returns {bool} true if all visible and enabled items are selected
+  ###
+  all_items_selected: () ->
+    for item in @get_folderitems()
+      if not item.disabled and item.uid not in @state.selected_uids
+        return no
+    return yes
+
+  ###*
    * Checks if the UID is selected.
    *
    * Throws an error if the ID was not found in the review_states list.
@@ -1853,6 +1864,7 @@ class ListingController extends React.Component
                 select_checkbox_name={@state.select_checkbox_name}
                 show_select_column={@state.show_select_column}
                 show_select_all_checkbox={@state.show_select_all_checkbox}
+                all_items_selected={@all_items_selected()}
                 categories={@state.categories}
                 expanded_categories={@state.expanded_categories}
                 selected_categories={@state.selected_categories}
