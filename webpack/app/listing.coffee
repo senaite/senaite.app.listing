@@ -1020,8 +1020,6 @@ class ListingController extends React.Component
     toggle ?= yes
     predicate = (item) -> item.uid == uid
 
-    # the current selected UIDs
-    selected_uids = new Set(@state.selected_uids)
     # get the folderitems
     items = @get_folderitems()
 
