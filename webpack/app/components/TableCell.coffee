@@ -566,6 +566,10 @@ class TableCell extends React.Component
     title = props.title or @props.column.title or column_key
     options = props.options or item.choices[column_key] or []
 
+    column = props.column or @get_column()
+    item.help ?= {}
+    help = props.help or item.help[column_key] or column.help
+
     converter = @ZPUBLISHER_CONVERTER["select"]
     fieldname = name + converter
 
@@ -630,6 +634,10 @@ class TableCell extends React.Component
     uid = props.uid or @get_uid()
     title = props.title or @props.column.title or column_key
 
+    column = props.column or @get_column()
+    item.help ?= {}
+    help = props.help or item.help[column_key] or column.help
+
     converter = @ZPUBLISHER_CONVERTER["multichoice"]
     fieldname = name + converter
 
@@ -681,6 +689,10 @@ class TableCell extends React.Component
     title = props.title or @props.column.title or column_key
     options = item.choices[column_key] or []
     duplicates = item.result_type == "multiselect_duplicates"
+
+    column = props.column or @get_column()
+    item.help ?= {}
+    help = props.help or item.help[column_key] or column.help
 
     converter = @ZPUBLISHER_CONVERTER["multiselect"]
     fieldname = name + converter
@@ -735,6 +747,10 @@ class TableCell extends React.Component
     uid = props.uid or @get_uid()
     title = props.title or @props.column.title or column_key
 
+    column = props.column or @get_column()
+    item.help ?= {}
+    help = props.help or item.help[column_key] or column.help
+
     converter = @ZPUBLISHER_CONVERTER["multivalue"]
     fieldname = name + converter
 
@@ -786,6 +802,10 @@ class TableCell extends React.Component
     uid = props.uid or @get_uid()
     title = props.title or @props.column.title or column_key
     options = item.choices[column_key] or []
+
+    column = props.column or @get_column()
+    item.help ?= {}
+    help = props.help or item.help[column_key] or column.help
 
     converter = @ZPUBLISHER_CONVERTER["boolean"]
     fieldname = name + converter
