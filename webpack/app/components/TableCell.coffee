@@ -421,25 +421,35 @@ class TableCell extends React.Component
 
   ###*
    * Creates a string field component
+   *
+   * The passed in `props` allow to override required values
+   *
    * @param props {object} properties passed to the component
    * @returns StringField component
   ###
   create_string_field: ({props}={}) ->
-    column_key = @get_column_key()
-    item = @get_item()
     props ?= {}
 
-    name = @get_name()
-    value = @get_value()
-    formatted_value = @get_formatted_value()
-    uid = @get_uid()
+    column_key = props.column_key or @get_column_key()
+    item = props.item or @get_item()
+    name = props.name or @get_name()
+    value = props.value or @get_value()
+    formatted_value = props.formatted_value or @get_formatted_value()
+    uid = props.uid or @get_uid()
+    title = props.title or @props.column.title or column_key
+
+    column = props.column or @get_column()
+    item.help ?= {}
+    help = props.help or item.help[column_key] or column.help
+
     converter = @ZPUBLISHER_CONVERTER["string"]
     fieldname = name + converter
-    title = @props.column.title or column_key
-    selected = @is_selected()
-    disabled = @is_disabled()
-    required = @is_required()
-    css_class = "form-control form-control-sm"
+
+    selected = props.selected or @is_selected()
+    disabled = props.disabled or @is_disabled()
+    required = props.required or @is_required()
+    size = props.size or @get_size()
+    css_class = props.css_class or "form-control form-control-sm"
     if required then css_class += " required"
 
     return (
@@ -451,6 +461,7 @@ class TableCell extends React.Component
         defaultValue={value}
         column_key={column_key}
         title={title}
+        help={help}
         formatted_value={formatted_value}
         placeholder={title}
         selected={selected}
@@ -460,6 +471,7 @@ class TableCell extends React.Component
         update_editable_field={@props.update_editable_field}
         save_editable_field={@props.save_editable_field}
         tabIndex={@props.tabIndex}
+        size={size}
         {...props}
         />)
 
