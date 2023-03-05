@@ -601,35 +601,44 @@ class TableCell extends React.Component
 
   ###*
    * Creates a multichoice field component
+   *
+   * The passed in `props` allow to override required values
+   *
    * @param props {object} properties passed to the component
    * @returns MultiChoice component
   ###
   create_multichoice_field: ({props}={}) ->
-    column_key = @get_column_key()
-    item = @get_item()
     props ?= {}
 
-    name = @get_name()
-    value = @get_value()
+    column_key = props.column_key or @get_column_key()
+    item = props.item or @get_item()
+    name = props.name or @get_name()
+
+    value = props.value or @get_value()
     # convert value to array
     if value.length > 0
       value = JSON.parse value
-    options = item.choices[column_key] or []
+
+    options = props.options or item.choices[column_key] or []
     # mark selected options
     options.forEach (option) ->
       selected = no
       if Array.isArray value
         selected = value.indexOf(option.ResultValue) > -1
       option.selected = selected
-    formatted_value = @get_formatted_value()
-    uid = @get_uid()
+
+    formatted_value = props.formatted_value or @get_formatted_value()
+    uid = props.uid or @get_uid()
+    title = props.title or @props.column.title or column_key
+
     converter = @ZPUBLISHER_CONVERTER["multichoice"]
     fieldname = name + converter
-    title = @props.column.title or column_key
-    selected = @is_selected()
-    disabled = @is_disabled()
-    required = @is_required()
-    css_class = "form-control form-control-sm"
+
+    selected = props.selected or @is_selected()
+    disabled = props.disabled or @is_disabled()
+    required = props.required or @is_required()
+    size = props.size or @get_size()
+    css_class = props.css_class or "form-control form-control-sm"
     if required then css_class += " required"
 
     return (
@@ -640,6 +649,7 @@ class TableCell extends React.Component
         name={fieldname}
         column_key={column_key}
         title={title}
+        help={help}
         disabled={disabled}
         selected={selected}
         required={required}
@@ -648,6 +658,7 @@ class TableCell extends React.Component
         update_editable_field={@props.update_editable_field}
         save_editable_field={@props.save_editable_field}
         tabIndex={@props.tabIndex}
+        size={size}
         {...props}
         />)
 
