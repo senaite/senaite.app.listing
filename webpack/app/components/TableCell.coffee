@@ -267,7 +267,7 @@ class TableCell extends React.Component
 
     column_key = props.column_key or @get_column_key()
     item = props.item or @get_item()
-    name = props.name @get_name()
+    name = props.name or @get_name()
     value = props.value or @get_value()
     formatted_value = props.formatted_value or @get_formatted_value()
     uid = props.uid or @get_uid()
@@ -297,7 +297,7 @@ class TableCell extends React.Component
 
     column_key = props.column_key or @get_column_key()
     item = props.item or @get_item()
-    name = props.name @get_name()
+    name = props.name or @get_name()
     value = props.value or @get_value()
     formatted_value = props.formatted_value or @get_formatted_value()
     uid = props.uid or @get_uid()
@@ -328,19 +328,22 @@ class TableCell extends React.Component
 
   ###*
    * Creates a hidden field component
+   *
+   * The passed in `props` allow to override required values
+   *
    * @param props {object} properties passed to the component
    * @returns HiddenField component
   ###
   create_hidden_field: ({props}={}) ->
-    column_key = @get_column_key()
-    item = @get_item()
     props ?= {}
 
-    name = @get_name()
-    value = @get_value()
-    formatted_value = @get_formatted_value()
-    uid = @get_uid()
-    title = @props.column.title or column_key
+    column_key = props.column_key or @get_column_key()
+    item = props.item or @get_item()
+    name = props.name or @get_name()
+    value = props.value or @get_value()
+    formatted_value = props.formatted_value or @get_formatted_value()
+    uid = props.uid or @get_uid()
+    title = props.title or @props.column.title or column_key
 
     return (
       <HiddenField
