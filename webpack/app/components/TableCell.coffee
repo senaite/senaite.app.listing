@@ -302,8 +302,14 @@ class TableCell extends React.Component
     formatted_value = props.formatted_value or @get_formatted_value()
     uid = props.uid or @get_uid()
     title = props.title or @props.column.title or column_key
+
+    column = props.column or @get_column()
+    item.help ?= {}
+    help = props.help or item.help[column_key] or column.help
+
     selected = props.selected or @is_selected()
     required = props.required or @is_required()
+    size = props.size or @get_size()
     css_class = props.css_class or "form-control form-control-sm calculated"
     if required then css_class += " required"
 
@@ -316,6 +322,7 @@ class TableCell extends React.Component
         value={value}
         column_key={column_key}
         title={title}
+        help={help}
         formatted_value={formatted_value}
         placeholder={title}
         selected={selected}
@@ -323,6 +330,7 @@ class TableCell extends React.Component
         className={css_class}
         update_editable_field={@props.update_editable_field}
         save_editable_field={@props.save_editable_field}
+        size={size}
         {...props}
         />)
 
