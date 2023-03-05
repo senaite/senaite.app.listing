@@ -96,8 +96,11 @@ class TableTransposedCell extends TableCell
   ###
   create_interim_fields: ({props}={}) ->
     props ?= {}
-    uid = @get_uid()
     item = @get_item()
+    # return if there is no item
+    if not item
+      return null
+    uid = @get_uid()
     fields = []
     interims = item.interimfields or []
     # [{value: 10, keyword: "F_cl", formatted_value: "10,0", unit: "mg/mL", title: "Faktor cl"}, ...]
@@ -128,7 +131,13 @@ class TableTransposedCell extends TableCell
       if @is_edit_allowed()
         # add a numeric field per interim
         props.className = "form-control form-control-sm interim"
-        fields = fields.concat @create_numeric_field props: props
+        type = interim.result_type
+        if type in ["select", "choices"]
+          fields = fields.concat @create_select_field props: props
+        else if type in ["multichoice"]
+          fields = fields.concat @create_multichoice_field props: props
+        else
+          fields = fields.concat @create_numeric_field props: props
       else
         props.className = "readonly interim"
         fields = fields.concat @create_readonly_field props: props
@@ -188,12 +197,8 @@ class TableTransposedCell extends TableCell
 
     # E.g. a submitted result
     if type == "readonly"
-      fields = fields.concat @create_interim_fields()
       fields = fields.concat @create_readonly_field()
     else
-      # interims first
-      fields = fields.concat @create_interim_fields()
-
       # calculated field
       if type == "calculated"
         fields = fields.concat @create_calculated_field
@@ -206,6 +211,8 @@ class TableTransposedCell extends TableCell
         fields = fields.concat @create_multichoice_field()
       else if type in ["multiselect", "multiselect_duplicates" ]
         fields = fields.concat @create_multiselect_field()
+      else if type in ["multivalue"]
+        field = field.concat @create_multivalue_field()
       else if type == "boolean"
         fields = fields.concat @create_checkbox_field()
       else if type == "numeric"
@@ -251,6 +258,7 @@ class TableTransposedCell extends TableCell
         rowSpan={@props.rowspan}>
       <div className="form-group">
         {@render_before_content()}
+        {@create_interim_fields()}
         {@render_content()}
         {@render_after_content()}
       </div>
