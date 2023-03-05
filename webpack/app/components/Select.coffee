@@ -102,8 +102,8 @@ class Select extends React.Component
     return options
 
   render: ->
-    <span className="form-group">
-      {@props.before and <span className="before_field" dangerouslySetInnerHTML={{__html: @props.before}}></span>}
+    <span className={@props.field_css or "form-group"}>
+      {@props.before and <span className={@props.before_css or "before_field"} dangerouslySetInnerHTML={{__html: @props.before}}></span>}
       <select key={@props.name}
               uid={@props.uid}
               name={@props.name}
@@ -119,7 +119,7 @@ class Select extends React.Component
               {...@props.attrs}>
         {@build_options()}
       </select>
-      {@props.after and <span className="after_field" dangerouslySetInnerHTML={{__html: @props.after}}></span>}
+      {@props.after and <span className={@props.after_css or "after_field"} dangerouslySetInnerHTML={{__html: @props.after}}></span>}
     </span>
 
 
