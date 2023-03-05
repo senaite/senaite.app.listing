@@ -286,22 +286,25 @@ class TableCell extends React.Component
 
   ###*
    * Creates a calculated field component
+   *
+   * The passed in `props` allow to override required values
+   *
    * @param props {object} properties passed to the component
    * @returns CalculatedField component
   ###
   create_calculated_field: ({props}={}) ->
-    column_key = @get_column_key()
-    item = @get_item()
     props ?= {}
 
-    name = @get_name()
-    value = @get_value()
-    formatted_value = @get_formatted_value()
-    uid = @get_uid()
-    title = @props.column.title or column_key
-    selected = @is_selected()
-    required = @is_required()
-    css_class = "form-control form-control-sm calculated"
+    column_key = props.column_key or @get_column_key()
+    item = props.item or @get_item()
+    name = props.name @get_name()
+    value = props.value or @get_value()
+    formatted_value = props.formatted_value or @get_formatted_value()
+    uid = props.uid or @get_uid()
+    title = props.title or @props.column.title or column_key
+    selected = props.selected or @is_selected()
+    required = props.required or @is_required()
+    css_class = props.css_class or "form-control form-control-sm calculated"
     if required then css_class += " required"
 
     return (
