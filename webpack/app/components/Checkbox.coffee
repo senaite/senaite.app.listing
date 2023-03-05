@@ -49,7 +49,7 @@ class Checkbox extends React.Component
             name={@props.name}
             value={@props.value}
             column_key={@props.column_key}
-            title={@props.title}
+            title={@props.help or @props.title}
             disabled={@props.disabled}
             checked={@props.checked}
             defaultChecked={@props.defaultChecked}

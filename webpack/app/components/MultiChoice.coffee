@@ -68,6 +68,7 @@ class MultiChoice extends React.Component
                  value={value}
                  onChange={@props.onChange or @on_change}
                  column_key={@props.column_key}
+                 title={@props.help or @props.title}
                  tabIndex={@props.tabIndex}
                  {...@props.attrs}/> {title}
         </li>)

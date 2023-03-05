@@ -20,7 +20,7 @@ class CalculatedField extends React.Component
              name={@props.name}
              value={@props.value or ""}
              column_key={@props.column_key}
-             title={@props.title}
+             title={@props.help or @props.title}
              disabled={yes}
              required={@props.required}
              className={@props.className}

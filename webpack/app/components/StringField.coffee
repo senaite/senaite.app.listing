@@ -61,7 +61,7 @@ class StringField extends React.Component
              name={@props.name}
              value={@state.value}
              column_key={@props.column_key}
-             title={@props.title}
+             title={@props.help or @props.title}
              disabled={@props.disabled}
              required={@props.required}
              className={@props.className}

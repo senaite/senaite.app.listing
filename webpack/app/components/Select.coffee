@@ -109,7 +109,7 @@ class Select extends React.Component
               name={@props.name}
               value={@state.value}
               column_key={@props.column_key}
-              title={@props.title}
+              title={@props.help or @props.title}
               disabled={@props.disabled}
               onBlur={@props.onBlur or @on_blur}
               onChange={@props.onChange or @on_change}

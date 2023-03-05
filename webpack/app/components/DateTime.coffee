@@ -87,7 +87,7 @@ class DateTime extends React.Component
         <input type="date"
                ref={@dt_date}
                name="#{@props.name}-date"
-               title={@props.title}
+               title={@props.help or @props.title}
                className={@props.className}
                disabled={@props.disabled}
                required={@props.required}

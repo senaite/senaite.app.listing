@@ -141,6 +141,7 @@ class MultiSelect extends React.Component
           <select value={selected_value}
                   uid={@props.uid}
                   name={@props.name}
+                  title={@props.help or @props.title}
                   onChange={@props.onChange or @on_change}
                   column_key={@props.column_key}
                   className={@props.className}
