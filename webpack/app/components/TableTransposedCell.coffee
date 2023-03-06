@@ -176,6 +176,18 @@ class TableTransposedCell extends TableCell
           fields = fields.concat @create_select_field props: props
         else if type in ["multichoice"]
           fields = fields.concat @create_multichoice_field props: props
+        else if type in ["multiselect", "multiselect_duplicates"]
+          fields = fields.concat @create_multiselect_field props:props
+        else if type in ["multivalue"]
+          fields = fields.concat @create_multivalue_field props:props
+        else if type == "boolean"
+          fields = fields.concat @create_checkbox_field props:props
+        else if type == "numeric"
+          fields = fields.concat @create_numeric_field props:props
+        else if type == "string"
+          fields = fields.concat @create_string_field props:props
+        else if type == "datetime"
+          fields = fields.concat @create_datetime_field props:props
         else
           fields = fields.concat @create_numeric_field props: props
       else
