@@ -51,6 +51,27 @@ class TableTransposedCell extends TableCell
     # @props.column_key is the actual column key rendered, e.g. "1", "2", "column_key"
     return @props.item.item_key or @props.item.column_key
 
+  is_header_slot: () ->
+    item = @get_item()
+    if not item
+      return no
+    if item.uid
+      return no
+    if not item?.replace?.Pos
+      return no
+    return yes
+
+  is_assigned_slot: () ->
+    item = @get_item()
+    if not item
+      return no
+    if not item.uid
+      return no
+    return yes
+
+  is_unassigned_slot: () ->
+    return not @is_assigned_slot()
+
   ###*
    * Calculate CSS Class for the <td> cell based on the original folderitem
   ###
