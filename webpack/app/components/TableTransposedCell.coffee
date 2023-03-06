@@ -96,18 +96,22 @@ class TableTransposedCell extends TableCell
     return columns
 
   ###*
-   * Creates a select checkbox for the original folderitem
+   * Creates a select checkbox for an assigned slot
+   *
    * @param props {object} properties passed to the component
    * @returns ReadonlyField component
   ###
-  create_select_checkbox: ({props}={}) ->
+  render_select_checkbox: ({props}={}) ->
     props ?= {}
     uid = @get_uid()
+    item = @get_item()
+    # already checked in render(), but just to be sure
+    return unless item and uid
     name = "#{@props.select_checkbox_name}:list"
     disabled = @is_disabled()
     selected = @is_selected()
-    return (
-      <div key="select" className="checkbox">
+    return [
+      <div key="select" className="checkbox d-flex d-flex-row align-items-center flex-nowrap">
         <Checkbox
           name={name}
           value={uid}
@@ -116,21 +120,24 @@ class TableTransposedCell extends TableCell
           onChange={@props.on_select_checkbox_checked}
           {...props}
           />
-      </div>)
+        <div className="badge badge-secondary">{item.Pos}</div>
+        <div className="ml-2 small text-secondary">{item.Service}</div>
+      </div>
+    ]
 
   ###*
-   * Creates all interim fields
+   * Render all interim fields of the current item
+   *
    * @param props {object} properties passed to the component
    * @returns Interim Fields
   ###
-  create_interim_fields: ({props}={}) ->
+  render_interims: ({props}={}) ->
     props ?= {}
-    item = @get_item()
-    # return if there is no item
-    if not item
-      return null
-    uid = @get_uid()
     fields = []
+    uid = @get_uid()
+    item = @get_item()
+    # already checked in render(), but just to be sure
+    return unless item
     interims = item.interimfields or []
     # [{value: 10, keyword: "F_cl", formatted_value: "10,0", unit: "mg/mL", title: "Faktor cl"}, ...]
     for interim, index in interims
@@ -150,12 +157,16 @@ class TableTransposedCell extends TableCell
         key: keyword
         column_key: keyword
         name: "#{keyword}.#{uid}"
-        defaultValue: interim.value
+        title: title
         placeholder: title
+        defaultValue: interim.value
         formatted_value: interim.formatted_value
         size: size
-        before: "<span>#{title}</span>"
-        after: "<span>#{unit}</span>"
+        before_css: "d-block"
+        after_css: "d-inline"
+        field_css: "d-block mb-2"
+        before: "<span class='text-secondary'>#{title}</span>"
+        after: "<span class='text-secondary small pl-1'>#{unit}</span>"
 
       if @is_edit_allowed()
         # add a numeric field per interim
@@ -170,51 +181,20 @@ class TableTransposedCell extends TableCell
       else
         props.className = "readonly interim"
         fields = fields.concat @create_readonly_field props: props
-
     return fields
 
   ###*
-   * Render the fields for a single transposed cell
-   * @param column_key {object} properties passed to the component
-   * @returns fields {array}
+   * Render the remarks toggle icon
   ###
-  render_content: ->
-    # the current rendered column ID
-    column_key = @get_column_key()
-    # single folderitem
-    item = @get_item()
-    # return if there is no item
-    if not item
-      console.debug "Skipping empty item for '#{column_key}' in column '#{@props.column_key}'"
-      return null
-    # the UID of the original folderitem
-    uid = @get_uid()
-    # field type to render
-    type = @get_type()
-
-    # the fields to return
+  render_remarks_toggle: ->
     fields = []
-
-    # We deal only with result columns in transposed view for now
-    if not @is_result_column
-      return
-
-    # Get the Result column
-    result_column = @props.columns["Result"]
-    result_column_title = result_column.title
-
-    # Each item can render a piece of HTML, which is defined in the before/after
-    # key of the folderitem.
-    # To add a controlled ReactJS component (with callbacks etc.), we inject here
-    # a checkbox and the remarks button into the item['before_components'].
-    # This is handled then by `render_before_content` and `render_after_content`.
-    before_components = {}
-    # Add a select checkbox for result cells
-    before_components[column_key] = [@create_select_checkbox()]
-    # Append remarks toggle
+    uid = @get_uid()
+    item = @get_item()
+    # already checked in render(), but just to be sure
+    return unless item
 
     if @get_remarks_columns().length > 0
-      before_components[column_key].push(
+      fields = fields.concat (
         <a key={uid + "_remarks"}
             href="#"
             className="transposed_remarks"
@@ -222,42 +202,24 @@ class TableTransposedCell extends TableCell
             onClick={@props.on_remarks_expand_click}>
           <i className="remarksicon fas fa-comment"></i>
         </a>)
-    item["before_components"] = before_components
+    return fields
 
-    # E.g. a submitted result
-    if type == "readonly"
-      fields = fields.concat @create_readonly_field()
-    else
-      # calculated field
-      if type == "calculated"
-        fields = fields.concat @create_calculated_field
-          props:
-            before: "<span>#{result_column_title}</span>"
-            after: "<span>#{item.Unit or ''}</span>"
-      else if type in ["select", "choices"]
-        fields = fields.concat @create_select_field()
-      else if type in ["multichoice"]
-        fields = fields.concat @create_multichoice_field()
-      else if type in ["multiselect", "multiselect_duplicates" ]
-        fields = fields.concat @create_multiselect_field()
-      else if type in ["multivalue"]
-        field = field.concat @create_multivalue_field()
-      else if type == "boolean"
-        fields = fields.concat @create_checkbox_field()
-      else if type == "numeric"
-        fields = fields.concat @create_numeric_field()
-      else if type == "string"
-        fields = fields.concat @create_string_field()
-      else if type == "datetime"
-        fields = fields.concat @create_datetime_field()
-      else
-        fields = fields.concat @create_numeric_field()
+  ###*
+   * Render the actual analysis remarks textbox
+  ###
+  render_remarks: ->
+    fields = []
+    column_key = @get_column_key()
+    uid = @get_uid()
+    item = @get_item()
+    # already checked in render(), but just to be sure
+    return unless item
 
     # Append Remarks field(s)
     for column_key, column_index in @get_remarks_columns()
       value = item[column_key]
       fields.push(
-        <div key={column_index + "_remarks"}>
+        <span key={column_index + "_remarks"}>
           <RemarksField
             {...@props}
             uid={uid}
@@ -265,32 +227,107 @@ class TableTransposedCell extends TableCell
             column_key={column_key}
             value={item[column_key]}
           />
-        </div>)
+        </span>)
+    return fields
 
-    # Append Attachments
+  ###*
+   * Render analysis attachments
+  ###
+  render_attachments: ->
+    fields = []
+    column_key = @get_column_key()
+    uid = @get_uid()
+    item = @get_item()
+    # already checked in render(), but just to be sure
+    return unless item
+
     if item.replace.Attachments
       fields = fields.concat @create_readonly_field
           props:
-            key: column_index + "_attachments"
+            key: "attachments"
             uid: uid
             item: item
             column_key: "Attachments"
             formatted_value: item.replace.Attachments
             attrs:
               style: {display: "block"}
-
     return fields
+
+  ###*
+   * Render the result field + additional fields
+  ###
+  render_result: ->
+    column_key = @get_column_key()
+    item = @get_item()
+    # already checked in render(), but just to be sure
+    return unless item
+    uid = @get_uid()
+    type = @get_type()
+    props = {}
+
+    if type == "readonly"
+      result_field = @create_readonly_field props:props
+    else
+      # calculated field
+      if type == "calculated"
+        result_field = @create_calculated_field props:props
+      else if type in ["select", "choices"]
+        result_field = @create_select_field props:props
+      else if type in ["multichoice"]
+        result_field = @create_multichoice_field props:props
+      else if type in ["multiselect", "multiselect_duplicates" ]
+        result_field = @create_multiselect_field props:props
+      else if type in ["multivalue"]
+        result_field = @create_multivalue_field props:props
+      else if type == "boolean"
+        result_field = @create_checkbox_field props:props
+      else if type == "numeric"
+        result_field = @create_numeric_field props:props
+      else if type == "string"
+        result_field = @create_string_field props:props
+      else if type == "datetime"
+        result_field = @create_datetime_field props:props
+      else
+        result_field = @create_numeric_field props:props
+
+    # get the (translated) title of the results column
+    result_column = @props.columns["Result"]
+    result_column_title = result_column.title
+
+    return (
+      <div className="result">
+        <div className="text-secondary">{result_column_title}</div>
+        <div>{@render_before_content()}</div>
+        <div className="d-flex d-flex-row flex-nowrap">
+          <div className="align-self-center">{result_field}</div>
+          <div className="align-self-center">{@render_after_content()}</div>
+          <div className="align-self-center">{@render_remarks_toggle()}</div>
+        </div>
+      </div>)
 
   render: ->
     <td className={@get_css()}
         colSpan={@props.colspan}
         rowSpan={@props.rowspan}>
-      <div className="form-group">
-        {@render_before_content()}
-        {@create_interim_fields()}
-        {@render_content()}
-        {@render_after_content()}
-      </div>
+
+      {@is_header_slot() and <div className="position">
+        {@create_readonly_field()}
+      </div>}
+
+      {@is_assigned_slot() and <div className="card">
+        <div className="card-header">
+         {@render_select_checkbox()}
+        </div>
+        <div className="card-body">
+          {@render_interims()}
+          {@render_result()}
+        </div>
+        <div className="card-footer">
+          {@render_remarks()}
+          {@render_attachments()}
+        </div>
+      </div>}
+
     </td>
 
 export default TableTransposedCell
