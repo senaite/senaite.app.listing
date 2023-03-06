@@ -30,6 +30,14 @@ class TableTransposedCell extends TableCell
     return @props.item[@props.column_key]
 
   ###*
+   * Get the UID of the transposed item
+  ###
+  get_uid: ->
+    item = @get_item()
+    return null unless item
+    return item.uid
+
+  ###*
    * Get the value within the transposed folderitem to render
    *
    * also see bika.lims.browser.worksheet.views.analyses_transposed.py
