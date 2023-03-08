@@ -36,6 +36,7 @@ from senaite.app.listing.decorators import set_application_json_header
 from senaite.app.listing.decorators import translate
 from senaite.app.listing.interfaces import IAjaxListingView
 from senaite.app.listing.interfaces import IChildFolderItems
+from senaite.app.listing.interfaces import ITransposedListingView
 from senaite.core.decorators import readonly_transaction
 from senaite.core.interfaces import IDataManager
 from senaite.core.p3compat import cmp
@@ -399,6 +400,7 @@ class AjaxListingView(BrowserView):
             "fetch_transitions_on_select": self.fetch_transitions_on_select,
             "view_context_state": api.get_workflow_status_of(self.context),
             "allow_row_reorder": self.allow_row_reorder,
+            "transposed": ITransposedListingView.providedBy(self),
         }
 
         return config

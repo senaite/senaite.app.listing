@@ -1,6 +1,7 @@
 2.4.0 (unreleased)
 ------------------
 
+- #104 Allow to select all items in worksheet transposed view and layout design improvements
 - #102 Support range selections for listing checkboxes
 - #101 Allow to select all items of a category
 - #100 Allow manual row reordering

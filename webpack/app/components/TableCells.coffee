@@ -63,9 +63,10 @@ class TableCells extends React.Component
    * @returns SelectCell component
   ###
   create_select_cell: () ->
+    uid = @get_uid()
+    if not uid then return @create_placeholder_cell()
     checkbox_name = "#{@props.select_checkbox_name}:list"
     item = @get_item()
-    uid = @get_uid()
     remarks = @props.remarks  # True if this row follows a remarks row
     level = item.node_level or 0
     cell = (
@@ -86,6 +87,13 @@ class TableCells extends React.Component
           <span className="remarksicon fas fa-comment-alt"/>
         </a>}
       </td>)
+    return cell
+
+  ###*
+   * Create an empty placeholder cell
+  ###
+  create_placeholder_cell: () ->
+    cell = (<td className="placeholder"></td>)
     return cell
 
   ###*

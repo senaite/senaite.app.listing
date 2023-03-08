@@ -136,13 +136,13 @@ class RemarksField extends React.Component
     if not @props.uid
       return null
     <div style={@get_style()}
-         className="remarks text-muted">
-      {@props.before and <span className="before_field" dangerouslySetInnerHTML={{__html: @props.before}}></span>}
+         className={@props.field_css or "remarks text-muted"}>
+      {@props.before and <span className={@props.before_css or "before_field"} dangerouslySetInnerHTML={{__html: @props.before}}></span>}
       <div className="text-info">
         <i className="fas fa-hand-point-right"/> {@get_column_title()}:
       </div>
       {@render_remarks_field()}
-      {@props.after and <span className="after_field" dangerouslySetInnerHTML={{__html: @props.after}}></span>}
+      {@props.after and <span className={@props.after_css or "after_field"} dangerouslySetInnerHTML={{__html: @props.after}}></span>}
     </div>
 
 

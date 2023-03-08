@@ -68,6 +68,7 @@ class MultiChoice extends React.Component
                  value={value}
                  onChange={@props.onChange or @on_change}
                  column_key={@props.column_key}
+                 title={@props.help or @props.title}
                  tabIndex={@props.tabIndex}
                  {...@props.attrs}/> {title}
         </li>)
@@ -75,12 +76,12 @@ class MultiChoice extends React.Component
     return options
 
   render: ->
-    <div className="multichoice">
-      {@props.before and <span className="before_field" dangerouslySetInnerHTML={{__html: @props.before}}></span>}
+    <div className={@props.field_css or "multichoice"}>
+      {@props.before and <span className={@props.before_css or "before_field"} dangerouslySetInnerHTML={{__html: @props.before}}></span>}
       <ul className="list-unstyled">
         {@build_options()}
       </ul>
-      {@props.after and <span className="after_field" dangerouslySetInnerHTML={{__html: @props.after}}></span>}
+      {@props.after and <span className={@props.after_css or "after_field"} dangerouslySetInnerHTML={{__html: @props.after}}></span>}
     </div>
 
 

@@ -87,6 +87,7 @@ class MultiValue extends React.Component
                  value={value}
                  uid={@props.uid}
                  name={@props.name}
+                 title={@props.help or @props.title}
                  onChange={@props.onChange or @on_change}
                  column_key={@props.column_key}
                  className={@props.className}
@@ -97,12 +98,12 @@ class MultiValue extends React.Component
     return inputs
 
   render: ->
-    <div className="multivalue">
-      {@props.before and <span className="before_field" dangerouslySetInnerHTML={{__html: @props.before}}></span>}
+    <div className={@props.field_css or "multivalue"}>
+      {@props.before and <span className={@props.before_css or "before_field"} dangerouslySetInnerHTML={{__html: @props.before}}></span>}
       <ul className="list-unstyled" tabIndex={@props.tabIndex}>
         {@build_inputs()}
       </ul>
-      {@props.after and <span className="after_field" dangerouslySetInnerHTML={{__html: @props.after}}></span>}
+      {@props.after and <span className={@props.after_css or "after_field"} dangerouslySetInnerHTML={{__html: @props.after}}></span>}
     </div>
 
 

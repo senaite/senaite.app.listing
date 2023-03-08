@@ -53,15 +53,15 @@ class StringField extends React.Component
       @props.update_editable_field uid, name, value, @props.item
 
   render: ->
-    <span className="form-group">
-      {@props.before and <span className="before_field" dangerouslySetInnerHTML={{__html: @props.before}}></span>}
+    <span className={@props.field_css or "form-group"}>
+      {@props.before and <span className={@props.before_css or "before_field"} dangerouslySetInnerHTML={{__html: @props.before}}></span>}
       <input type="text"
              size={@props.size or 20}
              uid={@props.uid}
              name={@props.name}
              value={@state.value}
              column_key={@props.column_key}
-             title={@props.title}
+             title={@props.help or @props.title}
              disabled={@props.disabled}
              required={@props.required}
              className={@props.className}
@@ -69,7 +69,7 @@ class StringField extends React.Component
              onChange={@props.onChange or @on_change}
              tabIndex={@props.tabIndex}
              {...@props.attrs}/>
-      {@props.after and <span className="after_field" dangerouslySetInnerHTML={{__html: @props.after}}></span>}
+      {@props.after and <span className={@props.after_css or "after_field"} dangerouslySetInnerHTML={{__html: @props.after}}></span>}
     </span>
 
 

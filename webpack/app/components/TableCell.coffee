@@ -256,19 +256,22 @@ class TableCell extends React.Component
 
   ###*
    * Creates a readonly field component
+   *
+   * The passed in `props` allow to override required values
+   *
    * @param props {object} properties passed to the component
    * @returns ReadonlyField component
   ###
   create_readonly_field: ({props}={}) ->
-    column_key = @get_column_key()
-    item = @get_item()
     props ?= {}
 
-    name = @get_name()
-    value = @get_value()
-    formatted_value = @get_formatted_value()
-    uid = @get_uid()
-    css_class = "readonly"
+    column_key = props.column_key or @get_column_key()
+    item = props.item or @get_item()
+    name = props.name or @get_name()
+    value = props.value or @get_value()
+    formatted_value = props.formatted_value or @get_formatted_value()
+    uid = props.uid or @get_uid()
+    css_class = props.css_class or "readonly"
 
     return (
       <ReadonlyField
@@ -283,22 +286,31 @@ class TableCell extends React.Component
 
   ###*
    * Creates a calculated field component
+   *
+   * The passed in `props` allow to override required values
+   *
    * @param props {object} properties passed to the component
    * @returns CalculatedField component
   ###
   create_calculated_field: ({props}={}) ->
-    column_key = @get_column_key()
-    item = @get_item()
     props ?= {}
 
-    name = @get_name()
-    value = @get_value()
-    formatted_value = @get_formatted_value()
-    uid = @get_uid()
-    title = @props.column.title or column_key
-    selected = @is_selected()
-    required = @is_required()
-    css_class = "form-control form-control-sm calculated"
+    column_key = props.column_key or @get_column_key()
+    item = props.item or @get_item()
+    name = props.name or @get_name()
+    value = props.value or @get_value()
+    formatted_value = props.formatted_value or @get_formatted_value()
+    uid = props.uid or @get_uid()
+    title = props.title or @props.column.title or column_key
+
+    column = props.column or @get_column()
+    item.help ?= {}
+    help = props.help or item.help[column_key] or column.help
+
+    selected = props.selected or @is_selected()
+    required = props.required or @is_required()
+    size = props.size or @get_size()
+    css_class = props.css_class or "form-control form-control-sm calculated"
     if required then css_class += " required"
 
     return (
@@ -310,6 +322,7 @@ class TableCell extends React.Component
         value={value}
         column_key={column_key}
         title={title}
+        help={help}
         formatted_value={formatted_value}
         placeholder={title}
         selected={selected}
@@ -317,24 +330,27 @@ class TableCell extends React.Component
         className={css_class}
         update_editable_field={@props.update_editable_field}
         save_editable_field={@props.save_editable_field}
+        size={size}
         {...props}
         />)
 
   ###*
    * Creates a hidden field component
+   *
+   * The passed in `props` allow to override required values
+   *
    * @param props {object} properties passed to the component
    * @returns HiddenField component
   ###
   create_hidden_field: ({props}={}) ->
-    column_key = @get_column_key()
-    item = @get_item()
     props ?= {}
 
-    name = @get_name()
-    value = @get_value()
-    formatted_value = @get_formatted_value()
-    uid = @get_uid()
-    title = @props.column.title or column_key
+    column_key = props.column_key or @get_column_key()
+    item = props.item or @get_item()
+    name = props.name or @get_name()
+    value = props.value or @get_value()
+    uid = props.uid or @get_uid()
+    title = props.title or @props.column.title or column_key
 
     return (
       <HiddenField
@@ -348,29 +364,35 @@ class TableCell extends React.Component
 
   ###*
    * Creates a numeric field component
+   *
+   * The passed in `props` allow to override required values
+   *
    * @param props {object} properties passed to the component
    * @returns NumericField component
   ###
   create_numeric_field: ({props}={}) ->
-    column_key = @get_column_key()
-    item = @get_item()
-    column = @get_column()
     props ?= {}
-    item.help ?= {}
 
-    name = @get_name()
-    value = @get_value()
-    formatted_value = @get_formatted_value()
-    uid = @get_uid()
+    column_key = props.column_key or @get_column_key()
+    item = props.item or @get_item()
+    name = props.name or @get_name()
+    value = props.value or @get_value()
+    formatted_value = props.formatted_value or @get_formatted_value()
+    uid = props.uid or @get_uid()
+    title = props.title or @props.column.title or column_key
+
+    column = props.column or @get_column()
+    item.help ?= {}
+    help = props.help or item.help[column_key] or column.help
+
     converter = @ZPUBLISHER_CONVERTER["numeric"]
     fieldname = name + converter
-    title = @props.column.title or column_key
-    help = item.help[column_key] or column.help
-    selected = @is_selected()
-    disabled = @is_disabled()
-    required = @is_required()
-    size = @get_size()
-    css_class = "form-control form-control-sm"
+
+    selected = props.selected or @is_selected()
+    disabled = props.disabled or @is_disabled()
+    required = props.required or @is_required()
+    size = props.size or @get_size()
+    css_class = props.css_class or "form-control form-control-sm"
     if required then css_class += " required"
 
     return (
@@ -398,25 +420,35 @@ class TableCell extends React.Component
 
   ###*
    * Creates a string field component
+   *
+   * The passed in `props` allow to override required values
+   *
    * @param props {object} properties passed to the component
    * @returns StringField component
   ###
   create_string_field: ({props}={}) ->
-    column_key = @get_column_key()
-    item = @get_item()
     props ?= {}
 
-    name = @get_name()
-    value = @get_value()
-    formatted_value = @get_formatted_value()
-    uid = @get_uid()
+    column_key = props.column_key or @get_column_key()
+    item = props.item or @get_item()
+    name = props.name or @get_name()
+    value = props.value or @get_value()
+    formatted_value = props.formatted_value or @get_formatted_value()
+    uid = props.uid or @get_uid()
+    title = props.title or @props.column.title or column_key
+
+    column = props.column or @get_column()
+    item.help ?= {}
+    help = props.help or item.help[column_key] or column.help
+
     converter = @ZPUBLISHER_CONVERTER["string"]
     fieldname = name + converter
-    title = @props.column.title or column_key
-    selected = @is_selected()
-    disabled = @is_disabled()
-    required = @is_required()
-    css_class = "form-control form-control-sm"
+
+    selected = props.selected or @is_selected()
+    disabled = props.disabled or @is_disabled()
+    required = props.required or @is_required()
+    size = props.size or @get_size()
+    css_class = props.css_class or "form-control form-control-sm"
     if required then css_class += " required"
 
     return (
@@ -428,6 +460,7 @@ class TableCell extends React.Component
         defaultValue={value}
         column_key={column_key}
         title={title}
+        help={help}
         formatted_value={formatted_value}
         placeholder={title}
         selected={selected}
@@ -437,33 +470,44 @@ class TableCell extends React.Component
         update_editable_field={@props.update_editable_field}
         save_editable_field={@props.save_editable_field}
         tabIndex={@props.tabIndex}
+        size={size}
         {...props}
         />)
 
   ###*
    * Creates a datetime field component
+   *
+   * The passed in `props` allow to override required values
+   *
    * @param props {object} properties passed to the component
    * @returns DateTime component
   ###
   create_datetime_field: ({props}={}) ->
-    column_key = @get_column_key()
-    item = @get_item()
-    column = @get_column()
     props ?= {}
 
-    name = @get_name()
-    value = @get_value()
-    formatted_value = @get_formatted_value()
-    uid = @get_uid()
+    column_key = props.column_key or @get_column_key()
+    item = props.item or @get_item()
+    name = props.name or @get_name()
+    value = props.value or @get_value()
+    formatted_value = props.formatted_value or @get_formatted_value()
+    uid = props.uid or @get_uid()
+    title = props.title or @props.column.title or column_key
+
+    column = props.column or @get_column()
+    item.help ?= {}
+    help = props.help or item.help[column_key] or column.help
+
+    result_type = "date"
     converter = @ZPUBLISHER_CONVERTER["string"]
     fieldname = name + converter
-    title = @props.column.title or column_key
-    selected = @is_selected()
-    disabled = @is_disabled()
-    required = @is_required()
-    css_class = "form-control form-control-sm"
+
+    selected = props.selected or @is_selected()
+    disabled = props.disabled or @is_disabled()
+    required = props.required or @is_required()
+    size = props.size or @get_size()
+    css_class = props.css_class or "form-control form-control-sm"
+
     if required then css_class += " required"
-    result_type = "date"
 
     # min/max dates
     min = column.min or null
@@ -483,6 +527,7 @@ class TableCell extends React.Component
         defaultValue={value}
         column_key={column_key}
         title={title}
+        help={help}
         formatted_value={formatted_value}
         placeholder={title}
         selected={selected}
@@ -493,6 +538,7 @@ class TableCell extends React.Component
         update_editable_field={@props.update_editable_field}
         save_editable_field={@props.save_editable_field}
         tabIndex={@props.tabIndex}
+        size={size}
         min_date={min_date}
         max_date={max_date}
         min_time={min_time}
@@ -502,26 +548,36 @@ class TableCell extends React.Component
 
   ###*
    * Creates a select field component
+   *
+   * The passed in `props` allow to override required values
+   *
    * @param props {object} properties passed to the component
    * @returns SelectField component
   ###
   create_select_field: ({props}={}) ->
-    column_key = @get_column_key()
-    item = @get_item()
     props ?= {}
 
-    name = @get_name()
-    value = @get_value()
-    options = item.choices[column_key] or []
-    formatted_value = @get_formatted_value()
-    uid = @get_uid()
+    column_key = props.column_key or @get_column_key()
+    item = props.item or @get_item()
+    name = props.name or @get_name()
+    value = props.value or @get_value()
+    formatted_value = props.formatted_value or @get_formatted_value()
+    uid = props.uid or @get_uid()
+    title = props.title or @props.column.title or column_key
+    options = props.options or item.choices[column_key] or []
+
+    column = props.column or @get_column()
+    item.help ?= {}
+    help = props.help or item.help[column_key] or column.help
+
     converter = @ZPUBLISHER_CONVERTER["select"]
     fieldname = name + converter
-    title = @props.column.title or column_key
-    selected = @is_selected()
-    disabled = @is_disabled()
-    required = @is_required()
-    css_class = "form-control form-control-sm"
+
+    selected = props.selected or @is_selected()
+    disabled = props.disabled or @is_disabled()
+    required = props.required or @is_required()
+    size = props.size or @get_size()
+    css_class = props.css_class or "form-control form-control-sm"
     if required then css_class += " required"
 
     return (
@@ -533,6 +589,7 @@ class TableCell extends React.Component
         defaultValue={value}
         column_key={column_key}
         title={title}
+        help={help}
         disabled={disabled}
         selected={selected}
         required={required}
@@ -541,40 +598,54 @@ class TableCell extends React.Component
         update_editable_field={@props.update_editable_field}
         save_editable_field={@props.save_editable_field}
         tabIndex={@props.tabIndex}
+        size={size}
         {...props}
         />)
 
   ###*
    * Creates a multichoice field component
+   *
+   * The passed in `props` allow to override required values
+   *
    * @param props {object} properties passed to the component
    * @returns MultiChoice component
   ###
   create_multichoice_field: ({props}={}) ->
-    column_key = @get_column_key()
-    item = @get_item()
     props ?= {}
 
-    name = @get_name()
-    value = @get_value()
+    column_key = props.column_key or @get_column_key()
+    item = props.item or @get_item()
+    name = props.name or @get_name()
+
+    value = props.value or @get_value()
     # convert value to array
     if value.length > 0
       value = JSON.parse value
-    options = item.choices[column_key] or []
+
+    options = props.options or item.choices[column_key] or []
     # mark selected options
     options.forEach (option) ->
       selected = no
       if Array.isArray value
         selected = value.indexOf(option.ResultValue) > -1
       option.selected = selected
-    formatted_value = @get_formatted_value()
-    uid = @get_uid()
+
+    formatted_value = props.formatted_value or @get_formatted_value()
+    uid = props.uid or @get_uid()
+    title = props.title or @props.column.title or column_key
+
+    column = props.column or @get_column()
+    item.help ?= {}
+    help = props.help or item.help[column_key] or column.help
+
     converter = @ZPUBLISHER_CONVERTER["multichoice"]
     fieldname = name + converter
-    title = @props.column.title or column_key
-    selected = @is_selected()
-    disabled = @is_disabled()
-    required = @is_required()
-    css_class = "form-control form-control-sm"
+
+    selected = props.selected or @is_selected()
+    disabled = props.disabled or @is_disabled()
+    required = props.required or @is_required()
+    size = props.size or @get_size()
+    css_class = props.css_class or "form-control form-control-sm"
     if required then css_class += " required"
 
     return (
@@ -585,6 +656,7 @@ class TableCell extends React.Component
         name={fieldname}
         column_key={column_key}
         title={title}
+        help={help}
         disabled={disabled}
         selected={selected}
         required={required}
@@ -593,32 +665,43 @@ class TableCell extends React.Component
         update_editable_field={@props.update_editable_field}
         save_editable_field={@props.save_editable_field}
         tabIndex={@props.tabIndex}
+        size={size}
         {...props}
         />)
 
   ###*
    * Creates a multiselect field component
+   *
+   * The passed in `props` allow to override required values
+   *
    * @param props {object} properties passed to the component
    * @returns MultiSelect component
   ###
   create_multiselect_field: ({props}={}) ->
-    column_key = @get_column_key()
-    item = @get_item()
     props ?= {}
 
-    uid = @get_uid()
-    name = @get_name()
-    value = @get_value()
+    column_key = props.column_key or @get_column_key()
+    item = props.item or @get_item()
+    name = props.name or @get_name()
+    value = props.value or @get_value()
+    formatted_value = props.formatted_value or @get_formatted_value()
+    uid = props.uid or @get_uid()
+    title = props.title or @props.column.title or column_key
     options = item.choices[column_key] or []
-    formatted_value = @get_formatted_value()
+    duplicates = item.result_type == "multiselect_duplicates"
+
+    column = props.column or @get_column()
+    item.help ?= {}
+    help = props.help or item.help[column_key] or column.help
+
     converter = @ZPUBLISHER_CONVERTER["multiselect"]
     fieldname = name + converter
-    title = @props.column.title or column_key
-    selected = @is_selected()
-    disabled = @is_disabled()
-    required = @is_required()
-    duplicates = item.result_type == "multiselect_duplicates"
-    css_class = "form-control form-control-sm"
+
+    selected = props.selected or @is_selected()
+    disabled = props.disabled or @is_disabled()
+    required = props.required or @is_required()
+    size = props.size or @get_size()
+    css_class = props.css_class or "form-control form-control-sm"
     if required then css_class += " required"
 
     return (
@@ -631,6 +714,7 @@ class TableCell extends React.Component
         value={value}
         column_key={column_key}
         title={title}
+        help={help}
         disabled={disabled}
         selected={selected}
         required={required}
@@ -640,29 +724,41 @@ class TableCell extends React.Component
         update_editable_field={@props.update_editable_field}
         save_editable_field={@props.save_editable_field}
         tabIndex={@props.tabIndex}
+        size={size}
         {...props}
         />)
 
   ###*
    * Creates a multivalue field component
+   *
+   * The passed in `props` allow to override required values
+   *
    * @param props {object} properties passed to the component
    * @returns MultiValue component
   ###
   create_multivalue_field: ({props}={}) ->
-    column_key = @get_column_key()
-    item = @get_item()
     props ?= {}
 
-    uid = @get_uid()
-    name = @get_name()
-    value = @get_value()
+    column_key = props.column_key or @get_column_key()
+    item = props.item or @get_item()
+    name = props.name or @get_name()
+    value = props.value or @get_value()
+    formatted_value = props.formatted_value or @get_formatted_value()
+    uid = props.uid or @get_uid()
+    title = props.title or @props.column.title or column_key
+
+    column = props.column or @get_column()
+    item.help ?= {}
+    help = props.help or item.help[column_key] or column.help
+
     converter = @ZPUBLISHER_CONVERTER["multivalue"]
     fieldname = name + converter
-    title = @props.column.title or column_key
-    selected = @is_selected()
-    disabled = @is_disabled()
-    required = @is_required()
-    css_class = "form-control form-control-sm"
+
+    selected = props.selected or @is_selected()
+    disabled = props.disabled or @is_disabled()
+    required = props.required or @is_required()
+    size = props.size or @get_size()
+    css_class = props.css_class or "form-control form-control-sm"
     if required then css_class += " required"
 
     return (
@@ -675,6 +771,7 @@ class TableCell extends React.Component
         value={value}
         column_key={column_key}
         title={title}
+        help={help}
         disabled={disabled}
         selected={selected}
         required={required}
@@ -682,31 +779,42 @@ class TableCell extends React.Component
         update_editable_field={@props.update_editable_field}
         save_editable_field={@props.save_editable_field}
         tabIndex={@props.tabIndex}
+        size={size}
         {...props}
         />)
 
   ###*
    * Creates a checkbox field component
+   *
+   * The passed in `props` allow to override required values
+   *
    * @param props {object} properties passed to the component
    * @returns Checkbox component
   ###
   create_checkbox_field: ({props}={}) ->
-    column_key = @get_column_key()
-    item = @get_item()
     props ?= {}
 
-    name = @get_name()
-    value = @get_value()
+    column_key = props.column_key or @get_column_key()
+    item = props.item or @get_item()
+    name = props.name or @get_name()
+    value = props.value or @get_value()
+    formatted_value = props.formatted_value or @get_formatted_value()
+    uid = props.uid or @get_uid()
+    title = props.title or @props.column.title or column_key
     options = item.choices[column_key] or []
-    formatted_value = @get_formatted_value()
-    uid = @get_uid()
+
+    column = props.column or @get_column()
+    item.help ?= {}
+    help = props.help or item.help[column_key] or column.help
+
     converter = @ZPUBLISHER_CONVERTER["boolean"]
     fieldname = name + converter
-    title = @props.column.title or column_key
-    selected = @is_selected()
-    disabled = @is_disabled()
-    required = @is_required()
-    css_class = "checkbox"
+
+    selected = props.selected or @is_selected()
+    disabled = props.disabled or @is_disabled()
+    required = props.required or @is_required()
+    size = props.size or @get_size()
+    css_class = props.css_class or "checkbox"
     if required then css_class += " required"
 
     return (
@@ -718,12 +826,14 @@ class TableCell extends React.Component
         value="on"
         column_key={column_key}
         title={title}
+        help={help}
         defaultChecked={value}
         disabled={disabled}
         className={css_class}
         update_editable_field={@props.update_editable_field}
         save_editable_field={@props.save_editable_field}
         tabIndex={@props.tabIndex}
+        size={size}
         {...props}
         />)
 
