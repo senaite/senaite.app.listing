@@ -1,4 +1,4 @@
-2.4.0 (unreleased)
+2.4.0 (2023-03-10)
 ------------------
 
 - #104 Allow to select all items in worksheet transposed view and layout design improvements

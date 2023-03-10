@@ -216,3 +216,18 @@ Run this command to watch/rebuild the JavaScript for Development:
 Run this command to build the final JavaScript for Production:
 
     » yarn build
+
+
+## License
+
+**SENAITE.APP.LISTING** Copyright (C) RIDING BYTES & NARALABS
+
+This program is free software; you can redistribute it and/or modify it under
+the terms of the [GNU General Public License version
+2](https://github.com/senaite/senaite.app.listing/blob/master/LICENSE)
+as published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
