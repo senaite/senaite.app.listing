@@ -1023,7 +1023,10 @@ class ListingController extends React.Component
     # get the folderitems
     items = @get_folderitems()
 
-    # expanded children are not part of the folder items, but are
+    # Expanded children are not part of the folder items, but are remembered
+    # when fetched in the `state.children` object.
+    # => Expand child items to the regular folderitems to be selectable, see:
+    #    https://github.com/senaite/senaite.app.listing/pull/106
     items = items.concat.apply(items, Object.values(@state.children))
 
     if toggle is yes
