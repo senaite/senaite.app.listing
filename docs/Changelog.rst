@@ -1,7 +1,7 @@
 2.5.0 (unreleased)
 ------------------
 
-- no changes yet
+- #106 Fix child items can not be selected in listings
 
 
 2.4.0 (2023-03-10)
