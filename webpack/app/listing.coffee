@@ -1023,6 +1023,9 @@ class ListingController extends React.Component
     # get the folderitems
     items = @get_folderitems()
 
+    # expanded children are not part of the folder items, but are
+    items = items.concat.apply(items, Object.values(@state.children))
+
     if toggle is yes
       if uid == "all"
         # select all
