@@ -68,18 +68,10 @@ class MultiSelect extends React.Component
     # option does not exist yet
     empties = props_options.filter (option) -> option.ResultValue ==  ""
     if empties.length == 0
-      props_options.push({ResultValue: "", ResultText: ""})
-
-    # Sort the options alphabetically
-    sorted_options = props_options.sort (a, b) ->
-      text_a = a.ResultText.toLowerCase()
-      text_b = b.ResultText.toLowerCase()
-      if text_a > text_b then return 1
-      if text_a < text_b then return -1
-      return 0
+      props_options.splice(0, 0, {ResultValue: "", ResultText: ""})
 
     # Add the options to the selection list
-    for option in sorted_options
+    for option in props_options
       value = option.ResultValue
       title = option.ResultText
       options.push(
