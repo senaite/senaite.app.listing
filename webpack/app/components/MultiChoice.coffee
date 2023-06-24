@@ -47,15 +47,7 @@ class MultiChoice extends React.Component
   build_options: ->
     options = []
 
-    # Sort the items alphabetically
-    sorted_options = @props.options.sort (a, b) ->
-      text_a = a.ResultText.toLowerCase()
-      text_b = b.ResultText.toLowerCase()
-      if text_a > text_b then return 1
-      if text_a < text_b then return -1
-      return 0
-
-    for option in sorted_options
+    for option in @props.options
       value = option.ResultValue
       title = option.ResultText
       selected = option.selected or no
