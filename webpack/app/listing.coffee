@@ -878,8 +878,13 @@ class ListingController extends React.Component
     action = id.split("_transition")[0]
 
     # Performance: Process some transitions one by one to avoid huge transactions
-    if action in ["receive", "submit", "verify", "cancel"]
-      return @ajax_do_transition_for(@state.selected_uids, action)
+    if action in ["receive", "submit", "verify", "cancel", "reinstate"]
+      # process UIDs from top to bottom
+      sorted_uids = []
+      for item in @state.folderitems
+        if item.uid in @state.selected_uids
+          sorted_uids.push item.uid
+      return @ajax_do_transition_for(sorted_uids, action)
 
     ###
      Process form
@@ -904,14 +909,11 @@ class ListingController extends React.Component
     # Override the form action when a custom URL is given
     if url then form.action = url
 
-    else if @enable_ajax_transitions
+    if @enable_ajax_transitions
       # always save pending items of the save_queue
       @saveAjaxQueue().then (data) =>
         # ajax form submit
         @ajax_post_form(form)
-        # cleanup hidden fields
-        form.removeChild action_id_input
-        form.removeChild form_id_input
     else
       # do a classic form submit
       form.submit()
