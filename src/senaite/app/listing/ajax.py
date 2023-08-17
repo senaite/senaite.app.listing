@@ -23,8 +23,6 @@ import json
 from functools import cmp_to_key
 
 import six
-from six.moves.urllib.parse import urlencode
-
 from bika.lims import api
 from bika.lims.browser import BrowserView
 from plone.memoize import view
@@ -41,6 +39,8 @@ from senaite.core.decorators import readonly_transaction
 from senaite.core.interfaces import IDataManager
 from senaite.core.p3compat import cmp
 from senaite.core.registry import get_registry_record
+from six.moves.urllib.parse import urlencode
+from ZODB.POSException import ConflictError
 from zope import event
 from zope.component import getMultiAdapter
 from zope.component import queryAdapter
@@ -612,6 +612,52 @@ class AjaxListingView(BrowserView):
         data = {
             "count": len(folderitems),
             "folderitems": folderitems,
+        }
+
+        return data
+
+    @set_application_json_header
+    @returns_safe_json
+    @inject_runtime
+    def ajax_do_action_for(self):
+        """Transition multiple objects
+
+        The POST Payload needs to provide the following data:
+
+        :uids: A list of UIDs to transition
+        :transition: The transition to perform
+        """
+
+        # Get the HTTP POST JSON Payload
+        payload = self.get_json()
+
+        required = ["uids", "transition"]
+        if not all(map(lambda k: k in payload, required)):
+            return self.json_message("Payload needs to provide the keys {}"
+                                     .format(", ".join(required)), status=400)
+
+        uids = payload.get("uids")
+        transition = payload.get("transition")
+        errors = {}
+
+        for uid in uids:
+            obj = api.get_object_by_uid(uid)
+            # transition the object
+            try:
+                obj = api.do_transition_for(obj, transition)
+            except (api.APIError, ConflictError) as exc:
+                errors[uid] = exc.message
+
+        # get the updated folderitems
+        self.contentFilter["UID"] = uids
+        folderitems = self.get_folderitems()
+
+        # prepare the response object
+        data = {
+            "count": len(folderitems),
+            "uids": uids,
+            "folderitems": folderitems,
+            "errors": errors,
         }
 
         return data
