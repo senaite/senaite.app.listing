@@ -192,6 +192,8 @@ class ListingController extends React.Component
       refetch: false
       # allow to reorder table rows with drag&drop
       allow_row_reorder: yes
+      # Lock all action buttons
+      lock_buttons: no
 
 
   ###*
@@ -966,6 +968,8 @@ class ListingController extends React.Component
    * @param form {element} The form to post
   ###
   ajax_do_transition_for: (uids, transition) ->
+    # lock the buttons
+    @setState lock_buttons: yes
     # always save pending items of the save_queue
     promise = @saveAjaxQueue().then (data) =>
       chain = Promise.resolve()
@@ -996,6 +1000,9 @@ class ListingController extends React.Component
       chain.then () =>
         if @state.fetch_transitions_on_select
           @fetch_transitions()
+        # unlock the buttons
+        @setState lock_buttons: no
+
     return promise
 
   ###*
@@ -1986,6 +1993,7 @@ class ListingController extends React.Component
                   show_select_column={@state.show_select_column}
                   transitions={@state.transitions}
                   review_state={@get_review_state_by_id(@state.review_state)}
+                  lock_buttons={@state.lock_buttons}
                   />
               </div>
               <div className="col-sm-1 text-right">
