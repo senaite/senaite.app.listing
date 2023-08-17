@@ -872,26 +872,33 @@ class ListingController extends React.Component
       @selectUID "all", off
       return
 
-    # get the form element
-    form = document.getElementById @state.form_id
-
     # N.B. Transition submit buttons are suffixed with `_transition`, because
     #      otherwise the form.submit call below retrieves the element instead of
     #      doing the method call.
     action = id.split("_transition")[0]
 
-    # inject workflow action id for `BikaListing._get_form_workflow_action`
+    # Performance: Process some transitions one by one to avoid huge transactions
+    if action in ["receive", "submit", "verify", "cancel"]
+      return @ajax_do_transition_for(@state.selected_uids, action)
+
+    ###
+     Process form
+    ###
+
+    # get the form element
+    form = document.getElementById @state.form_id
+
+    # inject hidden fields for workflow action adapters
     action_id_input = @create_input_element "hidden", id,  "workflow_action_id", action
     form.appendChild action_id_input
 
-    # inject the id of the form
     form_id_input = @create_input_element "hidden", "form_id", "form_id", @state.form_id
     form.appendChild form_id_input
 
     # Override the form action when a custom URL is given
     if url then form.action = url
 
-    if @enable_ajax_transitions
+    else if @enable_ajax_transitions
       # always save pending items of the save_queue
       @saveAjaxQueue().then (data) =>
         # ajax form submit
@@ -944,6 +951,44 @@ class ListingController extends React.Component
     .catch (error) =>
       @toggle_loader off
       console.error(error)
+
+  ###*
+   * Transition multiple UIDs batchwise
+   *
+   * @param form {element} The form to post
+  ###
+  ajax_do_transition_for: (uids, transition) ->
+    # always save pending items of the save_queue
+    promise = @saveAjaxQueue().then (data) =>
+      chain = Promise.resolve()
+      uids.forEach (uid) =>
+        chain = chain.then () =>
+          # toggle row loading on
+          @toggleUIDLoading uid, on
+          api_call = @api.do_action_for
+            uids: [uid]
+            transition: transition
+          api_call.then (data) =>
+            # handle eventual errors
+            errors = data.errors or {}
+            message = errors[uid]
+            if message
+              # display error
+              title = _t("Oops, an error occured! 🙈")
+              @addMessage title, message, null, level="danger"
+
+            # folderitems of the updated objects and their dependencies
+            folderitems = data.folderitems or []
+            # update the existing folderitems
+            @update_existing_folderitems_with folderitems
+            # toggle row loading off
+            @toggleUIDLoading uid, off
+
+      # all objects transitioned
+      chain.then () =>
+        if @state.fetch_transitions_on_select
+          @fetch_transitions()
+    return promise
 
   ###*
    * Creates an input element with the attributes passed-in
