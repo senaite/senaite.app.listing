@@ -888,6 +888,12 @@ class ListingController extends React.Component
     # get the form element
     form = document.getElementById @state.form_id
 
+    # Ensure all previous added hidden fields are removed
+    document.querySelectorAll("input[name='workflow_action_id']", form).forEach (input) ->
+      input.remove()
+    document.querySelectorAll("input[name='form_id']", form).forEach (input) ->
+      input.remove()
+
     # inject hidden fields for workflow action adapters
     action_id_input = @create_input_element "hidden", id,  "workflow_action_id", action
     form.appendChild action_id_input
