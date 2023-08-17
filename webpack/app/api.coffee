@@ -106,6 +106,16 @@ class ListingAPI
       method: "POST"
     return @get_json "set_fields", options
 
+  do_action_for: (data) ->
+    ###
+     * Transition multiple objects
+     * @returns {Promise}
+    ###
+    options =
+      data: data or {}
+      method: "POST"
+    return @get_json "do_action_for", options
+
   on_change: (data) ->
     ###
      * Call the on_change handler to refresh the data
