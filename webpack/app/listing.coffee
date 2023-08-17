@@ -159,6 +159,8 @@ class ListingController extends React.Component
       # UIDs of selected rows are stored in selected_uids.
       # These are sent when a transition action is clicked.
       selected_uids: []
+      # UIDs that are in loading state
+      loading_uids: []
       # The possible transition buttons
       transitions: []
       # The available catalog indexes for sorting
@@ -275,6 +277,35 @@ class ListingController extends React.Component
    * This method is not called for the initial render.
   ###
   componentDidUpdate: (prevProps, prevState, snapshot) ->
+
+  ###
+   * Toggle the loading state of an UID (row)
+   *
+   * @param uid {string} UID of the item
+   * @returns {bool} true if the UID was added set in loading state, otherwise false
+  ###
+  toggleUIDLoading: (uid, toggle) ->
+    console.debug "ListingController::toggleRowLoading: uid=#{uid}"
+
+    # skip if no uid is given
+    return false unless uid
+
+    # get the current expanded rows
+    loading_uids = @state.loading_uids
+
+    # check if the current UID is in there
+    index = loading_uids.indexOf uid
+    # set the default toggle flag value to "on" if the UID is not in the array
+    toggle ?= index == -1
+
+    if index > -1
+      # remove the UID if the toggle flag is set to "off"
+      if not toggle then loading_uids.splice index, 1
+    else
+      # add the UID if the toggle flag is set to "on"
+      if toggle then loading_uids.push uid
+
+    @setState {loading_uids: loading_uids}
 
   ###*
    * Expand/Collapse a listing category row by adding the category ID to the
@@ -1865,6 +1896,7 @@ class ListingController extends React.Component
                 folderitems={@state.folderitems}
                 children={@state.children}
                 selected_uids={@state.selected_uids}
+                loading_uids={@state.loading_uids}
                 select_checkbox_name={@state.select_checkbox_name}
                 show_select_column={@state.show_select_column}
                 show_select_all_checkbox={@state.show_select_all_checkbox}
