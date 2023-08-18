@@ -316,23 +316,16 @@ class AjaxListingView(BrowserView):
     @view.memoize
     @returns_safe_json
     def ajax_transitions_enabled(self):
-        """Returns wether transitions should be submitted via ajax
+        """Returns if transitions should be submitted via ajax
         """
-        # return immediately if disabled globally
-        enabled = get_registry_record("listing_enable_ajax_transitions", False)
-        if not enabled:
-            return False
-        blist = get_registry_record("listing_ajax_transitions_blacklist", [])
-        # return immediately if the portal type is blacklisted
-        if api.get_portal_type(self.context) in blist:
-            return False
-        # return immediately if the current view name is blacklisted
-        if self.__name__ in blist:
-            return False
-        # return immediately if the current view disabled ajax transitions
-        if self.enable_ajax_transitions is False:
-            return False
-        return True
+        return get_registry_record("listing_enable_ajax_transitions", False)
+
+    @view.memoize
+    @returns_safe_json
+    def ajax_transitions_list(self):
+        """Returns a list of active transitions
+        """
+        return get_registry_record("listing_active_ajax_transitions", [])
 
     @translate
     def get_folderitems(self):
@@ -752,6 +745,14 @@ class AjaxListingView(BrowserView):
         }
 
         return data
+
+    @set_application_json_header
+    @returns_safe_json
+    @inject_runtime
+    def ajax_listing_config(self):
+        """Returns the config of the listing
+        """
+        return self.get_listing_config()
 
     def notify_edited(self, obj):
         """Notify object edited event
