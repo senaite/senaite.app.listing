@@ -93,9 +93,10 @@ class ListingController extends React.Component
     @form_id = @root_el.dataset.form_id
     @listing_identifier = @root_el.dataset.listing_identifier
     @pagesize = parseInt @root_el.dataset.pagesize
-    @review_states = JSON.parse @root_el.dataset.review_states
-    @show_column_toggles = JSON.parse @root_el.dataset.show_column_toggles
-    @enable_ajax_transitions = JSON.parse @root_el.dataset.enable_ajax_transitions
+    @review_states = @parse_json @root_el.dataset.review_states
+    @show_column_toggles = @parse_json @root_el.dataset.show_column_toggles
+    @enable_ajax_transitions = @parse_json @root_el.dataset.enable_ajax_transitions, no
+    @active_ajax_transitions = @parse_json @root_el.dataset.active_ajax_transitions, []
 
     # bind event handlers
     @root_el.addEventListener "reload", @on_reload
@@ -879,17 +880,18 @@ class ListingController extends React.Component
     #      doing the method call.
     action = id.split("_transition")[0]
 
-    # Performance: Process some transitions one by one to avoid huge transactions
-    if action in ["receive", "submit", "verify", "cancel", "reinstate"]
-      # process UIDs from top to bottom
+    # Process configured transitions sequentially via ajax
+    if @enable_ajax_transitions and action in @active_ajax_transitions
+      # sort UIDs according to the list
       sorted_uids = []
       for item in @state.folderitems
         if item.uid in @state.selected_uids
           sorted_uids.push item.uid
+      # execute transitions
       return @ajax_do_transition_for(sorted_uids, action)
 
     ###
-     Process form
+     Classic Form Submission
     ###
 
     # get the form element
@@ -911,14 +913,8 @@ class ListingController extends React.Component
     # Override the form action when a custom URL is given
     if url then form.action = url
 
-    if @enable_ajax_transitions
-      # always save pending items of the save_queue
-      @saveAjaxQueue().then (data) =>
-        # ajax form submit
-        @ajax_post_form(form)
-    else
-      # do a classic form submit
-      form.submit()
+    # Submit the form
+    form.submit()
 
   ###*
    * Submit form via ajax
@@ -951,13 +947,12 @@ class ListingController extends React.Component
       promise = @fetch_folderitems false
       promise.then (data) =>
         # send event to update e.g. the transition menu
-        event = new CustomEvent "listing:submit",
-          detail:
-            data: data
-            folderitems: data.folderitems
-            form: form
-            action: form.action
-        document.body.dispatchEvent event
+        @trigger_event "listing:submit",
+          data: data
+          folderitems: data.folderitems
+          form: form
+          action: form.action
+
     .catch (error) =>
       @toggle_loader off
       console.error(error)
@@ -1002,8 +997,43 @@ class ListingController extends React.Component
           @fetch_transitions()
         # unlock the buttons
         @setState lock_buttons: no
+        # check if the whole site needs to be reloaded, e.g. if all analyses are
+        # submitted or verified etc.
+        promise = @api.fetch_listing_config()
+        promise.then (data) ->
+          # check if the old context WF state differs from the new context WF state
+          old_workflow_state = document.body.dataset.reviewState
+          if old_workflow_state != data.view_context_state
+            location.reload()
 
     return promise
+
+  ###*
+   * Trigger a named event
+   *
+   * @param {String} event_name: The name of the event to dispatch
+   * @param {Object} event_data: The data to send with the event
+  ###
+  trigger_event: (event_name, event_data, el) ->
+    # Trigger a custom event
+    el ?= document.body
+    event = new CustomEvent event_name,
+      detail: event_data
+      bubbles: yes
+    el.dispatchEvent event
+
+
+  ###*
+   * JSON parse the given value
+   *
+   * @param {String} value: The JSON value to parse
+  ###
+  parse_json: (value, default_value) ->
+    try
+      return JSON.parse(value)
+    catch
+      return default_value
+
 
   ###*
    * Creates an input element with the attributes passed-in
