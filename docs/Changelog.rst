@@ -1,6 +1,7 @@
 2.5.0 (unreleased)
 ------------------
 
+- #108 Sequential Ajax Transitions
 - #107 Do not sort options for Select, MultiSelect and MultiChoice
 - #106 Fix child items can not be selected in listings
 
