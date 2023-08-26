@@ -160,8 +160,10 @@ class ListingController extends React.Component
       # UIDs of selected rows are stored in selected_uids.
       # These are sent when a transition action is clicked.
       selected_uids: []
-      # UIDs that are in loading state
+      # UIDs (rows) that are in loading state
       loading_uids: []
+      # Mapping of UID -> List of error messages
+      errors: {}
       # The possible transition buttons
       transitions: []
       # The available catalog indexes for sorting
@@ -309,6 +311,48 @@ class ListingController extends React.Component
       if toggle then loading_uids.push uid
 
     @setState {loading_uids: loading_uids}
+
+  ###*
+   * Add an error message for a given UID
+   *
+   * @param uid {string} UID of the object
+   * @param message {string} Error message
+   * @returns {bool} true if the error message was set
+  ###
+  setErrors: (uid, message) ->
+    if not (uid? or message?)
+      return false
+
+    message ?= ""
+
+    if not uid?
+      # display global error message
+      title = _t("Oops, an error occured! 🙈")
+      return @addMessage title, message, null, level="danger"
+
+    # append the message to the given UID
+    errors = @state.errors
+    messages = errors[uid] or []
+    if message.length > 0 and messages.indexOf(message) < 0
+      messages = messages.concat message
+    errors[uid] = messages
+    @setState {errors: errors}
+
+  ###*
+   * Flush error messages for a given UID (or all)
+   *
+   * @param uid {string} UID of the object
+  ###
+  flushErrors: (uid) ->
+    errors = @state.errors
+    if not uid?
+      # flush all errors
+      errors = {}
+      @dismissMessage()
+    else
+      # flush error messages for the given UID
+      errors[uid] = []
+    @setState {errors: errors}
 
   ###*
    * Expand/Collapse a listing category row by adding the category ID to the
@@ -969,6 +1013,8 @@ class ListingController extends React.Component
     promise = @saveAjaxQueue().then (data) =>
       chain = Promise.resolve()
       uids.forEach (uid) =>
+        # flush previous errors
+        @flushErrors uid
         chain = chain.then () =>
           # toggle row loading on
           @toggleUIDLoading uid, on
@@ -980,9 +1026,8 @@ class ListingController extends React.Component
             errors = data.errors or {}
             message = errors[uid]
             if message
-              # display error
-              title = _t("Oops, an error occured! 🙈")
-              @addMessage title, message, null, level="danger"
+              # display an error for the given UID
+              @setErrors uid, message
 
             # folderitems of the updated objects and their dependencies
             folderitems = data.folderitems or []
@@ -1987,6 +2032,7 @@ class ListingController extends React.Component
                 children={@state.children}
                 selected_uids={@state.selected_uids}
                 loading_uids={@state.loading_uids}
+                errors={@state.errors}
                 select_checkbox_name={@state.select_checkbox_name}
                 show_select_column={@state.show_select_column}
                 show_select_all_checkbox={@state.show_select_all_checkbox}
