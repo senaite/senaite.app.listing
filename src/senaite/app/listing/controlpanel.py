@@ -55,6 +55,8 @@ class IListingRegistry(ISenaiteRegistry):
             "verify",
             "cancel",
             "reinstate",
+            "deactivate",
+            "activate",
         ],
         required=False,
     )
