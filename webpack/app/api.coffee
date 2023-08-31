@@ -12,6 +12,16 @@ class ListingAPI
       return
     return @
 
+  get_base_url: () ->
+    ###
+     * Get the current base URL
+     * @returns {string}
+    ###
+    base_url = document.body.dataset.baseUrl
+    if base_url is undefined
+      base_url = location.href.split("#")[0].split("?")[0]
+    return base_url
+
   get_api_url: (endpoint) ->
     ###
      * Build API URL for the given endpoint
@@ -106,6 +116,16 @@ class ListingAPI
       method: "POST"
     return @get_json "set_fields", options
 
+  do_action_for: (data) ->
+    ###
+     * Transition multiple objects
+     * @returns {Promise}
+    ###
+    options =
+      data: data or {}
+      method: "POST"
+    return @get_json "do_action_for", options
+
   on_change: (data) ->
     ###
      * Call the on_change handler to refresh the data
@@ -155,6 +175,16 @@ class ListingAPI
       data: data or {}
       method: "POST"
     return @get_json "transitions", options
+
+  fetch_listing_config: (data) ->
+    ###
+     * Fetch the  current listing  configuration
+     * @returns {Promise}
+    ###
+    options =
+      data: data or {}
+      method: "POST"
+    return @get_json "listing_config", options
 
   get_csrf_token: () ->
     ###

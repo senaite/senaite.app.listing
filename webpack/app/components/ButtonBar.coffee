@@ -22,6 +22,7 @@ class ButtonBar extends React.Component
       "retract"
       "unassign"
       "retest"
+      "reinstate"
     ]
 
     @css_mapping =
@@ -177,6 +178,7 @@ class ButtonBar extends React.Component
           className={cls}
           badge={@props.selected_uids.length}
           onClick={@on_transition_button_click}
+          disabled={@props.lock_buttons}
           attrs={attrs}/>
       )
 

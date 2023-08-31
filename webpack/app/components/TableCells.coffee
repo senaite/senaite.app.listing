@@ -57,6 +57,15 @@ class TableCells extends React.Component
     column = @get_column column_key
     return column.type == "transposed"
 
+  is_loading: (uid) ->
+    loading_uids = this.props.loading_uids or []
+    return loading_uids.indexOf(uid) > -1
+
+  get_errors_for: (uid) ->
+    errors = this.props.errors or {}
+    return errors[uid] or []
+
+
   ###*
    * Creates a select cell
    *
@@ -69,17 +78,29 @@ class TableCells extends React.Component
     item = @get_item()
     remarks = @props.remarks  # True if this row follows a remarks row
     level = item.node_level or 0
+    loading = @is_loading(uid)
+    errors = @get_errors_for(uid)
     cell = (
       <td key={uid} className="level-#{level}">
-        <Checkbox
-          name={checkbox_name}
-          value={uid}
-          disabled={@props.disabled}
-          checked={@props.selected}
-          tabIndex="-1"
-          onChange={@props.on_select_checkbox_checked}/>
+        {!loading &&
+          <Checkbox
+            name={checkbox_name}
+            value={uid}
+            disabled={@props.disabled}
+            checked={@props.selected}
+            tabIndex="-1"
+            onChange={@props.on_select_checkbox_checked}/>
+          }
 
-        {remarks and
+        {loading &&
+        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>}
+
+        {errors.length > 0 &&
+        <span className="text-danger fas fa-exclamation-triangle"
+              title={errors.join("\n")}>
+        </span>}
+
+        {remarks &&
         <a uid={uid}
             href="#"
             className="remarks"

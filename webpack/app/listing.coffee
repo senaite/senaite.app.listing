@@ -93,9 +93,10 @@ class ListingController extends React.Component
     @form_id = @root_el.dataset.form_id
     @listing_identifier = @root_el.dataset.listing_identifier
     @pagesize = parseInt @root_el.dataset.pagesize
-    @review_states = JSON.parse @root_el.dataset.review_states
-    @show_column_toggles = JSON.parse @root_el.dataset.show_column_toggles
-    @enable_ajax_transitions = JSON.parse @root_el.dataset.enable_ajax_transitions
+    @review_states = @parse_json @root_el.dataset.review_states
+    @show_column_toggles = @parse_json @root_el.dataset.show_column_toggles
+    @enable_ajax_transitions = @parse_json @root_el.dataset.enable_ajax_transitions, no
+    @active_ajax_transitions = @parse_json @root_el.dataset.active_ajax_transitions, []
 
     # bind event handlers
     @root_el.addEventListener "reload", @on_reload
@@ -159,6 +160,10 @@ class ListingController extends React.Component
       # UIDs of selected rows are stored in selected_uids.
       # These are sent when a transition action is clicked.
       selected_uids: []
+      # UIDs (rows) that are in loading state
+      loading_uids: []
+      # Mapping of UID -> List of error messages
+      errors: {}
       # The possible transition buttons
       transitions: []
       # The available catalog indexes for sorting
@@ -190,6 +195,8 @@ class ListingController extends React.Component
       refetch: false
       # allow to reorder table rows with drag&drop
       allow_row_reorder: yes
+      # Lock all action buttons
+      lock_buttons: no
 
 
   ###*
@@ -275,6 +282,77 @@ class ListingController extends React.Component
    * This method is not called for the initial render.
   ###
   componentDidUpdate: (prevProps, prevState, snapshot) ->
+
+  ###
+   * Toggle the loading state of an UID (row)
+   *
+   * @param uid {string} UID of the item
+   * @returns {bool} true if the UID was added set in loading state, otherwise false
+  ###
+  toggleUIDLoading: (uid, toggle) ->
+    console.debug "ListingController::toggleRowLoading: uid=#{uid}"
+
+    # skip if no uid is given
+    return false unless uid
+
+    # get the current expanded rows
+    loading_uids = @state.loading_uids
+
+    # check if the current UID is in there
+    index = loading_uids.indexOf uid
+    # set the default toggle flag value to "on" if the UID is not in the array
+    toggle ?= index == -1
+
+    if index > -1
+      # remove the UID if the toggle flag is set to "off"
+      if not toggle then loading_uids.splice index, 1
+    else
+      # add the UID if the toggle flag is set to "on"
+      if toggle then loading_uids.push uid
+
+    @setState {loading_uids: loading_uids}
+
+  ###*
+   * Add an error message for a given UID
+   *
+   * @param uid {string} UID of the object
+   * @param message {string} Error message
+   * @returns {bool} true if the error message was set
+  ###
+  setErrors: (uid, message) ->
+    if not (uid? or message?)
+      return false
+
+    message ?= ""
+
+    if not uid?
+      # display global error message
+      title = _t("Oops, an error occured! 🙈")
+      return @addMessage title, message, null, level="danger"
+
+    # append the message to the given UID
+    errors = @state.errors
+    messages = errors[uid] or []
+    if message.length > 0 and messages.indexOf(message) < 0
+      messages = messages.concat message
+    errors[uid] = messages
+    @setState {errors: errors}
+
+  ###*
+   * Flush error messages for a given UID (or all)
+   *
+   * @param uid {string} UID of the object
+  ###
+  flushErrors: (uid) ->
+    errors = @state.errors
+    if not uid?
+      # flush all errors
+      errors = {}
+      @dismissMessage()
+    else
+      # flush error messages for the given UID
+      errors[uid] = []
+    @setState {errors: errors}
 
   ###*
    * Expand/Collapse a listing category row by adding the category ID to the
@@ -841,36 +919,46 @@ class ListingController extends React.Component
       @selectUID "all", off
       return
 
-    # get the form element
-    form = document.getElementById @state.form_id
-
     # N.B. Transition submit buttons are suffixed with `_transition`, because
     #      otherwise the form.submit call below retrieves the element instead of
     #      doing the method call.
     action = id.split("_transition")[0]
 
-    # inject workflow action id for `BikaListing._get_form_workflow_action`
+    # Process configured transitions sequentially via ajax
+    if @enable_ajax_transitions and action in @active_ajax_transitions
+      # sort UIDs according to the list
+      sorted_uids = []
+      for item in @state.folderitems
+        if item.uid in @state.selected_uids
+          sorted_uids.push item.uid
+      # execute transitions
+      return @ajax_do_transition_for(sorted_uids, action)
+
+    ###
+     Classic Form Submission
+    ###
+
+    # get the form element
+    form = document.getElementById @state.form_id
+
+    # Ensure all previous added hidden fields are removed
+    document.querySelectorAll("input[name='workflow_action_id']", form).forEach (input) ->
+      input.remove()
+    document.querySelectorAll("input[name='form_id']", form).forEach (input) ->
+      input.remove()
+
+    # inject hidden fields for workflow action adapters
     action_id_input = @create_input_element "hidden", id,  "workflow_action_id", action
     form.appendChild action_id_input
 
-    # inject the id of the form
     form_id_input = @create_input_element "hidden", "form_id", "form_id", @state.form_id
     form.appendChild form_id_input
 
     # Override the form action when a custom URL is given
     if url then form.action = url
 
-    if @enable_ajax_transitions
-      # always save pending items of the save_queue
-      @saveAjaxQueue().then (data) =>
-        # ajax form submit
-        @ajax_post_form(form)
-        # cleanup hidden fields
-        form.removeChild action_id_input
-        form.removeChild form_id_input
-    else
-      # do a classic form submit
-      form.submit()
+    # Submit the form
+    form.submit()
 
   ###*
    * Submit form via ajax
@@ -903,16 +991,94 @@ class ListingController extends React.Component
       promise = @fetch_folderitems false
       promise.then (data) =>
         # send event to update e.g. the transition menu
-        event = new CustomEvent "listing:submit",
-          detail:
-            data: data
-            folderitems: data.folderitems
-            form: form
-            action: form.action
-        document.body.dispatchEvent event
+        @trigger_event "listing:submit",
+          data: data
+          folderitems: data.folderitems
+          form: form
+          action: form.action
+
     .catch (error) =>
       @toggle_loader off
       console.error(error)
+
+  ###*
+   * Transition multiple UIDs batchwise
+   *
+   * @param form {element} The form to post
+  ###
+  ajax_do_transition_for: (uids, transition) ->
+    # lock the buttons
+    @setState lock_buttons: yes
+    # always save pending items of the save_queue
+    promise = @saveAjaxQueue().then (data) =>
+      chain = Promise.resolve()
+      uids.forEach (uid) =>
+        # flush previous errors
+        @flushErrors uid
+        chain = chain.then () =>
+          # toggle row loading on
+          @toggleUIDLoading uid, on
+          api_call = @api.do_action_for
+            uids: [uid]
+            transition: transition
+          api_call.then (data) =>
+            # handle eventual errors
+            errors = data.errors or {}
+            message = errors[uid]
+            if message
+              # display an error for the given UID
+              @setErrors uid, message
+
+            # folderitems of the updated objects and their dependencies
+            folderitems = data.folderitems or []
+            # update the existing folderitems
+            @update_existing_folderitems_with folderitems
+            # toggle row loading off
+            @toggleUIDLoading uid, off
+
+      # all objects transitioned
+      chain.then () =>
+        if @state.fetch_transitions_on_select
+          @fetch_transitions()
+        # unlock the buttons
+        @setState lock_buttons: no
+        # check if the whole site needs to be reloaded, e.g. if all analyses are
+        # submitted or verified etc.
+        promise = @api.fetch_listing_config()
+        promise.then (data) ->
+          # check if the old context WF state differs from the new context WF state
+          old_workflow_state = document.body.dataset.reviewState
+          if old_workflow_state != data.view_context_state
+            location.reload()
+
+    return promise
+
+  ###*
+   * Trigger a named event
+   *
+   * @param {String} event_name: The name of the event to dispatch
+   * @param {Object} event_data: The data to send with the event
+  ###
+  trigger_event: (event_name, event_data, el) ->
+    # Trigger a custom event
+    el ?= document.body
+    event = new CustomEvent event_name,
+      detail: event_data
+      bubbles: yes
+    el.dispatchEvent event
+
+
+  ###*
+   * JSON parse the given value
+   *
+   * @param {String} value: The JSON value to parse
+  ###
+  parse_json: (value, default_value) ->
+    try
+      return JSON.parse(value)
+    catch
+      return default_value
+
 
   ###*
    * Creates an input element with the attributes passed-in
@@ -1865,6 +2031,8 @@ class ListingController extends React.Component
                 folderitems={@state.folderitems}
                 children={@state.children}
                 selected_uids={@state.selected_uids}
+                loading_uids={@state.loading_uids}
+                errors={@state.errors}
                 select_checkbox_name={@state.select_checkbox_name}
                 show_select_column={@state.show_select_column}
                 show_select_all_checkbox={@state.show_select_all_checkbox}
@@ -1901,6 +2069,7 @@ class ListingController extends React.Component
                   show_select_column={@state.show_select_column}
                   transitions={@state.transitions}
                   review_state={@get_review_state_by_id(@state.review_state)}
+                  lock_buttons={@state.lock_buttons}
                   />
               </div>
               <div className="col-sm-1 text-right">
