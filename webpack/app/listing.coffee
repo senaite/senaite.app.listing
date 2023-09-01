@@ -1719,44 +1719,54 @@ class ListingController extends React.Component
   ajax_save: ->
     console.debug "ListingController::ajax_save:ajax_save_queue=", @state.ajax_save_queue
 
-    # turn loader on
-    @toggle_loader on
+    # Sort items by the order they are currently listed
+    sorted_save_queue = []
+    for item in @state.folderitems
+      if item.uid of @state.ajax_save_queue
+        uid = item.uid
+        payload = @state.ajax_save_queue[uid]
+        sorted_save_queue.push {uid: uid, payload: payload}
 
-    promise = @api.set_fields
-      save_queue: @state.ajax_save_queue
+    # Process ajax_save_queue sequetially
+    chain = Promise.resolve()
+    sorted_save_queue.forEach (item) =>
+      chain = chain.then () =>
+        uid = item.uid
+        # toggle row loading on
+        @toggleUIDLoading uid, on
+        # save single uid
+        api_call = @api.set_fields
+          save_queue: {"#{uid}": item.payload}
+        api_call.then (data) =>
+          console.debug "ListingController::ajax_save: GOT DATA=", data
+          uids = data.uids or []
+          # ensure that all updated UIDs are also selected
+          uids.map (uid, index) => @selectUID uid, yes
+          # folderitems of the updated objects and their dependencies
+          folderitems = data.folderitems or []
+          # update the existing folderitems
+          @update_existing_folderitems_with folderitems
+          # toggle row loading off
+          @toggleUIDLoading uid, off
 
-    me = this
-    promise.then (data) ->
-      console.debug "ListingController::ajax_save: GOT DATA=", data
-
-      # uids of the updated objects
-      uids = data.uids or []
-
-      # ensure that all updated UIDs are also selected
-      uids.map (uid, index) -> me.selectUID uid, yes
-
+    # all objects saved
+    chain.then () =>
       # refetch or update folderitems
-      if me.state.refetch
+      if @state.refetch
         # refetch all folderitems
-        me.fetch_folderitems()
+        @fetch_folderitems()
       else
-        # folderitems of the updated objects and their dependencies
-        folderitems = data.folderitems or []
-        # update the existing folderitems
-        me.update_existing_folderitems_with folderitems
         # fetch all possible transitions
-        if me.state.fetch_transitions_on_select
-          me.fetch_transitions()
+        if @state.fetch_transitions_on_select
+          @fetch_transitions()
 
       # empty the ajax save queue and hide the save button
-      me.setState
+      @setState
         show_ajax_save: no
         ajax_save_queue: {}
         refetch: false
 
-      # toggle loader off
-      me.toggle_loader off
-    return promise
+    return chain
 
 
   ajax_on_change: (handler, data) ->
