@@ -41,7 +41,7 @@ class IListingRegistry(ISenaiteRegistry):
     listing_enable_ajax_transitions = schema.Bool(
         title=_("Enable Ajax Transitions"),
         description=_("Enable sequential ajax workflow transitions"),
-        default=False,
+        default=True,
         required=False,
     )
 
@@ -50,13 +50,13 @@ class IListingRegistry(ISenaiteRegistry):
         description=_("Transitions that are processed sequentially via ajax"),
         value_type=schema.ASCIILine(),
         default=[
+            "activate",
+            "cancel",
+            "deactivate",
             "receive",
+            "reinstate",
             "submit",
             "verify",
-            "cancel",
-            "reinstate",
-            "deactivate",
-            "activate",
         ],
         required=False,
     )
