@@ -28,6 +28,8 @@ from bika.lims.browser import BrowserView
 from plone.memoize import view
 from Products.Archetypes.event import ObjectEditedEvent
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
+from senaite.app.listing import logger
+from senaite.app.listing import senaiteMessageFactory as _
 from senaite.app.listing.decorators import inject_runtime
 from senaite.app.listing.decorators import returns_safe_json
 from senaite.app.listing.decorators import set_application_json_header
@@ -638,8 +640,24 @@ class AjaxListingView(BrowserView):
             # transition the object
             try:
                 obj = api.do_transition_for(obj, transition)
-            except (api.APIError, ConflictError) as exc:
-                errors[uid] = exc.message
+            except ConflictError:
+                oid = api.get_id(obj)
+                errors[uid] = _("A database conflict occured during "
+                                "transition '{}' on '{}'. Please try again."
+                                .format(transition, oid))
+            except api.APIError as exc:
+                # NOTE: We do not propagate back to the UI when the transition
+                #       failed, because it is most of the time an expected
+                #       side-effect. E.g. when an analysis with calculation
+                #       dependencies is submitted, the dependent analyses are
+                #       submitted as well. Therefore, if the current object is
+                #       such a dependency, it might fail here.
+                logger.warn(exc)
+            except Exception as exc:
+                oid = api.get_id(obj)
+                errors[uid] = _("An unkown error occured during "
+                                "transition '{}' on '{}': {}"
+                                .format(transition, oid, exc.message))
 
         # get the updated folderitems
         self.contentFilter["UID"] = uids

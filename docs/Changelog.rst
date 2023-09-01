@@ -2,6 +2,7 @@
 ------------------
 
 - #113 Enable ajax transitions per default
+- #112 Handle transition fails without UI notification
 - #110 Sequential save action
 - #109 Allow to set the size of input fields from inside cells
 - #108 Sequential Ajax Transitions
