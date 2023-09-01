@@ -1,6 +1,7 @@
 2.5.0 (unreleased)
 ------------------
 
+- #113 Enable ajax transitions per default
 - #110 Sequential save action
 - #109 Allow to set the size of input fields from inside cells
 - #108 Sequential Ajax Transitions
