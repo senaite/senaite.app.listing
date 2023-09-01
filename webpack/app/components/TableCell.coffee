@@ -146,15 +146,23 @@ class TableCell extends React.Component
   get_size: ->
     size = 5
     item = @get_item()
-    if item.hasOwnProperty "size"
-      size = item.size
+    column_key = @get_column_key
 
-    # Maybe is an interim field
+    # Maybe the size is defined in the interim field
     if @is_interimfield()
-      column_key = @get_column_key()
       interim = item[column_key]
-      if interim and interim.hasOwnProperty "size"
-        size = interim.size
+      if "size" of interim
+        return interim.size
+
+    # check the size for this field is defined in current item
+    sizes = item.size or {}
+    if column_key of sizes
+      return sizes[column_key]
+
+    # maybe the size is defined in the column
+    column = @props.column or {}
+    if "size" of column
+      return column.size
 
     return size
 
