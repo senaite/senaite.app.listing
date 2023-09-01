@@ -151,7 +151,7 @@ class TableCell extends React.Component
     # Maybe the size is defined in the interim field
     if @is_interimfield()
       interim = item[column_key]
-      if "size" of interim
+      if interim and interim.hasOwnProperty "size"
         return interim.size
 
     # check the size for this field is defined in current item
