@@ -96,7 +96,7 @@ class TableCells extends React.Component
         <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>}
 
         {errors.length > 0 &&
-        <span className="text-danger fas fa-exclamation-triangle"
+        <span className="text-warning fas fa-exclamation-triangle"
               title={errors.join("\n")}>
         </span>}
 
