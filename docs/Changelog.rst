@@ -1,6 +1,7 @@
 2.5.0 (unreleased)
 ------------------
 
+- #110 Sequential save action
 - #109 Allow to set the size of input fields from inside cells
 - #108 Sequential Ajax Transitions
 - #107 Do not sort options for Select, MultiSelect and MultiChoice
