@@ -1,6 +1,7 @@
 2.5.0 (unreleased)
 ------------------
 
+- #114 Fix Ajax Transitions for Transposed Worksheet Layout
 - #113 Enable ajax transitions per default
 - #112 Handle transition fails without UI notification
 - #110 Sequential save action
