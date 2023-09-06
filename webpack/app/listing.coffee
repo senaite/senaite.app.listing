@@ -928,7 +928,7 @@ class ListingController extends React.Component
     if @enable_ajax_transitions and action in @active_ajax_transitions
       # sort UIDs according to the list
       sorted_uids = []
-      for item in @state.folderitems
+      for item in @get_folderitems()
         if item.uid in @state.selected_uids
           sorted_uids.push item.uid
       # execute transitions
@@ -1721,7 +1721,7 @@ class ListingController extends React.Component
 
     # Sort items by the order they are currently listed
     sorted_save_queue = []
-    for item in @state.folderitems
+    for item in @get_folderitems()
       if item.uid of @state.ajax_save_queue
         uid = item.uid
         payload = @state.ajax_save_queue[uid]
