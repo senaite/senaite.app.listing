@@ -17,8 +17,8 @@ class ListingWorkflowTransition(object):
         self.context = context
         self.request = request
         self.error = {}
-        self.failed = False
 
+    @property
     def failed(self):
         """Flag to indicate if the transition failed
         """
@@ -40,11 +40,11 @@ class ListingWorkflowTransition(object):
         """Execute the workflow transition
         """
         obj = self.context
+        oid = api.get_id(obj)
 
         try:
             obj = api.do_transition_for(obj, transition)
         except ConflictError:
-            oid = api.get_id(obj)
             self.error["message"] = _(
                 "A database conflict occured during transition "
                 "'{}' on '{}'. Please try again.".format(transition, oid))
@@ -57,7 +57,6 @@ class ListingWorkflowTransition(object):
             #       such a dependency, it might fail here.
             logger.warn(exc)
         except Exception as exc:
-            oid = api.get_id(obj)
             self.error["message"] = _(
                 "An unkown error occured during transition '{}' on '{}': {}"
                 .format(transition, oid, exc.message))
