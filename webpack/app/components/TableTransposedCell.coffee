@@ -72,6 +72,10 @@ class TableTransposedCell extends TableCell
   is_unassigned_slot: () ->
     return not @is_assigned_slot()
 
+  is_loading: (uid) ->
+    loading_uids = this.props.loading_uids or []
+    return loading_uids.indexOf(uid) > -1
+
   ###*
    * Calculate CSS Class for the <td> cell based on the original folderitem
   ###
@@ -110,8 +114,10 @@ class TableTransposedCell extends TableCell
     name = "#{@props.select_checkbox_name}:list"
     disabled = @is_disabled()
     selected = @is_selected()
+    loading = @is_loading(uid)
     return [
       <div key="select" className="checkbox d-flex d-flex-row align-items-center flex-nowrap">
+        {!loading &&
         <Checkbox
           name={name}
           value={uid}
@@ -119,7 +125,11 @@ class TableTransposedCell extends TableCell
           checked={selected}
           onChange={@props.on_select_checkbox_checked}
           {...props}
-          />
+          />}
+
+        {loading &&
+        <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>}
+
         <div className="badge badge-secondary">{item.Pos}</div>
         <div className="ml-2 small text-secondary">{item.Service}</div>
       </div>
