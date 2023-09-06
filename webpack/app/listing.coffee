@@ -1009,6 +1009,8 @@ class ListingController extends React.Component
   ajax_do_transition_for: (uids, transition) ->
     # lock the buttons
     @setState lock_buttons: yes
+    # combined redirect URL of all transitions
+    redirect_url = ""
     # always save pending items of the save_queue
     promise = @saveAjaxQueue().then (data) =>
       chain = Promise.resolve()
@@ -1023,11 +1025,13 @@ class ListingController extends React.Component
             transition: transition
           api_call.then (data) =>
             # handle eventual errors
-            errors = data.errors or {}
-            message = errors[uid]
+            message = data.errors[uid]
             if message
               # display an error for the given UID
               @setErrors uid, message
+
+            # generate redirect url
+            redirect_url = @api.combine_urls(redirect_url, data.redirects[uid])
 
             # folderitems of the updated objects and their dependencies
             folderitems = data.folderitems or []
@@ -1038,6 +1042,10 @@ class ListingController extends React.Component
 
       # all objects transitioned
       chain.then () =>
+        # redirect
+        if redirect_url
+          return window.location.href = redirect_url
+        # fetch transitions
         if @state.fetch_transitions_on_select
           @fetch_transitions()
         # unlock the buttons
