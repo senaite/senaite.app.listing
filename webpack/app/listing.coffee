@@ -1927,10 +1927,19 @@ class ListingController extends React.Component
   on_api_error: (response) ->
     @toggle_loader off
     console.debug "°°° ListingController::on_api_error: GOT AN ERROR RESPONSE: ", response
-    response.text().then (data) =>
-      title = _t("Oops, an error occured! 🙈")
-      message = _t("The server responded with the status #{response.status}: #{response.statusText}")
+
+    title = _t("Oops, an error occured! 🙈")
+    if response instanceof Error
+      message = response.message
       @addMessage title, message, null, level="danger"
+    else if response.text
+      response.text().then (data) =>
+        message = _t("The server responded with the status #{response.status}: #{response.statusText}")
+        @addMessage title, message, null, level="danger"
+    else
+      message = _t("An unkown error occured: " + response)
+      @addMessage title, message, null, level="danger"
+
     return response
 
   on_reload: (event) ->
