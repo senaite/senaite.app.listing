@@ -79,9 +79,9 @@ class IListingWorkflowAdapter(Interface):
 
 
 class IListingWorkflowTransition(IListingWorkflowAdapter):
-    """Execute workflow transitions for listing views
+    """Workflow transition adapter for listing view
     """
-    failed = Attribute("Flag if transition was successful")
+    failed = Attribute("Error flag if transition failed")
 
     def do_transition(transition):
         """Perform the workflow the transition
