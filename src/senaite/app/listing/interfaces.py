@@ -19,6 +19,7 @@
 # Some rights reserved, see README and LICENSE.
 
 from zope.interface import Interface
+from zope.interface import Attribute
 
 
 class IListingView(Interface):
@@ -69,4 +70,27 @@ class IChildFolderItems(Interface):
 
     def get_children(parent_uid, child_uids=None):
         """Return the child folderitems
+        """
+
+
+class IListingWorkflowAdapter(Interface):
+    """Workflow adapter for listing view
+    """
+
+
+class IListingWorkflowTransition(IListingWorkflowAdapter):
+    """Execute workflow transitions for listing views
+    """
+    failed = Attribute("Flag if transition was successful")
+
+    def do_transition(transition):
+        """Perform the workflow the transition
+        """
+
+    def get_error():
+        """Return error message
+        """
+
+    def get_redirect_url():
+        """Return redirect URL
         """

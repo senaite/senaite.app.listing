@@ -28,24 +28,23 @@ from bika.lims.browser import BrowserView
 from plone.memoize import view
 from Products.Archetypes.event import ObjectEditedEvent
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
-from senaite.app.listing import logger
-from senaite.app.listing import senaiteMessageFactory as _
 from senaite.app.listing.decorators import inject_runtime
 from senaite.app.listing.decorators import returns_safe_json
 from senaite.app.listing.decorators import set_application_json_header
 from senaite.app.listing.decorators import translate
 from senaite.app.listing.interfaces import IAjaxListingView
 from senaite.app.listing.interfaces import IChildFolderItems
+from senaite.app.listing.interfaces import IListingWorkflowTransition
 from senaite.app.listing.interfaces import ITransposedListingView
 from senaite.core.decorators import readonly_transaction
 from senaite.core.interfaces import IDataManager
 from senaite.core.p3compat import cmp
 from senaite.core.registry import get_registry_record
 from six.moves.urllib.parse import urlencode
-from ZODB.POSException import ConflictError
 from zope import event
 from zope.component import getMultiAdapter
 from zope.component import queryAdapter
+from zope.component import queryMultiAdapter
 from zope.interface import implementer
 from zope.lifecycleevent import modified
 from zope.publisher.interfaces import IPublishTraverse
@@ -633,33 +632,38 @@ class AjaxListingView(BrowserView):
 
         uids = payload.get("uids")
         transition = payload.get("transition")
+
         errors = {}
+        redirects = {}
 
         for uid in uids:
+            import pdb; pdb.set_trace()
             obj = api.get_object_by_uid(uid)
-            # transition the object
-            try:
-                obj = api.do_transition_for(obj, transition)
-            except ConflictError:
-                oid = api.get_id(obj)
-                errors[uid] = _("A database conflict occured during "
-                                "transition '{}' on '{}'. Please try again."
-                                .format(transition, oid))
-            except api.APIError as exc:
-                # NOTE: We do not propagate back to the UI when the transition
-                #       failed, because it is most of the time an expected
-                #       side-effect. E.g. when an analysis with calculation
-                #       dependencies is submitted, the dependent analyses are
-                #       submitted as well. Therefore, if the current object is
-                #       such a dependency, it might fail here.
-                logger.warn(exc)
-            except Exception as exc:
-                oid = api.get_id(obj)
-                errors[uid] = _("An unkown error occured during "
-                                "transition '{}' on '{}': {}"
-                                .format(transition, oid, exc.message))
 
-        # get the updated folderitems
+            # try named workflow transition adapter first
+            adapter = queryMultiAdapter(
+                (self, obj, self.request),
+                interface=IListingWorkflowTransition,
+                name=transition)
+            if adapter is None:
+                # get generic workflow transition adapter
+                adapter = getMultiAdapter(
+                    (self, obj, self.request),
+                    interface=IListingWorkflowTransition)
+
+            # execute the transition
+            adapter.do_transition(transition)
+
+            # collect errors
+            if adapter.failed:
+                errors[uid] = adapter.get_error()
+
+            # collect redirects
+            redirect = adapter.get_redirect_url()
+            if redirect:
+                redirects[uid] = redirect
+
+        # fetch updated folderitems
         self.contentFilter["UID"] = uids
         folderitems = self.get_folderitems()
 
@@ -669,6 +673,7 @@ class AjaxListingView(BrowserView):
             "uids": uids,
             "folderitems": folderitems,
             "errors": errors,
+            "redirects": redirects,
         }
 
         return data
