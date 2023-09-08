@@ -46,7 +46,7 @@ class ListingWorkflowTransition(object):
             obj = api.do_transition_for(obj, transition)
         except ConflictError:
             self.error["message"] = _(
-                "A database conflict occured during transition "
+                "A database conflict error occurred during transition "
                 "'{}' on '{}'. Please try again.".format(transition, oid))
         except api.APIError as exc:
             # NOTE: We do not propagate back to the UI when the transition
@@ -58,5 +58,5 @@ class ListingWorkflowTransition(object):
             logger.warn(exc)
         except Exception as exc:
             self.error["message"] = _(
-                "An unkown error occured during transition '{}' on '{}': {}"
+                "An unkown error occurred during transition '{}' on '{}': {}"
                 .format(transition, oid, exc.message))
