@@ -9,4 +9,11 @@
            zope.publisher.interfaces.browser.IBrowserRequest"
       factory=".childfolderitems.ChildFolderItems"/>
 
+  <!-- Workflow transition adapter -->
+  <adapter
+      for="senaite.app.listing.interfaces.IAjaxListingView
+           *
+           zope.publisher.interfaces.browser.IBrowserRequest"
+      factory=".workflow.ListingWorkflowTransition"/>
+
 </configure>

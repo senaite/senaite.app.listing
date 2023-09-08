@@ -193,5 +193,34 @@ class ListingAPI
     ###
     return document.querySelector("#protect-script").dataset.token
 
+  combine_urls: (url1, url2) ->
+    ###
+     * Merge search params of two urls into one
+    ###
+    url1 ?= ""
+    url2 ?= ""
+
+    if url1.length == 0
+      return url2
+
+    u1 = new URL(url1)
+    u2 = new URL(url2)
+
+    # can not combine urls with different path names
+    if u1.pathname != u2.pathname
+      return u1.href
+
+    u2.searchParams.forEach (value, key) ->
+      old_value = u1.searchParams.get(key)
+      # join values that differ
+      if old_value isnt value
+        splitted = old_value.split(",")
+        new_value = splitted.concat(value.split(","))
+        u1.searchParams.set(key, new_value.join(","))
+      else
+        # set eventual missing keys
+        u1.searchParams.set(key, value)
+
+    return u1.href
 
 export default ListingAPI
