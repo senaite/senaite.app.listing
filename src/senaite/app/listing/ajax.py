@@ -637,7 +637,6 @@ class AjaxListingView(BrowserView):
         redirects = {}
 
         for uid in uids:
-            import pdb; pdb.set_trace()
             obj = api.get_object_by_uid(uid)
 
             # try named workflow transition adapter first
