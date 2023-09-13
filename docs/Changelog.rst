@@ -1,6 +1,7 @@
 2.5.0 (unreleased)
 ------------------
 
+- #116 Fix datetime value is not updated onchange
 - #115 Support redirects after Ajax transitions
 - #114 Fix Ajax Transitions for Transposed Worksheet Layout
 - #113 Enable ajax transitions per default
