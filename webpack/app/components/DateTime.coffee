@@ -71,8 +71,6 @@ class DateTime extends React.Component
     uid = el.getAttribute("uid")
     # Extract the column_key attribute
     name = el.getAttribute("column_key") or el.name
-    # Extract the value of the datetime field
-    value = el.value
 
     console.debug "DateTime::on_change: value=#{value}"
 
