@@ -22,11 +22,11 @@ import json
 import time
 from functools import wraps
 
-from bika.lims import logger
-from bika.lims.utils import t
-from zope.i18nmessageid import Message
-from DateTime import DateTime
 from bika.lims import api
+from bika.lims import logger
+from DateTime import DateTime
+from senaite.core.i18n import translate as t
+from zope.i18nmessageid import Message
 
 
 def returns_safe_json(func):
