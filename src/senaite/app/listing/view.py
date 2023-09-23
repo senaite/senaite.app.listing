@@ -355,20 +355,28 @@ class ListingView(AjaxListingView):
         if not self.review_states:
             logger.error("%s.review_states is undefined." % self)
             return None
+
         # get state_id from (request or default_review_states)
         key = "%s_review_state" % self.form_id
         state_id = self.request.form.get(key, self.default_review_state)
-        if not state_id:
-            state_id = self.default_review_state
-        states = [r for r in self.review_states if r["id"] == state_id]
-        if not states:
+
+        # get the review state definition
+        review_state = self.get_review_state(state_id)
+        if not review_state:
             logger.error("%s.review_states does not contain id='%s'." %
                          (self, state_id))
-            return None
-        review_state = states[0] if states else self.review_states[0]
+            # fallback to default
+            review_state = self.get_review_state(self.default_review_state)
+
         # set selected state into the request
         self.request["%s_review_state" % self.form_id] = review_state["id"]
         return review_state
+
+    def get_review_state(self, state_id):
+        """Returns the review state definition for the given state id or None
+        """
+        states = filter(lambda st: st["id"] == state_id, self.review_states)
+        return states[0] if states else None
 
     def remove_column(self, column):
         """Removes the column passed-in, if exists
