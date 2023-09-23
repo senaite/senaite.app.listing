@@ -94,7 +94,7 @@ class ListingController extends React.Component
     @listing_identifier = @root_el.dataset.listing_identifier
     @pagesize = parseInt @root_el.dataset.pagesize
     @review_states = @parse_json @root_el.dataset.review_states
-    @default_review_state = @root_el.dataset.default_review_state
+    @default_review_state = @root_el.dataset.default_review_state or "default"
     @show_column_toggles = @parse_json @root_el.dataset.show_column_toggles
     @enable_ajax_transitions = @parse_json @root_el.dataset.enable_ajax_transitions, no
     @active_ajax_transitions = @parse_json @root_el.dataset.active_ajax_transitions, []
