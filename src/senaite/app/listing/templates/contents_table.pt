@@ -41,6 +41,7 @@
                          data-api_url python:view.get_api_url();
                          data-columns python:view.ajax_columns();
                          data-show_column_toggles python:view.ajax_show_column_toggles();
+                         data-default_review_state python:view.default_review_state;
                          data-review_states python:view.ajax_review_states();">
     </div>
   </form>

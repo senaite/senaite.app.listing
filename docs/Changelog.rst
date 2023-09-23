@@ -1,6 +1,7 @@
 2.5.0 (unreleased)
 ------------------
 
+- #118 Fix listing's default review state does not have any effect
 - #117 Compatibility with senaite.core i18n
 - #116 Fix datetime value is not updated onchange
 - #115 Support redirects after Ajax transitions

@@ -94,6 +94,7 @@ class ListingController extends React.Component
     @listing_identifier = @root_el.dataset.listing_identifier
     @pagesize = parseInt @root_el.dataset.pagesize
     @review_states = @parse_json @root_el.dataset.review_states
+    @default_review_state = @root_el.dataset.default_review_state
     @show_column_toggles = @parse_json @root_el.dataset.show_column_toggles
     @enable_ajax_transitions = @parse_json @root_el.dataset.enable_ajax_transitions, no
     @active_ajax_transitions = @parse_json @root_el.dataset.active_ajax_transitions, []
@@ -112,7 +113,7 @@ class ListingController extends React.Component
     @pagesize = parseInt(@api.get_url_parameter("pagesize")) or @pagesize
     @sort_on = @api.get_url_parameter("sort_on")
     @sort_order = @api.get_url_parameter("sort_order")
-    @review_state = @api.get_url_parameter("review_state") or "default"
+    @review_state = @api.get_url_parameter("review_state") or @default_review_state
 
     # last selected item
     @last_select = null
