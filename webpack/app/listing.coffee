@@ -1049,6 +1049,8 @@ class ListingController extends React.Component
         # fetch transitions
         if @state.fetch_transitions_on_select
           @fetch_transitions()
+        # refetch all folderitems
+        @fetch_folderitems()
         # unlock the buttons
         @setState lock_buttons: no
         # check if the whole site needs to be reloaded, e.g. if all analyses are
