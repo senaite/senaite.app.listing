@@ -636,6 +636,7 @@ class AjaxListingView(BrowserView):
 
         errors = {}
         redirects = {}
+        affected_uids = set(uids)
 
         for uid in uids:
             obj = api.get_object_by_uid(uid)
@@ -663,14 +664,18 @@ class AjaxListingView(BrowserView):
             if redirect:
                 redirects[uid] = redirect
 
+            # update affected uids
+            affected_uids.update(adapter.get_uids())
+
         # fetch updated folderitems
-        self.contentFilter["UID"] = uids
+        affected_uids = list(affected_uids)
+        self.contentFilter["UID"] = affected_uids
         folderitems = self.get_folderitems()
 
         # prepare the response object
         data = {
             "count": len(folderitems),
-            "uids": uids,
+            "uids": affected_uids,
             "folderitems": folderitems,
             "errors": errors,
             "redirects": redirects,

@@ -36,6 +36,11 @@ class ListingWorkflowTransition(object):
         """
         return ""
 
+    def get_uids(self):
+        """Return the uids affected by the transition
+        """
+        return [api.get_uid(self.context)]
+
     def do_transition(self, transition):
         """Execute the workflow transition
         """
