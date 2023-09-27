@@ -1050,7 +1050,7 @@ class ListingController extends React.Component
         if @state.fetch_transitions_on_select
           @fetch_transitions()
         # refetch all folderitems
-        @fetch_folderitems()
+        #@fetch_folderitems()
         # unlock the buttons
         @setState lock_buttons: no
         # check if the whole site needs to be reloaded, e.g. if all analyses are
@@ -1846,6 +1846,16 @@ class ListingController extends React.Component
             new_item[key] = old_item[key]
         # add the new folderitem
         new_folderitems.push new_item
+
+    # Add updated items that were not yet in existing
+    for uid, folderitem of updated_folderitems
+      if uid of existing_folderitems
+        # this item already exists, do nothing
+        continue
+      # shallow copy
+      item = Object.assign {}, folderitem
+      # add the new folderitem
+      new_folderitems.push item
 
     # updated the state with the new folderitems
     @setState
