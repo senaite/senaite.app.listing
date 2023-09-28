@@ -1,6 +1,7 @@
 2.5.0 (unreleased)
 ------------------
 
+- #121 Trigger event after sequential transitions
 - #120 Auto-add dependents after listing transition
 - #118 Fix listing's default review state does not have any effect
 - #117 Compatibility with senaite.core i18n
