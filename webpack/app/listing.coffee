@@ -1054,11 +1054,14 @@ class ListingController extends React.Component
         # check if the whole site needs to be reloaded, e.g. if all analyses are
         # submitted or verified etc.
         promise = @api.fetch_listing_config()
-        promise.then (data) ->
-          # check if the old context WF state differs from the new context WF state
-          old_workflow_state = document.body.dataset.reviewState
-          if old_workflow_state != data.view_context_state
-            location.reload()
+        promise.then (config) =>
+          # send after-transition event to update e.g. the transition menu or reload the whole page.
+          # see: senaite.core.js for event handler
+          @trigger_event "listing:after_transition_event",
+            uids: uids
+            transition: transition
+            config: config
+            folderitems: @state.folderitems
 
     return promise
 
