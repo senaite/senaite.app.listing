@@ -962,47 +962,6 @@ class ListingController extends React.Component
     form.submit()
 
   ###*
-   * Submit form via ajax
-   *
-   * @param form {element} The form to post
-  ###
-  ajax_post_form: (form) ->
-    # turn loader on
-    @toggle_loader on
-    # process form submit
-    fetch form.action,
-      method: "POST",
-      body: new FormData(form)
-    .then (response) =>
-      if not response.ok
-        Promise.reject(response)
-        # eventually display a status message
-        location.reload()
-
-      if response.redirected
-        url = response.url or location.href
-        # only redirect to different URLs
-        if not location.href.startsWith(url)
-         location.href = url
-      return response.text()
-    .then (text) =>
-      @toggle_loader off
-      # refetch folderitems w/o keeping missing items from the current folderitems.
-      # E.g. we do not want a retracted analysis to be displayed as editable in the listing.
-      promise = @fetch_folderitems false
-      promise.then (data) =>
-        # send event to update e.g. the transition menu
-        @trigger_event "listing:submit",
-          data: data
-          folderitems: data.folderitems
-          form: form
-          action: form.action
-
-    .catch (error) =>
-      @toggle_loader off
-      console.error(error)
-
-  ###*
    * Transition multiple UIDs batchwise
    *
    * @param form {element} The form to post
@@ -1054,11 +1013,14 @@ class ListingController extends React.Component
         # check if the whole site needs to be reloaded, e.g. if all analyses are
         # submitted or verified etc.
         promise = @api.fetch_listing_config()
-        promise.then (data) ->
-          # check if the old context WF state differs from the new context WF state
-          old_workflow_state = document.body.dataset.reviewState
-          if old_workflow_state != data.view_context_state
-            location.reload()
+        promise.then (config) =>
+          # send after-transition event to update e.g. the transition menu or reload the whole page.
+          # see: senaite.core.js for event handler
+          @trigger_event "listing:after_transition_event",
+            uids: uids
+            transition: transition
+            config: config
+            folderitems: @state.folderitems
 
     return promise
 
