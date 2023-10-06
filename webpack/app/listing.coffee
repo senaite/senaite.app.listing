@@ -1877,12 +1877,16 @@ class ListingController extends React.Component
 
   on_multi_select_checkbox_checked: (event) ->
     console.debug "°°° ListingController::on_multi_select_checkbox_checked"
+    me = this
     el = event.currentTarget
     value = el.value
     uids = value.split ","
     items = @get_folderitems().filter (item) ->
       uids.indexOf(item.uid) > -1
-    @selectItems items, null, el.checked
+    @selectItems(items, null, el.checked).then ->
+      if me.state.fetch_transitions_on_select
+        # fetch all possible transitions
+        me.fetch_transitions()
 
   on_category_click: (event) ->
     console.debug "°°° ListingController::on_category_click"
