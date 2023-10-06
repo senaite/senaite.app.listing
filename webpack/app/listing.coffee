@@ -67,6 +67,7 @@ class ListingController extends React.Component
     @on_api_error = @on_api_error.bind @
     @on_column_config_click = @on_column_config_click.bind @
     @on_select_checkbox_checked = @on_select_checkbox_checked.bind @
+    @on_multi_select_checkbox_checked = @on_multi_select_checkbox_checked.bind @
     @on_category_click = @on_category_click.bind @
     @on_category_select = @on_category_select.bind @
     @on_reload = @on_reload.bind @
@@ -1874,6 +1875,15 @@ class ListingController extends React.Component
         # fetch all possible transitions
         me.fetch_transitions()
 
+  on_multi_select_checkbox_checked: (event) ->
+    console.debug "°°° ListingController::on_multi_select_checkbox_checked"
+    el = event.currentTarget
+    value = el.value
+    uids = value.split ","
+    items = @get_folderitems().filter (item) ->
+      uids.indexOf(item.uid) > -1
+    @selectItems items, null, el.checked
+
   on_category_click: (event) ->
     console.debug "°°° ListingController::on_category_click"
     me = this
@@ -2017,6 +2027,7 @@ class ListingController extends React.Component
                 allow_edit={@state.allow_edit}
                 on_header_column_click={@sortBy}
                 on_select_checkbox_checked={@on_select_checkbox_checked}
+                on_multi_select_checkbox_checked={@on_multi_select_checkbox_checked}
                 on_context_menu={@on_column_config_click}
                 sort_on={@state.sort_on}
                 sort_order={@state.sort_order}
