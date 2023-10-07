@@ -542,13 +542,10 @@ class ListingController extends React.Component
    * Handle a row menu action
   ###
   handleRowMenuAction: (id, url, item) ->
-    if id is "select_all"
-      return @selectUID("all", on)
-    else if id is "deselect_all"
-      return @selectUID("all", off)
-
+    if id == "save"
+      return @saveAjaxQueue()
     # handle transitions
-    uids = @get_uids_from([item])
+    uids = @state.selected_uids or @get_uids_from([item])
     @doAction(id, url, uids)
 
   ###*
@@ -576,17 +573,27 @@ class ListingController extends React.Component
     folderitems = @get_folderitems().filter((item) -> item.uid in uids)
 
     @fetch_transitions(uids, loader=no).then (data) =>
+      transitions = []
+
+      # inject save button
+      if @state.show_ajax_save
+        transitions.unshift({
+          "id": "save"
+          "title": "Save"
+        })
+      transitions = transitions.concat(data.transitions)
+
       @setState {
         row_context_menu: {
           folderitems: folderitems or []
-          transitions: data.transitions or []
+          transitions: transitions
           actions: [
             {
-              id: "select_all",
-              title: @translate("Select all")
+              id: "all",
+              title: "Select all"
             }, {
-              id: "deselect_all",
-              title: @translate("Deselect all")
+              id: "clear_selection",
+              title: "Deselect all"
             }
           ]
         }
@@ -999,8 +1006,11 @@ class ListingController extends React.Component
 
     # handle clear button separate
     if id == "clear_selection"
-      @selectUID "all", off
-      return
+      return @selectUID "all", off
+    else if id == "all"
+      return @selectUID("all", on).then () =>
+        if @state.fetch_transitions_on_select
+          @fetch_transitions()
 
     # N.B. Transition submit buttons are suffixed with `_transition`, because
     #      otherwise the form.submit call below retrieves the element instead of

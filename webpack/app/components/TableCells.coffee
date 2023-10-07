@@ -65,6 +65,10 @@ class TableCells extends React.Component
   has_transposed_items: () ->
     return @get_transposed_items().length > 0
 
+  is_transposed_item: () ->
+    item = @get_item()
+    return item.hasOwnProperty "transposed_keys"
+
   is_loading: (uid) ->
     loading_uids = this.props.loading_uids or []
     return loading_uids.indexOf(uid) > -1
@@ -78,14 +82,18 @@ class TableCells extends React.Component
    * @returns SelectCell component
   ###
   create_multi_select_cell: (uids) ->
+    uids ?= []
+    return @create_placeholder_cell() unless uids.length > 0
     value = uids.join(",")
     item = @get_item()
     level = item.node_level or 0
+    all_selected = uids.every (uid) => @props.selected_uids.includes(uid)
     cell = (
       <td key={value} className="level-#{level}">
         <Checkbox
           value={value}
           tabIndex="-1"
+          checked={all_selected}
           onChange={@props.on_multi_select_checkbox_checked}/>
       </td>)
     return cell
@@ -98,6 +106,7 @@ class TableCells extends React.Component
   ###
   create_select_cell: () ->
     uid = @get_uid()
+    return @create_placeholder_cell() unless uid
     checkbox_name = "#{@props.select_checkbox_name}:list"
     item = @get_item()
     remarks = @props.remarks  # True if this row follows a remarks row
@@ -232,9 +241,9 @@ class TableCells extends React.Component
     cells = []
 
     # insert select column
-    if @show_select() and not @has_transposed_items()
+    if @show_select() and not @is_transposed_item()
       cells.push @create_select_cell()
-    else if @show_select() and @has_transposed_items()
+    else if @show_select() and @is_transposed_item()
       items = @get_transposed_items()
       uids = items.map (item) -> item.uid
       cells.push @create_multi_select_cell uids

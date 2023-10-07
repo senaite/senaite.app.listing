@@ -1,5 +1,7 @@
-import {Menu, Item, Separator, Submenu} from "react-contexify"
+import { Menu, Item, Separator } from "react-contexify"
 import "react-contexify/dist/ReactContexify.css"
+import { CONFIRM_TRANSITION_IDS }from "./Constants.js"
+
 
 const ContextMenu = function ContextMenu({...props}) {
 
@@ -45,7 +47,7 @@ const ContextMenu = function ContextMenu({...props}) {
     for (let action of actions) {
       menu_items.push(
         <Item key={action.id} data={action} onClick={on_menu_item_click}>
-          {action.title}
+          {window._t(action.title)}
         </Item>
       )
     }
