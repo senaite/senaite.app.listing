@@ -27,9 +27,6 @@ import {useContextMenu} from "react-contexify"
 
 import "./listing.css"
 
-TABLE_ROW_CONTEXT_MENU_ID = "table-row-context-menu-id"
-
-
 ###* DOCUMENT READY ENTRY POINT ###
 document.addEventListener "DOMContentLoaded", ->
   console.debug "*** SENAITE.APP.LISTING::DOMContentLoaded: --> Loading ReactJS Controller"
@@ -105,6 +102,7 @@ class ListingController extends React.Component
     @show_column_toggles = @parse_json @root_el.dataset.show_column_toggles
     @enable_ajax_transitions = @parse_json @root_el.dataset.enable_ajax_transitions, no
     @active_ajax_transitions = @parse_json @root_el.dataset.active_ajax_transitions, []
+    @row_context_menu_id = "row-context-menu-#{@form_id}"
 
     # bind event handlers
     @root_el.addEventListener "reload", @on_reload
@@ -561,7 +559,7 @@ class ListingController extends React.Component
 
     # https://fkhadra.github.io/react-contexify/api/use-context-menu
     menu = useContextMenu({
-      id: TABLE_ROW_CONTEXT_MENU_ID
+      id: @row_context_menu_id
     })
 
     uids = []
@@ -620,13 +618,13 @@ class ListingController extends React.Component
           ]
           configurations: configurations
         }
-      }
-      # show the context menu
-      menu.show(
-        event: event
-        props:
-          item: item
-      )
+      }, ->
+        # show the context menu
+        menu.show(
+          event: event
+          props:
+            item: item
+        )
 
   ###*
    * Move the table row by the given indexes
@@ -2182,7 +2180,7 @@ class ListingController extends React.Component
                   on_column_toggle_click={@toggleColumn}
                   on_columns_order_change={@setColumnsOrder}/>}
               <ContextMenu
-                id={TABLE_ROW_CONTEXT_MENU_ID}
+                id={@row_context_menu_id}
                 menu={@state.row_context_menu}
                 on_menu_item_click={@handleRowMenuAction} />
               <Table

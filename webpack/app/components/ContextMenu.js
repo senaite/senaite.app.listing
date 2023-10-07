@@ -12,7 +12,7 @@ const ContextMenu = function ContextMenu({...props}) {
     // componentDidUpdate
   });
 
-  function on_menu_item_click({event, props, triggerEvent, data}) {
+  const on_menu_item_click = ({event, props, triggerEvent, data}) => {
     console.log(event, props, triggerEvent, data)
     if (callback) {
       if (CONFIRM_TRANSITION_IDS.includes(data.id)) {
@@ -39,7 +39,7 @@ const ContextMenu = function ContextMenu({...props}) {
     }
   }
 
-  function render_menu_items() {
+  const render_menu_items = () => {
     let menu_items = []
 
     let title = window._t("Selected items")
@@ -56,31 +56,35 @@ const ContextMenu = function ContextMenu({...props}) {
       <Item key="title" disabled>
         {count > 1 && <span className="badge badge-secondary mr-1">{count}</span>}
         {title}
-      </Item>,
-      <Separator key="separator_title" />
+      </Item>
     ]
+    menu_items.push(<Separator key="separator_below_title" />)
 
     // Transitions
+    // NOTE: We set here closeOnClick={false} to avoid closing when a confirmation dialog is displayed
     let transitions = props.menu.transitions || []
     for (let transition of transitions) {
       menu_items.push(
-        <Item closeOnClick={false} key={transition.id} data={transition} onClick={on_menu_item_click}>
+        <Item key={transition.id} closeOnClick={false}  data={transition} onClick={on_menu_item_click}>
           {window._t(transition.title)}
         </Item>
       )
     }
+    if (transitions.length > 0) {
+      menu_items.push(<Separator key="separator_below_transitions" />)
+    }
 
     // Actions
     let actions = props.menu.actions || []
-    if (transitions.length > 0) {
-      menu_items.push(<Separator key="separator_transitions" />)
-    }
     for (let action of actions) {
       menu_items.push(
         <Item key={action.id} data={action} onClick={on_menu_item_click}>
           {window._t(action.title)}
         </Item>
       )
+    }
+    if (actions.length > 0) {
+      menu_items.push(<Separator key="separator_below_actions" />)
     }
 
     // Configurations
@@ -95,8 +99,7 @@ const ContextMenu = function ContextMenu({...props}) {
     }
     if (config_items.length > 0) {
       menu_items.push(
-        <Separator key="separator_transitions" />,
-        <Submenu key="configuration" label="Configuration">
+        <Submenu key="configuration_submenu" label="Configuration">
           {config_items}
         </Submenu>
       )
@@ -105,11 +108,15 @@ const ContextMenu = function ContextMenu({...props}) {
     return menu_items
   }
 
-  return (
-    <Menu id={props.id}>
-      {render_menu_items()}
-    </Menu>
-  )
+  const render_menu = () => {
+    return (
+      <Menu id={props.id}>
+        {render_menu_items()}
+      </Menu>
+    )
+  }
+
+  return render_menu()
 }
 
 export default ContextMenu
