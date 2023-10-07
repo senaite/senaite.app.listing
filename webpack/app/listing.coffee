@@ -600,7 +600,7 @@ class ListingController extends React.Component
               title: "Deselect all"
             }, {
               id: "reload",
-              title: "Reload all"
+              title: "Reload"
             }
 
           ]
