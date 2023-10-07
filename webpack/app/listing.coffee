@@ -544,8 +544,12 @@ class ListingController extends React.Component
   handleRowMenuAction: (id, url, item) ->
     if id == "save"
       return @saveAjaxQueue()
+    if id == "reload"
+      return @fetch_folderitems()
     # handle transitions
-    uids = @state.selected_uids or @get_uids_from([item])
+    uids = @get_uids_from([item])
+    if @state.selected_uids.length > 0
+      uids = [].concat(@state.selected_uids)
     @doAction(id, url, uids)
 
   ###*
@@ -594,7 +598,11 @@ class ListingController extends React.Component
             }, {
               id: "clear_selection",
               title: "Deselect all"
+            }, {
+              id: "reload",
+              title: "Reload all"
             }
+
           ]
         }
       }
