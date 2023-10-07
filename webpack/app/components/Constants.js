@@ -4,12 +4,14 @@ export const ItemTypes = {
 
 export const CONFIRM_TRANSITION_IDS = [
     "cancel",
+    "close",
     "deactivate",
     "invalidate",
+    "reinstate",
     "reject",
     "remove",
-    "retract",
-    "unassign",
+    "remove",
     "retest",
-    "reinstate"
+    "retract",
+    "unassign"
 ]
