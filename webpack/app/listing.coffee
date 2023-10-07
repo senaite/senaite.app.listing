@@ -595,10 +595,15 @@ class ListingController extends React.Component
           "id": "toggle_auto_fetch_transitions"
           "title": "Enable auto fetch transitions"
         })
+      configurations.push({
+        "id": "reset_columns"
+        "title": "Reset columns"
+      })
 
       # build context menu state config
-      state = {
+      new_state = {
         row_context_menu: {
+          folderitems: folderitems
           transitions: transitions
           actions: [
             {
@@ -623,10 +628,10 @@ class ListingController extends React.Component
       # Transitions are set by the fetch_transitions method.
       # If auto fetch is disabled, we do not want to set them implicitly.
       if not @state.fetch_transitions_on_select
-        state["transitions"] = []
+        new_state["transitions"] = []
 
       # set the new state and show the context menu afterwards
-      @setState state, ->
+      @setState new_state, ->
         # show the context menu
         menu.show(
           event: event
@@ -1045,6 +1050,7 @@ class ListingController extends React.Component
         return @setState
           fetch_transitions_on_select: toggle
           transitions: []
+      when "reset_columns" then return @toggleColumn("reset")
 
     # load action in modal popup if id starts/ends with `modal`
     if id.startsWith("modal") or id.endsWith("modal_transition")

@@ -65,7 +65,7 @@ const ContextMenu = function ContextMenu({...props}) {
     let transitions = props.menu.transitions || []
     for (let transition of transitions) {
       menu_items.push(
-        <Item key={transition.id} closeOnClick={false}  data={transition} onClick={on_menu_item_click}>
+        <Item key={transition.id} closeOnClick={false} data={transition} onClick={on_menu_item_click}>
           {window._t(transition.title)}
         </Item>
       )
@@ -99,7 +99,7 @@ const ContextMenu = function ContextMenu({...props}) {
     }
     if (config_items.length > 0) {
       menu_items.push(
-        <Submenu key="configuration_submenu" label="Configuration">
+        <Submenu key="configuration_submenu" label={window._t("Configuration")}>
           {config_items}
         </Submenu>
       )
