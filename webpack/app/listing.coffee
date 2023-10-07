@@ -593,12 +593,12 @@ class ListingController extends React.Component
       else
         configurations.push({
           "id": "toggle_auto_fetch_transitions"
-          "title": "Enable auto fetch transtions"
+          "title": "Enable auto fetch transitions"
         })
 
-      @setState {
+      # build context menu state config
+      state = {
         row_context_menu: {
-          folderitems: folderitems or []
           transitions: transitions
           actions: [
             {
@@ -618,7 +618,15 @@ class ListingController extends React.Component
           ]
           configurations: configurations
         }
-      }, ->
+      }
+
+      # Transitions are set by the fetch_transitions method.
+      # If auto fetch is disabled, we do not want to set them implicitly.
+      if not @state.fetch_transitions_on_select
+        state["transitions"] = []
+
+      # set the new state and show the context menu afterwards
+      @setState state, ->
         # show the context menu
         menu.show(
           event: event
