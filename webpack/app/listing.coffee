@@ -951,11 +951,14 @@ class ListingController extends React.Component
    * @param url {string} The form action URL
    * @param event {object} ReactJS event object
   ###
-  loadModal: (url) ->
+  loadModal: (url, selected_uids) ->
     el = $("#modal_#{@form_id}")
 
+    # allow to override selected uids
+    selected_uids ?= @state.selected_uids
+
     url = new URL(url)
-    url.searchParams.append("uids", this.state.selected_uids)
+    url.searchParams.append("uids", selected_uids)
 
     # submit callback
     on_submit = (event) =>
@@ -1009,7 +1012,7 @@ class ListingController extends React.Component
 
     # load action in modal popup if id starts/ends with `modal`
     if id.startsWith("modal") or id.endsWith("modal_transition")
-      @loadModal url
+      @loadModal url, selected_uids
       return
 
     # handle clear button separate
