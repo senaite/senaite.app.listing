@@ -539,17 +539,16 @@ class ListingController extends React.Component
     return toggle
 
   ###*
-   * Handle a row menu action
+   * Handle context menu action
   ###
   handleRowMenuAction: (id, url, item) ->
-    if id == "save"
-      return @saveAjaxQueue()
-    if id == "reload"
-      return @fetch_folderitems()
-    # handle transitions
+    # either use the already selected UIDs or, if nothing is selected, the UIDs
+    # from the row item where the context menu was opened.
+    # N.B. Transposed folderitems might contain multiple folderitems/UIDs!
     uids = @get_uids_from([item])
     if @state.selected_uids.length > 0
       uids = [].concat(@state.selected_uids)
+    # execute the transition
     @doAction(id, url, uids)
 
   ###*
@@ -587,6 +586,18 @@ class ListingController extends React.Component
         })
       transitions = transitions.concat(data.transitions)
 
+      configurations = []
+      if @state.fetch_transitions_on_select
+        configurations.push({
+          "id": "toggle_auto_fetch_transitions"
+          "title": "Disable auto fetch transtions"
+        })
+      else
+        configurations.push({
+          "id": "toggle_auto_fetch_transitions"
+          "title": "Enable auto fetch transtions"
+        })
+
       @setState {
         row_context_menu: {
           folderitems: folderitems or []
@@ -599,11 +610,15 @@ class ListingController extends React.Component
               id: "clear_selection",
               title: "Deselect all"
             }, {
+              id: "fetch_transitions",
+              title: "Fetch Transitions"
+            }, {
               id: "reload",
               title: "Reload"
             }
 
           ]
+          configurations: configurations
         }
       }
       # show the context menu
@@ -997,12 +1012,11 @@ class ListingController extends React.Component
         el.modal("show")
 
   ###*
-   * Submit form
-   *
-   * This method executes an HTTP POST form submission
+   * Execute an action
    *
    * @param id {string} The workflow action id
    * @param url {string} The form action URL
+   * @param url {array} List of affected UIDs
    * @returns form submission
   ###
   doAction: (id, url, selected_uids) ->
@@ -1010,18 +1024,26 @@ class ListingController extends React.Component
     # perform action on selected uids
     selected_uids ?= @state.selected_uids
 
+    # handle local actions directly
+    switch id
+      when "save" then return @saveAjaxQueue()
+      when "reload" then return @fetch_folderitems()
+      when "fetch_transitions" then return @fetch_transitions(selected_uids)
+      when "clear_selection" then return @selectUID("all", off)
+      when "all"
+        return @selectUID("all", on).then () =>
+          if @state.fetch_transitions_on_select
+            @fetch_transitions()
+      when "toggle_auto_fetch_transitions"
+        toggle = not @state.fetch_transitions_on_select
+        return @setState
+          fetch_transitions_on_select: toggle
+          transitions: []
+
     # load action in modal popup if id starts/ends with `modal`
     if id.startsWith("modal") or id.endsWith("modal_transition")
       @loadModal url, selected_uids
       return
-
-    # handle clear button separate
-    if id == "clear_selection"
-      return @selectUID "all", off
-    else if id == "all"
-      return @selectUID("all", on).then () =>
-        if @state.fetch_transitions_on_select
-          @fetch_transitions()
 
     # N.B. Transition submit buttons are suffixed with `_transition`, because
     #      otherwise the form.submit call below retrieves the element instead of

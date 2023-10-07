@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { Menu, Item, Separator } from "react-contexify"
+import { Menu, Item, Separator, Submenu } from "react-contexify"
 import "react-contexify/dist/ReactContexify.css"
 import { CONFIRM_TRANSITION_IDS }from "./Constants.js"
 
@@ -80,6 +80,25 @@ const ContextMenu = function ContextMenu({...props}) {
         <Item key={action.id} data={action} onClick={on_menu_item_click}>
           {window._t(action.title)}
         </Item>
+      )
+    }
+
+    // Configurations
+    let config_items = []
+    let configurations = props.menu.configurations || []
+    for (let config of configurations) {
+      config_items.push(
+        <Item key={config.id} data={config} onClick={on_menu_item_click}>
+          {window._t(config.title)}
+        </Item>
+      )
+    }
+    if (config_items.length > 0) {
+      menu_items.push(
+        <Separator key="separator_transitions" />,
+        <Submenu key="configuration" label="Configuration">
+          {config_items}
+        </Submenu>
       )
     }
 
