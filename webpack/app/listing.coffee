@@ -1040,28 +1040,26 @@ class ListingController extends React.Component
     ###
 
     # get the form element
-    form = document.getElementById @state.form_id
+    form = document.getElementById(@state.form_id)
 
     # Ensure all previous added hidden fields are removed
     document.querySelectorAll("input[name='workflow_action_id']", form).forEach (input) ->
       input.remove()
     document.querySelectorAll("input[name='form_id']", form).forEach (input) ->
       input.remove()
-    # remove checkboxes selected uids
-    document.querySelectorAll("input[name='#{@state.select_checkbox_name}:list']:checked", form).forEach (input) ->
-      input.remove()
+
+    # Make sure all checkboxes for the selected UIDs are checked
+    # => this happens when a transition is triggered from the context menu directly on the row
+    selected_uids.forEach (uid) =>
+      input = document.querySelector("input[value='#{uid}']")
+      input.checked = yes
 
     # inject hidden fields for workflow action adapters
-    action_id_input = @create_input_element "hidden", id,  "workflow_action_id", action
+    action_id_input = @create_input_element "hidden", id, "workflow_action_id", action
     form.appendChild action_id_input
 
     form_id_input = @create_input_element "hidden", "form_id", "form_id", @state.form_id
     form.appendChild form_id_input
-
-    # inject selected uids
-    selected_uids.forEach (uid) =>
-      uid_input = @create_input_element "hidden", uid, "#{@state.select_checkbox_name}:list", uid
-      form.appendChild uid_input
 
     # Override the form action when a custom URL is given
     if url then form.action = url
