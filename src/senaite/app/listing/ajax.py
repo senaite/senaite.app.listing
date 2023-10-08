@@ -20,7 +20,6 @@
 
 import inspect
 import json
-from functools import cmp_to_key
 
 import six
 from bika.lims import api
@@ -34,11 +33,11 @@ from senaite.app.listing.decorators import set_application_json_header
 from senaite.app.listing.decorators import translate
 from senaite.app.listing.interfaces import IAjaxListingView
 from senaite.app.listing.interfaces import IChildFolderItems
+from senaite.app.listing.interfaces import IListingTransitions
 from senaite.app.listing.interfaces import IListingWorkflowTransition
 from senaite.app.listing.interfaces import ITransposedListingView
 from senaite.core.decorators import readonly_transaction
 from senaite.core.interfaces import IDataManager
-from senaite.core.p3compat import cmp
 from senaite.core.registry import get_registry_record
 from six.moves.urllib.parse import urlencode
 from zope import event
@@ -191,98 +190,15 @@ class AjaxListingView(BrowserView):
         """Retrieves all transitions from the given UIDs and calculate the
         ones which have all in common (intersection).
         """
-
-        # Handle empty list of objects
+        # Nothing to do
         if not uids:
             return []
 
-        # allowed transitions
-        transitions = []
+        # Get listing adapter to get possible transitions
+        transitions_adapter = getMultiAdapter(
+            (self, self.context, self.request), IListingTransitions)
 
-        # allowed transitions of the current workflow
-        allowed_transitions = self.review_state.get("transitions", [])
-        allowed_transition_ids = map(
-            lambda t: t.get("id"), allowed_transitions)
-
-        # internal mapping of transition id -> transition
-        transitions_by_tid = {}
-
-        # get the custom transitions of the current review_state
-        custom_transitions = self.review_state.get("custom_transitions", [])
-
-        # N.B. we use set() here to handle dupes in the views gracefully
-        custom_tids = set()
-        for transition in custom_transitions:
-            tid = transition.get("id")
-            custom_tids.add(tid)
-            transitions_by_tid[tid] = transition
-
-        # transition ids all objects have in common
-        common_tids = set()
-
-        # statuses to skip when no transitions are found
-        for uid in uids:
-            # TODO: Research how to avoid the object wakeup here
-            obj = api.get_object_by_uid(uid)
-            obj_transitions = self.get_transitions_for(obj)
-            if not obj_transitions:
-                # skip retracted/rejected analyses because we do want users to
-                # be able to do transitions to selected analyses in worksheet
-                # context even when rejected and retracted are selected. This
-                # makes the worksheet more usable and reduces frustration
-                if api.get_review_status(obj) in ["rejected", "retracted"]:
-                    continue
-                # no need to go any further, no shared transitions can exist
-                common_tids.clear()
-                break
-
-            tids = []
-            for transition in obj_transitions:
-                tid = transition.get("id")
-                if allowed_transition_ids:
-                    if tid not in allowed_transition_ids:
-                        continue
-                    tids.append(tid)
-                else:
-                    # no restrictions by the selected review_state
-                    tids.append(tid)
-                transitions_by_tid[tid] = transition
-
-            if not common_tids:
-                common_tids = set(tids)
-
-            common_tids = common_tids.intersection(tids)
-
-        # union the common and custom transitions
-        all_transition_ids = common_tids.union(custom_tids)
-
-        def sort_transitions(a, b):
-            default_weights = {
-                "invalidate": 100,
-                "retract": 90,
-                "reject": 90,
-                "cancel": 80,
-                "deactivate": 70,
-                "unassign": 70,
-                "publish": 60,
-                "republish": 50,
-                "prepublish": 50,
-                "partition": 40,
-                "assign": 30,
-                "receive": 20,
-                "submit": 10,
-            }
-            w1 = transitions_by_tid[a].get(
-                "weight", default_weights.get(a, 0))
-            w2 = transitions_by_tid[b].get(
-                "weight", default_weights.get(b, 0))
-            return cmp(w1, w2)
-
-        for tid in sorted(all_transition_ids, key=cmp_to_key(sort_transitions)):
-            transition = transitions_by_tid.get(tid)
-            transitions.append(transition)
-
-        return transitions
+        return transitions_adapter.get_transitions(uids)
 
     def get_category_uid(self, brain_or_object, accessor="getCategoryUID"):
         """Get the category UID from the brain or object
