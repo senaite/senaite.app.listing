@@ -1,6 +1,7 @@
 2.5.0 (unreleased)
 ------------------
 
+- #123 Move logic to calculate possible listing transitions for selected UIDs into an own adapter
 - #121 Trigger event after sequential transitions
 - #120 Auto-add dependents after listing transition
 - #118 Fix listing's default review state does not have any effect
