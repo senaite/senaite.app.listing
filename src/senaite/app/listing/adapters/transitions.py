@@ -28,6 +28,11 @@ class ListingTransitions(object):
 
     def get_default_transition_weights(self):
         """Return default transitions weights for sorting
+
+        Hint: The higher the number, the more "right positioned" the button
+              appears below the listing.
+
+        Example: The "Invalidate" button currently always appears at the right
         """
         return {
             "invalidate": 100,
