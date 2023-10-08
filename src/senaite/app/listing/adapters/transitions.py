@@ -49,7 +49,7 @@ class ListingTransitions(object):
         }
 
     def get_object_by_uid(self, uid):
-        """Cached version to api.get_object_by_uid
+        """Cached version of `api.get_object_by_uid`
         """
         if not api.is_uid(uid):
             return None
@@ -62,6 +62,9 @@ class ListingTransitions(object):
         """Get allowed transition IDs for the current workflow filter
         """
         allowed_transitions = self.view.review_state.get("transitions", [])
+        # The used notation in the current codebase is somewhat weird and used
+        # e.g. `"transitions": [{"id": "x"}]` to disallow all transitions,
+        # instead of simply listing the transition ID in there:
         allowed_transition_ids = map(
             lambda t: t.get("id"), allowed_transitions)
         return list(allowed_transition_ids)
