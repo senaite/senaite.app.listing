@@ -149,7 +149,7 @@ class TableCell extends React.Component
       "string": 30,
 
     item = @get_item()
-    column_key = @get_column_key
+    column_key = @get_column_key()
 
     # Maybe the size is defined in the interim field
     if @is_interimfield()
