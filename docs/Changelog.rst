@@ -1,7 +1,7 @@
 2.5.0 (unreleased)
 ------------------
 
-- #124 Fix size of input fields is not taken into account
+- #125 Fix size attribute for interim fields is not taken into account
 - #121 Trigger event after sequential transitions
 - #120 Auto-add dependents after listing transition
 - #118 Fix listing's default review state does not have any effect
