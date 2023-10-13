@@ -2,6 +2,7 @@
 ------------------
 
 - #123 Move logic to calculate possible listing transitions for selected UIDs into an own adapter
+- #122 Add context menu for item transitions
 - #121 Trigger event after sequential transitions
 - #120 Auto-add dependents after listing transition
 - #118 Fix listing's default review state does not have any effect

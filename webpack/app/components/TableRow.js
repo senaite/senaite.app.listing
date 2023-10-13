@@ -1,3 +1,4 @@
+import React from "react"
 import { useCallback, useRef, memo } from "react"
 import TableCells from "./TableCells.coffee"
 import { ItemTypes } from "./Constants"
@@ -90,10 +91,18 @@ const TableRow = memo(function TableRow({...props}) {
     css_class += " dragging"
   }
 
+  function on_context_menu(event) {
+    // call the parent handler with the current item
+    if (props.on_row_context_menu) {
+      props.on_row_context_menu(event, props.item)
+    }
+  }
+
   return (
     <tr className={css_class}
         ref={dropRef}
         onClick={props.onClick}
+        onContextMenu={on_context_menu}
         category={props.category}
         uid={props.uid}>
       <TableCells dragref={dragRef} {...props}/>

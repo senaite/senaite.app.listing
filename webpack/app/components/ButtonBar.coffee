@@ -1,6 +1,7 @@
 import React from "react"
 
 import Button from "./Button.coffee"
+import { CONFIRM_TRANSITION_IDS }from "./Constants.js"
 
 
 class ButtonBar extends React.Component
@@ -11,19 +12,6 @@ class ButtonBar extends React.Component
     # Bind eventhandlers to local context
     @on_ajax_save_button_click = @on_ajax_save_button_click.bind @
     @on_transition_button_click = @on_transition_button_click.bind @
-
-    # default "confirm first" transitions
-    @confirm_transitions = [
-      "cancel"
-      "deactivate"
-      "invalidate"
-      "reject"
-      "remove"
-      "retract"
-      "unassign"
-      "retest"
-      "reinstate"
-    ]
 
     @css_mapping =
       # default buttons
@@ -159,7 +147,7 @@ class ButtonBar extends React.Component
       # Add bootstrap-confirmation data toggle
       # http://bootstrap-confirmation.js.org/#options
       attrs = transition.attrs or {}
-      if id in @confirm_transitions or id in review_state_confirm_transitions
+      if id in CONFIRM_TRANSITION_IDS or id in review_state_confirm_transitions
         attrs["data-toggle"] = "confirmation"
         attrs["data-title"] = "#{title}?"
 

@@ -22,9 +22,10 @@ import TableColumnConfig from "./components/TableColumnConfig.coffee"
 import { DndProvider } from "react-dnd"
 import { HTML5Backend } from "react-dnd-html5-backend"
 
+import ContextMenu from "./components/ContextMenu.js"
+import {useContextMenu} from "react-contexify"
 
 import "./listing.css"
-
 
 ###* DOCUMENT READY ENTRY POINT ###
 document.addEventListener "DOMContentLoaded", ->
@@ -67,6 +68,7 @@ class ListingController extends React.Component
     @on_api_error = @on_api_error.bind @
     @on_column_config_click = @on_column_config_click.bind @
     @on_select_checkbox_checked = @on_select_checkbox_checked.bind @
+    @on_multi_select_checkbox_checked = @on_multi_select_checkbox_checked.bind @
     @on_category_click = @on_category_click.bind @
     @on_category_select = @on_category_select.bind @
     @on_reload = @on_reload.bind @
@@ -82,6 +84,8 @@ class ListingController extends React.Component
     @updateEditableField = @updateEditableField.bind @
     @on_popstate = @on_popstate.bind @
     @moveRow = @moveRow.bind @
+    @showRowMenu = @showRowMenu.bind @
+    @handleRowMenuAction = @handleRowMenuAction.bind @
     @on_row_order_change = @on_row_order_change.bind @
 
     # root element
@@ -98,6 +102,7 @@ class ListingController extends React.Component
     @show_column_toggles = @parse_json @root_el.dataset.show_column_toggles
     @enable_ajax_transitions = @parse_json @root_el.dataset.enable_ajax_transitions, no
     @active_ajax_transitions = @parse_json @root_el.dataset.active_ajax_transitions, []
+    @row_context_menu_id = "row-context-menu-#{@form_id}"
 
     # bind event handlers
     @root_el.addEventListener "reload", @on_reload
@@ -198,7 +203,19 @@ class ListingController extends React.Component
       allow_row_reorder: yes
       # Lock all action buttons
       lock_buttons: no
+      # table row context menu config
+      row_context_menu: {}
 
+  ###*
+   * Translate the given i18n string
+   *
+   * @param s {string} String to translate
+   * @returns {string} Translated string
+  ###
+  translate: (s, domain="senaite") ->
+    if domain is "plone"
+      return window._p(s)
+    return window._t(s)
 
   ###*
    * Dismisses a message by its message index
@@ -518,6 +535,109 @@ class ListingController extends React.Component
     @setState {columns: columns}
 
     return toggle
+
+  ###*
+   * Handle context menu action
+  ###
+  handleRowMenuAction: (id, url, item) ->
+    # either use the already selected UIDs or, if nothing is selected, the UIDs
+    # from the row item where the context menu was opened.
+    # N.B. Transposed folderitems might contain multiple folderitems/UIDs!
+    uids = @get_uids_from([item])
+    if @state.selected_uids.length > 0
+      uids = [].concat(@state.selected_uids)
+    # execute the transition
+    @doAction(id, url, uids)
+
+  ###*
+   * Displays a context menu with all possible transitions for the clicked row
+   *
+   * Callback triggered by row onContextMenu handler (see TableRows.js)
+  ###
+  showRowMenu: (event, item) ->
+    event.preventDefault()
+
+    # https://fkhadra.github.io/react-contexify/api/use-context-menu
+    menu = useContextMenu({
+      id: @row_context_menu_id
+    })
+
+    uids = []
+    if @state.selected_uids.length > 0
+      # operate on selected UIDs
+      uids = @state.selected_uids
+    else
+      # extract UIDs of the folderitem (including transposed items)
+      uids = @get_uids_from([item])
+
+    # get the folderitems of the selected UIDS
+    folderitems = @get_folderitems().filter((item) -> item.uid in uids)
+
+    @fetch_transitions(uids, loader=no).then (data) =>
+      transitions = []
+
+      # inject save button
+      if @state.show_ajax_save
+        transitions.unshift({
+          "id": "save"
+          "title": "Save"
+        })
+      transitions = transitions.concat(data.transitions)
+
+      configurations = []
+      if @state.fetch_transitions_on_select
+        configurations.push({
+          "id": "toggle_auto_fetch_transitions"
+          "title": "Disable auto fetch transtions"
+        })
+      else
+        configurations.push({
+          "id": "toggle_auto_fetch_transitions"
+          "title": "Enable auto fetch transitions"
+        })
+      configurations.push({
+        "id": "reset_columns"
+        "title": "Reset columns"
+      })
+
+      # build context menu state config
+      new_state = {
+        row_context_menu: {
+          folderitems: folderitems
+          transitions: transitions
+          actions: [
+            {
+              id: "all",
+              title: "Select all"
+            }, {
+              id: "clear_selection",
+              title: "Deselect all"
+            }, {
+              id: "fetch_transitions",
+              title: "Fetch Transitions"
+            }, {
+              id: "reload",
+              title: "Reload"
+            }
+
+          ]
+          configurations: configurations
+        }
+      }
+
+      # Transitions are set by the fetch_transitions method.
+      # If auto fetch is disabled, we do not want to set them implicitly.
+      if not @state.fetch_transitions_on_select
+        new_state["transitions"] = []
+
+      # set the new state and show the context menu afterwards
+      @setState new_state, ->
+        # show the context menu
+        menu.show(
+          event: event
+          props:
+            item: item
+        )
 
   ###*
    * Move the table row by the given indexes
@@ -857,11 +977,14 @@ class ListingController extends React.Component
    * @param url {string} The form action URL
    * @param event {object} ReactJS event object
   ###
-  loadModal: (url) ->
+  loadModal: (url, selected_uids) ->
     el = $("#modal_#{@form_id}")
 
+    # allow to override selected uids
+    selected_uids ?= @state.selected_uids
+
     url = new URL(url)
-    url.searchParams.append("uids", this.state.selected_uids)
+    url.searchParams.append("uids", selected_uids)
 
     # submit callback
     on_submit = (event) =>
@@ -900,24 +1023,38 @@ class ListingController extends React.Component
         el.modal("show")
 
   ###*
-   * Submit form
-   *
-   * This method executes an HTTP POST form submission
+   * Execute an action
    *
    * @param id {string} The workflow action id
    * @param url {string} The form action URL
+   * @param url {array} List of affected UIDs
    * @returns form submission
   ###
-  doAction: (id, url) ->
+  doAction: (id, url, selected_uids) ->
+
+    # perform action on selected uids
+    selected_uids ?= @state.selected_uids
+
+    # handle local actions directly
+    switch id
+      when "save" then return @saveAjaxQueue()
+      when "reload" then return @fetch_folderitems()
+      when "fetch_transitions" then return @fetch_transitions(selected_uids)
+      when "clear_selection" then return @selectUID("all", off)
+      when "all"
+        return @selectUID("all", on).then () =>
+          if @state.fetch_transitions_on_select
+            @fetch_transitions()
+      when "toggle_auto_fetch_transitions"
+        toggle = not @state.fetch_transitions_on_select
+        return @setState
+          fetch_transitions_on_select: toggle
+          transitions: []
+      when "reset_columns" then return @toggleColumn("reset")
 
     # load action in modal popup if id starts/ends with `modal`
     if id.startsWith("modal") or id.endsWith("modal_transition")
-      @loadModal url
-      return
-
-    # handle clear button separate
-    if id == "clear_selection"
-      @selectUID "all", off
+      @loadModal url, selected_uids
       return
 
     # N.B. Transition submit buttons are suffixed with `_transition`, because
@@ -930,7 +1067,7 @@ class ListingController extends React.Component
       # sort UIDs according to the list
       sorted_uids = []
       for item in @get_folderitems()
-        if item.uid in @state.selected_uids
+        if item.uid in selected_uids
           sorted_uids.push item.uid
       # execute transitions
       return @ajax_do_transition_for(sorted_uids, action)
@@ -940,7 +1077,7 @@ class ListingController extends React.Component
     ###
 
     # get the form element
-    form = document.getElementById @state.form_id
+    form = document.getElementById(@state.form_id)
 
     # Ensure all previous added hidden fields are removed
     document.querySelectorAll("input[name='workflow_action_id']", form).forEach (input) ->
@@ -948,8 +1085,14 @@ class ListingController extends React.Component
     document.querySelectorAll("input[name='form_id']", form).forEach (input) ->
       input.remove()
 
+    # Make sure all checkboxes for the selected UIDs are checked
+    # => this happens when a transition is triggered from the context menu directly on the row
+    selected_uids.forEach (uid) =>
+      input = document.querySelector("input[value='#{uid}']")
+      input.checked = yes
+
     # inject hidden fields for workflow action adapters
-    action_id_input = @create_input_element "hidden", id,  "workflow_action_id", action
+    action_id_input = @create_input_element "hidden", id, "workflow_action_id", action
     form.appendChild action_id_input
 
     form_id_input = @create_input_element "hidden", "form_id", "form_id", @state.form_id
@@ -1073,10 +1216,11 @@ class ListingController extends React.Component
    *
    * @returns {array} copy of folderitems
   ###
-  get_folderitems: () ->
+  get_folderitems: (folderitems) ->
     items = []
 
-    for folderitem in @state.folderitems
+    folderitems ?= @state.folderitems
+    for folderitem in folderitems
       # regular folderitem
       if not folderitem.transposed_keys
         items = items.concat folderitem
@@ -1483,6 +1627,29 @@ class ListingController extends React.Component
     return mapping
 
   ###*
+   * Extract UIDs of folderitems
+   *
+   * @param folderitems {array} Array of folderitem records
+   * @returns {array} Array of UIDs
+  ###
+  get_uids_from: (folderitems) ->
+    folderitems ?= @state.folderitems
+    uids = []
+    folderitems.map (item, index) ->
+      if item.uid
+        # regular folderitem
+        uids.push item.uid
+      else if item.transposed_keys
+        # transposed folderitem
+        # => transposed_keys is an array of object keys
+        #    to contained folderitems
+        item.transposed_keys.forEach (key) ->
+          uid = item[key].uid
+          if uid
+            uids.push(uid)
+    return uids
+
+  ###*
    * Calculate the count of current folderitems
    *
    * @returns {int} Number of folderitems
@@ -1518,8 +1685,8 @@ class ListingController extends React.Component
    *
    * @returns {Promise} for the API fetch transitions call
   ###
-  fetch_transitions: ->
-    selected_uids = @state.selected_uids
+  fetch_transitions: (selected_uids, loader=yes) ->
+    selected_uids ?= @state.selected_uids
 
     # empty the possible transitions if no UID is selected
     if selected_uids.length == 0
@@ -1527,10 +1694,11 @@ class ListingController extends React.Component
       return
 
     # turn loader on
-    @toggle_loader on
+    if loader then @toggle_loader on
 
     # get the request options
     options = @getRequestOptions()
+    options.selected_uids = selected_uids
 
     # update the location hash
     @update_location_hash options
@@ -1544,7 +1712,7 @@ class ListingController extends React.Component
       me.setState data, ->
         console.debug "ListingController::fetch_transitions: NEW STATE=", me.state
         # turn loader off
-        me.toggle_loader off
+        if loader then me.toggle_loader off
     return promise
 
   ###
@@ -1874,6 +2042,19 @@ class ListingController extends React.Component
         # fetch all possible transitions
         me.fetch_transitions()
 
+  on_multi_select_checkbox_checked: (event) ->
+    console.debug "°°° ListingController::on_multi_select_checkbox_checked"
+    me = this
+    el = event.currentTarget
+    value = el.value
+    uids = value.split ","
+    items = @get_folderitems().filter (item) ->
+      uids.indexOf(item.uid) > -1
+    @selectItems(items, null, el.checked).then ->
+      if me.state.fetch_transitions_on_select
+        # fetch all possible transitions
+        me.fetch_transitions()
+
   on_category_click: (event) ->
     console.debug "°°° ListingController::on_category_click"
     me = this
@@ -2012,11 +2193,16 @@ class ListingController extends React.Component
                   columns_order={columns_order}
                   on_column_toggle_click={@toggleColumn}
                   on_columns_order_change={@setColumnsOrder}/>}
+              <ContextMenu
+                id={@row_context_menu_id}
+                menu={@state.row_context_menu}
+                on_menu_item_click={@handleRowMenuAction} />
               <Table
                 className="contentstable table table-hover small"
                 allow_edit={@state.allow_edit}
                 on_header_column_click={@sortBy}
                 on_select_checkbox_checked={@on_select_checkbox_checked}
+                on_multi_select_checkbox_checked={@on_multi_select_checkbox_checked}
                 on_context_menu={@on_column_config_click}
                 sort_on={@state.sort_on}
                 sort_order={@state.sort_order}
@@ -2047,6 +2233,7 @@ class ListingController extends React.Component
                 on_category_select={@on_category_select}
                 on_row_expand_click={@toggleRow}
                 on_remarks_expand_click={@toggleRemarks}
+                on_row_context_menu={@showRowMenu}
                 filter={@state.filter}
                 update_editable_field={@updateEditableField}
                 save_editable_field={@saveEditableField}
