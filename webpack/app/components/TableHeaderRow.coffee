@@ -84,7 +84,7 @@ class TableHeaderRow extends React.Component
             <Checkbox
               name={checkbox_name}
               value={checkbox_value}
-              checked={@props.all_selected}
+              checked={@props.all_items_selected}
               onChange={@props.on_select_checkbox_checked}/>}
         </th>
       )

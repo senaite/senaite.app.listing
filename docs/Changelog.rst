@@ -1,6 +1,7 @@
 2.5.0 (unreleased)
 ------------------
 
+- #122 Add context menu for item transitions
 - #121 Trigger event after sequential transitions
 - #120 Auto-add dependents after listing transition
 - #118 Fix listing's default review state does not have any effect
