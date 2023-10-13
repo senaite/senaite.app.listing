@@ -2,6 +2,7 @@
 ------------------
 
 - #123 Move logic to calculate possible listing transitions for selected UIDs into an own adapter
+- #125 Fix size attribute for interim fields is not taken into account
 - #122 Add context menu for item transitions
 - #121 Trigger event after sequential transitions
 - #120 Auto-add dependents after listing transition
