@@ -144,7 +144,10 @@ class TableCell extends React.Component
   Returns the size for the folderitem or interim field
   ###
   get_size: ->
-    size = 5
+    default_size = 5
+    types_size =
+      "string": 30,
+
     item = @get_item()
     column_key = @get_column_key
 
@@ -164,7 +167,12 @@ class TableCell extends React.Component
     if "size" of column
       return column.size
 
-    return size
+    # return default by type
+    type = @get_type()
+    if type of types_size
+      return types_size[type]
+
+    return default_size
 
   ###*
    * Create a mapping of interim keyword -> interim field
