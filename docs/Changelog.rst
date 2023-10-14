@@ -1,6 +1,7 @@
 2.5.0 (unreleased)
 ------------------
 
+- #127 Add Progress bar for sequential transitions
 - #123 Move logic to calculate possible listing transitions for selected UIDs into an own adapter
 - #126 Fix the size of string-type inputs is too small
 - #125 Fix size attribute for interim fields is not taken into account
