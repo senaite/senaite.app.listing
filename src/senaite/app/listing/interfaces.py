@@ -94,3 +94,12 @@ class IListingWorkflowTransition(IListingWorkflowAdapter):
     def get_redirect_url():
         """Return redirect URL
         """
+
+
+class IListingTransitions(Interface):
+    """Multi adapter to fetch possible transitions for selected UIDs in listings
+    """
+
+    def get_transitions(uids):
+        """Returns all possible transitions for the given UIDs
+        """

@@ -1,6 +1,7 @@
 2.5.0 (unreleased)
 ------------------
 
+- #123 Move logic to calculate possible listing transitions for selected UIDs into an own adapter
 - #126 Fix the size of string-type inputs is too small
 - #125 Fix size attribute for interim fields is not taken into account
 - #122 Add context menu for item transitions
