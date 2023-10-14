@@ -1674,10 +1674,11 @@ class ListingController extends React.Component
   ###
   set_progress: (progress=0, total=0, label=null) ->
     if Number.isInteger(progress) and Number.isInteger(total)
-      percent = progress/total
-      if not Number.isFinite(percent)
+      percent = (progress/total) * 100
+      # returns false for NaN and Infinite
+      if not Number.isInteger(percent)
         percent = null
-      @setState progress: percent * 100, progress_label: label
+      @setState progress: percent, progress_label: label
     else
       @reset_progress()
 
