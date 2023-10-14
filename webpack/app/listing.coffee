@@ -2181,13 +2181,6 @@ class ListingController extends React.Component
     return (
       <DndProvider backend={HTML5Backend}>
         <div className="listing-container">
-          {@state.progress and
-          <div className="progress">
-            <div className="progress-bar progress-bar-striped progress-bar-animated"
-                  style={{width: "#{@state.progress}%"}}>
-              {@state.progress_label or @state.progress + "%"}
-            </div>
-          </div>}
           <Modal className="modal fade" id="modal_#{@form_id}" />
           <Messages on_dismiss_message={@dismissMessage} id="messages" className="messages" messages={@state.messages} />
           {@state.loading and <div id="table-overlay"/>}
@@ -2213,6 +2206,13 @@ class ListingController extends React.Component
               </div>
             </div>
           }
+          {@state.progress and
+          <div className="progress my-2">
+            <div className="progress-bar progress-bar-striped progress-bar-animated"
+                  style={{width: "#{@state.progress}%"}}>
+              {@state.progress_label or @state.progress + "%"}
+            </div>
+          </div>}
           <div className="row">
             <div className="col-sm-12 table-responsive">
               {@state.show_column_toggles and
