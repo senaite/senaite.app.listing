@@ -205,6 +205,9 @@ class ListingController extends React.Component
       lock_buttons: no
       # table row context menu config
       row_context_menu: {}
+      # progress bar
+      progress: null
+      progress_label: null
 
   ###*
    * Translate the given i18n string
@@ -1112,12 +1115,14 @@ class ListingController extends React.Component
   ajax_do_transition_for: (uids, transition) ->
     # lock the buttons
     @setState lock_buttons: yes
+    # total number of numbers to process
+    total = uids.length
     # combined redirect URL of all transitions
     redirect_url = ""
     # always save pending items of the save_queue
     promise = @saveAjaxQueue().then (data) =>
       chain = Promise.resolve()
-      uids.forEach (uid) =>
+      uids.forEach (uid, index) =>
         # flush previous errors
         @flushErrors uid
         chain = chain.then () =>
@@ -1142,9 +1147,16 @@ class ListingController extends React.Component
             @update_existing_folderitems_with folderitems
             # toggle row loading off
             @toggleUIDLoading uid, off
+            # update the progress bar
+            count = index + 1
+            transition_title = transition.charAt(0).toUpperCase() + transition.slice(1)
+            label = "#{window._t(transition_title)}: #{count}/#{total}"
+            @set_progress count, total, label
 
       # all objects transitioned
       chain.then () =>
+        # reset progress counter
+        @reset_progress()
         # redirect
         if redirect_url
           return window.location.href = redirect_url
@@ -1658,6 +1670,24 @@ class ListingController extends React.Component
     return @state.folderitems.length
 
   ###*
+   * Set/Update progress bar
+  ###
+  set_progress: (progress=0, total=0, label=null) ->
+    if Number.isInteger(progress) and Number.isInteger(total)
+      percent = progress/total
+      if not Number.isFinite(percent)
+        percent = null
+      @setState progress: percent * 100, progress_label: label
+    else
+      @reset_progress()
+
+  ###*
+   * Reset progress bar
+  ###
+  reset_progress: ->
+    return @setState progress: null, progress_label: null
+
+  ###*
    * Toggles the loading animation on/off
    *
    * @param toggle {bool} true to show the loader, false otherwise
@@ -2151,6 +2181,13 @@ class ListingController extends React.Component
     return (
       <DndProvider backend={HTML5Backend}>
         <div className="listing-container">
+          {@state.progress and
+          <div className="progress">
+            <div className="progress-bar progress-bar-striped progress-bar-animated"
+                  style={{width: "#{@state.progress}%"}}>
+              {@state.progress_label or @state.progress + "%"}
+            </div>
+          </div>}
           <Modal className="modal fade" id="modal_#{@form_id}" />
           <Messages on_dismiss_message={@dismissMessage} id="messages" className="messages" messages={@state.messages} />
           {@state.loading and <div id="table-overlay"/>}
