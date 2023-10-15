@@ -1673,14 +1673,10 @@ class ListingController extends React.Component
    * Set/Update progress bar
   ###
   set_progress: (progress=0, total=0, label=null) ->
-    if Number.isInteger(progress) and Number.isInteger(total)
-      percent = (progress/total) * 100
-      # returns false for NaN and Infinite
-      if not Number.isInteger(percent)
-        percent = null
-      @setState progress: percent, progress_label: label
-    else
-      @reset_progress()
+    percent = (progress/total) * 100
+    if Number.isNaN(percent)
+      percent = null
+    @setState progress: percent, progress_label: label
 
   ###*
    * Reset progress bar
