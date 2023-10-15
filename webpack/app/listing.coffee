@@ -591,7 +591,7 @@ class ListingController extends React.Component
       if @state.fetch_transitions_on_select
         configurations.push({
           "id": "toggle_auto_fetch_transitions"
-          "title": "Disable auto fetch transtions"
+          "title": "Disable auto fetch transitions"
         })
       else
         configurations.push({
