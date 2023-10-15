@@ -72,7 +72,13 @@ class ListingTransitions(object):
         # instead of simply listing the transition ID in there:
         allowed_transition_ids = map(
             lambda t: t.get("id"), allowed_transitions)
-        return list(allowed_transition_ids)
+
+        # custom transitions are always allowed!
+        if allowed_transition_ids:
+            for transition in self.get_custom_transitions(uids):
+                allowed_transition_ids.append(transition.get("id"))
+
+        return list(set(allowed_transition_ids))
 
     def get_transitions(self, uids):
         """Returns a sorted list of possible transitions
