@@ -1,6 +1,7 @@
 2.5.0 (unreleased)
 ------------------
 
+- #131 Added FractionField for fraction-like results support
 - #130 Fix missing custom transition buttons
 - #127 Add Progress bar for sequential transitions
 - #123 Move logic to calculate possible listing transitions for selected UIDs into an own adapter
