@@ -76,7 +76,6 @@ class FractionField extends React.Component
     # may fail otherwise because the user is still typing
     fraction = value.replace /[<,>,=,\.,\/]*$/, ""
     # Validate if the entered value is a fraction
-    console.debug "FractionField::on_change: value=#{value} fraction=#{fraction}"
     if fraction and not @validate(fraction)
       value = value.replace fraction, ""
     # Set the sanitized value back to the field
