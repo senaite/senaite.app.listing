@@ -9,6 +9,11 @@ import RemarksField from "./RemarksField.coffee"
 ###
 class TableTransposedCell extends TableCell
 
+  constructor: (props) ->
+    super(props)
+    # Bind event handler to local context
+    @on_result_expand_click = @on_result_expand_click.bind @
+
   ###*
    * Get the transposed folderitem
    *
@@ -30,12 +35,33 @@ class TableTransposedCell extends TableCell
     return @props.item[@props.column_key]
 
   ###*
+   * Get interimfields of the item
+  ###
+  get_interimfields: ->
+    item = @get_item()
+    if not item
+      return []
+    return item.interimfields or []
+
+  ###*
+   * Check if the item has interimfields defined
+  ###
+  has_interimfields: ->
+    interims = @get_interimfields()
+    return interims.length > 0
+
+  ###*
    * Get the UID of the transposed item
   ###
   get_uid: ->
     item = @get_item()
     return null unless item
     return item.uid
+
+  get_resultfield_title: ->
+    # get the (translated) title of the results column
+    result_column = @props.columns["Result"]
+    return result_column.title or window._t("Result")
 
   ###*
    * Get the value within the transposed folderitem to render
@@ -174,7 +200,7 @@ class TableTransposedCell extends TableCell
         size: size
         before_css: "d-block"
         after_css: "d-inline"
-        field_css: "d-block mb-2"
+        field_css: "d-block mb-2 small"
         before: "<span class='text-secondary'>#{title}</span>"
         after: "<span class='text-secondary small pl-1'>#{unit}</span>"
 
@@ -312,13 +338,8 @@ class TableTransposedCell extends TableCell
       else
         result_field = @create_numeric_field props:props
 
-    # get the (translated) title of the results column
-    result_column = @props.columns["Result"]
-    result_column_title = result_column.title
-
     return (
       <div className="result">
-        <div className="text-secondary">{result_column_title}</div>
         <div>{@render_before_content()}</div>
         <div className="d-flex d-flex-row flex-nowrap">
           <div className="align-self-center">{result_field}</div>
@@ -326,6 +347,23 @@ class TableTransposedCell extends TableCell
           <div className="align-self-center">{@render_remarks_toggle()}</div>
         </div>
       </div>)
+
+  ###*
+   * Change the icon depending on the visible state of the interim fields
+   * NOTE: We could have also used the Bootstrap events:
+   *       https://getbootstrap.com/docs/4.6/components/collapse/#events
+   *       but this approach takes less boilerplate code
+  ###
+  on_result_expand_click: (event) ->
+    # switch the icon depending on the toggle state
+    el = event.currentTarget
+    id = el.getAttribute("href")
+    target = document.querySelector(id)
+    icon = el.querySelector("i")
+    if target.classList.contains "show"
+      icon.classList.replace "fa-minus-square", "fa-plus-square"
+    else
+      icon.classList.replace "fa-plus-square", "fa-minus-square"
 
   render: ->
     <td className={@get_css()}
@@ -341,7 +379,20 @@ class TableTransposedCell extends TableCell
          {@render_select_checkbox()}
         </div>
         <div className="card-body">
-          {@render_interims()}
+          <div className="text-secondary">
+            {@has_interimfields() and
+              <a onClick={@on_result_expand_click} className="text-decoration-none" data-toggle="collapse" href="#interim_#{@get_uid()}">
+                <i className="fas fa-plus-square"></i> {@get_resultfield_title()}
+              </a>
+            }
+            {not @has_interimfields() and @get_resultfield_title()}
+          </div>
+          {@has_interimfields() and
+            <div class="collapse p-1 my-2 border rounded" id="interim_#{@get_uid()}">
+              <div className="small text-secondary border-bottom mb-2">{window._t("Additional result values")}</div>
+              {@render_interims()}
+            </div>
+          }
           {@render_result()}
         </div>
         <div className="card-footer">
