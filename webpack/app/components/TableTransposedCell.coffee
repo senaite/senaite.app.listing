@@ -352,6 +352,7 @@ class TableTransposedCell extends TableCell
 
   ###*
    * Change the icon depending on the visible state of the interim fields
+   *
    * NOTE: We could have also used the Bootstrap events:
    *       https://getbootstrap.com/docs/4.6/components/collapse/#events
    *       but this approach takes less boilerplate code
@@ -383,14 +384,14 @@ class TableTransposedCell extends TableCell
         <div className="card-body">
           <div className="text-secondary">
             {@has_interimfields() and
-              <a onClick={@on_result_expand_click} className="text-decoration-none" data-toggle="collapse" href="#interim_#{@get_uid()}">
+              <a onClick={@on_result_expand_click} className="text-decoration-none" data-toggle="collapse" href="#interims_#{@get_uid()}">
                 <i className="fas fa-plus-square"></i> {@get_resultfield_title()}
               </a>
             }
             {not @has_interimfields() and @get_resultfield_title()}
           </div>
           {@has_interimfields() and
-            <div class="collapse p-1 my-2 border rounded" id="interim_#{@get_uid()}">
+            <div class="collapse p-1 my-2 border rounded" id="interims_#{@get_uid()}">
               <div className="small text-secondary border-bottom mb-2">{window._t("Additional result values")}</div>
               {@render_interims()}
             </div>
