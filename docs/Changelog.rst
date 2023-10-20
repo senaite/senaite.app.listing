@@ -1,6 +1,7 @@
 2.5.0 (unreleased)
 ------------------
 
+- #132 Improve transposed interims formatting
 - #131 Added FractionField for fraction-like results support
 - #130 Fix missing custom transition buttons
 - #127 Add Progress bar for sequential transitions
