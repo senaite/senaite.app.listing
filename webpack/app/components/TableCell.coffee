@@ -762,7 +762,7 @@ class TableCell extends React.Component
     uid = props.uid or @get_uid()
     title = props.title or @props.column.title or column_key
     options = item.choices[column_key] or []
-    duplicates = item.result_type == "multiselect_duplicates"
+    duplicates = @get_type() == "multiselect_duplicates"
 
     column = props.column or @get_column()
     item.help ?= {}
