@@ -1,6 +1,7 @@
 2.5.0 (unreleased)
 ------------------
 
+- #134 Fix APIError for non-UID listings
 - #133 Multiselect with duplicates support for interim fields
 - #132 Improve transposed interims formatting
 - #131 Added FractionField for fraction-like results support
