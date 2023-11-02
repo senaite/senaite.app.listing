@@ -129,6 +129,8 @@ class ListingTransitions(object):
 
         for uid in uids:
             obj = self.get_object_by_uid(uid)
+            if obj is None:
+                continue
             transitions = api.get_transitions_for(obj)
             if not transitions:
                 review_state = api.get_review_status(obj)
