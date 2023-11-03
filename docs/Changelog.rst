@@ -1,6 +1,7 @@
 2.5.0 (unreleased)
 ------------------
 
+- #135 Fix non-UID keyed folder items can not be pre-selected by the server
 - #134 Fix APIError for non-UID listings
 - #133 Multiselect with duplicates support for interim fields
 - #132 Improve transposed interims formatting
