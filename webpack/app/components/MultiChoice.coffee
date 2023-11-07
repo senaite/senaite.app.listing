@@ -6,12 +6,16 @@ class MultiChoice extends React.Component
   ###*
    * Multi-Choice Field for the Listing Table
    *
-   * A multi select field is identified by the column type "multichoice" in the listing
-   * view, e.g.  `self.columns = {"Result": {"type": "multichoice"}, ... }`
+   * A multi choice field is identified by the column type "multichoice" in the
+   * listing view, e.g.  `self.columns = {"Result": {"type": "multichoice"}, ... }`
    *
   ###
   constructor: (props) ->
     super(props)
+
+    # remember the initial value
+    @state =
+      value: props.defaultValue
 
     # bind event handler to the current context
     @on_change = @on_change.bind @
@@ -30,8 +34,10 @@ class MultiChoice extends React.Component
     uid = el.getAttribute("uid")
     # Extract the column_key attribute
     name = el.getAttribute("column_key") or el.name
-    # Prepare a list of UIDs
+    # Store the new values
     value = (input.value for input in checked)
+    @setState
+      value: value
 
     console.debug "MultiChoice::on_change: value=#{value}"
 
@@ -39,19 +45,45 @@ class MultiChoice extends React.Component
     if @props.update_editable_field
       @props.update_editable_field uid, name, value, @props.item
 
+  ###
+   * Converts the value to an array
+  ###
+  to_array: (value) ->
+    if not value
+      return []
+    if Array.isArray(value)
+      return value
+    parsed = JSON.parse value
+    if not Array.isArray(parsed)
+      # This might happen when a default value is set, e.g. 0
+      return [parsed]
+    return parsed
+
+
   ###*
-   * Select options builder
+   * Checkboxes list builder. Generates a list of checkboxes made of the
+   * options passed-in. The values are the ids of the options to be selected
+   * @param values {array} list of selected ResultValues
    * @param options {array} list of option objects, e.g.:
    *                        {"ResultText": ..., "ResultValue": ...}
   ###
-  build_options: ->
-    options = []
+  build_checkboxes: ->
+    checkboxes = []
+
+    # Convert the result to an array
+    values = @to_array @state.value
+
+    # filter out empties
+    values = values.filter (value) -> value isnt ""
+
+    # ensure safe comparison (strings)
+    values = values.map (value) -> value.toString()
 
     for option in @props.options
       value = option.ResultValue
       title = option.ResultText
-      selected = option.selected or no
-      options.push(
+      selected = value.toString() in values
+      checkboxes.push(
         <li key={value}>
           <input type="checkbox"
                  defaultChecked={selected}
@@ -65,13 +97,13 @@ class MultiChoice extends React.Component
                  {...@props.attrs}/> {title}
         </li>)
 
-    return options
+    return checkboxes
 
   render: ->
     <div className={@props.field_css or "multichoice"}>
       {@props.before and <span className={@props.before_css or "before_field"} dangerouslySetInnerHTML={{__html: @props.before}}></span>}
       <ul className="list-unstyled">
-        {@build_options()}
+        {@build_checkboxes()}
       </ul>
       {@props.after and <span className={@props.after_css or "after_field"} dangerouslySetInnerHTML={{__html: @props.after}}></span>}
     </div>
