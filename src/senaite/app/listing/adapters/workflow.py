@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from bika.lims import api
+from bika.lims.workflow import doActionFor
+from Products.CMFCore.WorkflowCore import WorkflowException
 from senaite.app.listing import logger
 from senaite.app.listing import senaiteMessageFactory as _
 from senaite.app.listing.interfaces import IListingWorkflowTransition
@@ -48,12 +50,21 @@ class ListingWorkflowTransition(object):
         oid = api.get_id(obj)
 
         try:
-            obj = api.do_transition_for(obj, transition)
+            # NOTE: We need to call `doActionFor` to ensure the reindexing
+            # happens *before* the Before- and AfterTransitionEventHandlers are
+            # called.
+            # This fixes e.g. that the sample progress bar is updated correctly
+            #
+            # obj = api.do_transition_for(obj, transition)
+            # obj.reindexObject()
+            succeed, message = doActionFor(obj, transition)
+            if not succeed:
+                raise WorkflowException(message)
         except ConflictError:
             self.error["message"] = _(
                 "A database conflict error occurred during transition "
                 "'{}' on '{}'. Please try again.".format(transition, oid))
-        except api.APIError as exc:
+        except (api.APIError, WorkflowException) as exc:
             # NOTE: We do not propagate back to the UI when the transition
             #       failed, because it is most of the time an expected
             #       side-effect. E.g. when an analysis with calculation
