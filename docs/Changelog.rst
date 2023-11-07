@@ -1,6 +1,7 @@
 2.5.0 (unreleased)
 ------------------
 
+- #137 Support default values for multi-choices type
 - #136 Fix server-side selected UIDs are not selected for new items after show more
 - #135 Fix non-UID keyed folder items can not be pre-selected by the server
 - #134 Fix APIError for non-UID listings
