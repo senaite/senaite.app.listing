@@ -50,11 +50,6 @@ class ListingWorkflowTransition(object):
         oid = api.get_id(obj)
 
         try:
-            # NOTE: We need to call `doActionFor` to ensure the reindexing
-            # happens *before* the Before- and AfterTransitionEventHandlers are
-            # called.
-            # This fixes e.g. that the sample progress bar is updated correctly
-            #
             # obj = api.do_transition_for(obj, transition)
             # obj.reindexObject()
             succeed, message = doActionFor(obj, transition)
