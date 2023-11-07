@@ -1,6 +1,7 @@
 2.5.0 (unreleased)
 ------------------
 
+- #138 Fix object reindexing in workflow transition adapter
 - #137 Support default values for multi-choices type
 - #135 Fix non-UID keyed folder items can not be pre-selected by the server
 - #134 Fix APIError for non-UID listings
