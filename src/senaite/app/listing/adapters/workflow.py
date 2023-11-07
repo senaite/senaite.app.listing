@@ -50,6 +50,7 @@ class ListingWorkflowTransition(object):
         oid = api.get_id(obj)
 
         try:
+            # https://github.com/senaite/senaite.app.listing/pull/138
             # obj = api.do_transition_for(obj, transition)
             # obj.reindexObject()
             succeed, message = doActionFor(obj, transition)
