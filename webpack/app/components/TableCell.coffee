@@ -690,23 +690,11 @@ class TableCell extends React.Component
     column_key = props.column_key or @get_column_key()
     item = props.item or @get_item()
     name = props.name or @get_name()
-
     value = props.value or @get_value()
-    # convert value to array
-    if value.length > 0
-      value = JSON.parse value
-
-    options = props.options or item.choices[column_key] or []
-    # mark selected options
-    options.forEach (option) ->
-      selected = no
-      if Array.isArray value
-        selected = value.indexOf(option.ResultValue) > -1
-      option.selected = selected
-
     formatted_value = props.formatted_value or @get_formatted_value()
     uid = props.uid or @get_uid()
     title = props.title or @props.column.title or column_key
+    options = props.options or item.choices[column_key] or []
 
     column = props.column or @get_column()
     item.help ?= {}
@@ -728,6 +716,7 @@ class TableCell extends React.Component
         uid={uid}
         item={item}
         name={fieldname}
+        defaultValue={value}
         column_key={column_key}
         title={title}
         help={help}
