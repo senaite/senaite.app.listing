@@ -880,6 +880,8 @@ class ListingController extends React.Component
 
     # the existing folderitems
     folderitems = @state.folderitems
+    # set of current selected UIDs
+    selected_uids = new Set(@state.selected_uids)
 
     me = this
     @setState
@@ -894,10 +896,18 @@ class ListingController extends React.Component
         me.toggle_loader off
         if data.folderitems.length > 0
           console.debug "Adding #{data.folderitems.length} more folderitems..."
+          # update selected UIDs from the server
+          for item in data.folderitems
+            if item.selected
+              selected_uids.add item.uid
           # append the new folderitems to the existing ones
           new_folderitems = folderitems.concat data.folderitems
+          # array of new selected UIDs
+          new_selected_uids = Array.from selected_uids
+
           me.setState
             folderitems: new_folderitems
+            selected_uids: new_selected_uids
     return true
 
   ###
