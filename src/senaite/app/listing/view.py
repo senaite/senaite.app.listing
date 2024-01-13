@@ -508,8 +508,11 @@ class ListingView(AjaxListingView):
         form_id = self.get_form_id()
         key = "{}_sort_on".format(form_id)
 
-        # The sort_on parameter from the request
-        return self.request.form.get(key, None)
+        # get the sort_on value either from the form (if manually changed) or
+        # from the initial catalog query
+        form_sort_on = self.request.form.get(key)
+        query_sort_on = self.contentFilter.get("sort_on")
+        return form_sort_on or query_sort_on
 
     def is_valid_sort_index(self, sort_on):
         """Checks if the sort_on index is capable for a sort_
