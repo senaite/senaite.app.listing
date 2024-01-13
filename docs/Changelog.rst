@@ -1,7 +1,7 @@
 2.6.0 (unreleased)
 ------------------
 
-- no changes yet
+- #139 Fix column sorting indicator is not initially displayed
 
 
 2.5.0 (2024-01-03)
