@@ -1,7 +1,7 @@
 2.6.0 (unreleased)
 ------------------
 
-- no changes yet
+- #140 Fix missing category for updated items
 
 
 2.5.0 (2024-01-03)
