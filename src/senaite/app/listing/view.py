@@ -219,8 +219,6 @@ class ListingView(AjaxListingView):
         self.total = 0
         self.limit_from = 0
         self.show_more = False
-        self.sort_on = "sortable_title"
-        self.sort_order = "ascending"
 
         # Internal cache for translated state titles
         self.state_titles = {}
