@@ -1989,6 +1989,9 @@ class ListingController extends React.Component
     # The current folderitems in our @state
     existing_folderitems = @group_by_uid @state.folderitems
 
+    # Update categories if needed
+    categories = @state.categories
+
     # We iterate through the existing folderitems and check if the items was updated.
     for uid, folderitem of existing_folderitems
 
@@ -2014,6 +2017,12 @@ class ListingController extends React.Component
 
     # Add updated items that were not yet in existing
     for uid, folderitem of updated_folderitems
+      category = folderitem.category
+      if category and category not in categories
+         categories.push category
+         # XXX unfortunately any sortKey sorting of the category get lost here
+         categories.sort()
+
       if uid of existing_folderitems
         # this item already exists, do nothing
         continue
@@ -2025,6 +2034,7 @@ class ListingController extends React.Component
     # updated the state with the new folderitems
     @setState
       folderitems: new_folderitems
+      categories: categories
 
   ###*
    * Update the location hash with the given object

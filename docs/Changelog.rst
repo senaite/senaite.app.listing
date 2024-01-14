@@ -1,6 +1,7 @@
 2.6.0 (unreleased)
 ------------------
 
+- #140 Fix missing category for updated items
 - #139 Fix column sorting indicator is not initially displayed
 
 
