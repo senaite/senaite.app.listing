@@ -2161,6 +2161,8 @@ class ListingController extends React.Component
       # workaround for string/number comparison
       if name == "pagesize"
         value = parseInt(value)
+      if name == "filter"
+        value = decodeURI(value)
       if value isnt @state[name]
         @state[name] = value
         reload = yes
