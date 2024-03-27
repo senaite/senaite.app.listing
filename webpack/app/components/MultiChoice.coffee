@@ -82,7 +82,7 @@ class MultiChoice extends React.Component
     for option in @props.options
       value = option.ResultValue
       title = option.ResultText
-      selected = value.toString() in values
+      selected = (value.toString() in values) or option.selected
       checkboxes.push(
         <li key={value}>
           <input type="checkbox"
