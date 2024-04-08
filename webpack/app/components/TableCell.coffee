@@ -563,6 +563,7 @@ class TableCell extends React.Component
     item = props.item or @get_item()
     name = props.name or @get_name()
     value = props.value or @get_value()
+    type = props.type or @get_type()
     formatted_value = props.formatted_value or @get_formatted_value()
     uid = props.uid or @get_uid()
     title = props.title or @props.column.title or column_key
@@ -613,6 +614,7 @@ class TableCell extends React.Component
         save_editable_field={@props.save_editable_field}
         tabIndex={@props.tabIndex}
         size={size}
+        type={type}
         min_date={min_date}
         max_date={max_date}
         min_time={min_time}
@@ -934,7 +936,7 @@ class TableCell extends React.Component
       field = field.concat @create_numeric_field()
     else if type == "string"
       field = field.concat @create_string_field()
-    else if type == "datetime"
+    else if type in ["date", "datetime"]
       field = field.concat @create_datetime_field()
     else if type == "fraction"
       field = field.concat @create_fraction_field()
