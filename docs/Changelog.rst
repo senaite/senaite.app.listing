@@ -1,6 +1,7 @@
 2.6.0 (unreleased)
 ------------------
 
+- #143 Allow date only fields in listings
 - #141 Fix non-latin string used as filter parameter sends as encoded string
 - #140 Fix missing category for updated items
 - #139 Fix column sorting indicator is not initially displayed
