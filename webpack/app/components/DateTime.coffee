@@ -4,11 +4,10 @@ import React from "react"
 class DateTime extends React.Component
 
   ###*
-   * DateTime field for the Listing Table
+   * Date/DateTime field for the Listing Table
    *
-   * A datetime field is identified by the column type "datetime" in the listing
+   * A date/datetime field is identified by the column type "date" or "datetime" in the listing
    * view, e.g.  `self.columns = {"Result": {"type": "datetime"}, ... }`
-   *
   ###
   constructor: (props) ->
     super(props)
@@ -19,10 +18,11 @@ class DateTime extends React.Component
       date_value: ""
       time_value: ""
 
-    if props.defaultValue
-      parts = props.defaultValue.split(" ")
-      @state["date_value"] = if parts.length > 0 then parts[0] else ""
-      @state["time_value"] = if parts.length > 1 then parts[1] else ""
+    value = props.defaultValue
+    if value
+      @state.value = @format_date_value(value)
+      @state.date_value = @format_date(value)
+      @state.time_value = @format_time(value)
 
     @dt_date = React.createRef()
     @dt_time = React.createRef()
@@ -38,7 +38,47 @@ class DateTime extends React.Component
   ###
   componentDidUpdate: (prevProps) ->
     if @props.defaultValue != prevProps.defaultValue
-      @setState value: @props.defaultValue
+      value = @props.defaultValue
+      @setState
+        value: @format_date_value(value)
+        date_value: @format_date(value)
+        time_value: @format_time(value)
+
+  ###*
+   * Format the date value
+   *
+   * @param d {string,object} date string or object
+   * @returns {string} date or datetime
+  ###
+  format_date_value: (d) ->
+      if @props.type == "date"
+        return @format_date(d)
+      return "#{@format_date(d)} #{@format_time(d)}"
+
+  ###*
+   * Format a date string/object to a date string with the format %Y-%m-%d
+   *
+   * @param d {string,object} date string or object
+   * @returns {string} date in the format %Y-%m-%d
+  ###
+  format_date: (d) ->
+      date = new Date(d)
+      year = date.getFullYear()
+      month = String(date.getMonth() + 1).padStart(2, "0")
+      day = String(date.getDate()).padStart(2, "0")
+      return "#{year}-#{month}-#{day}"
+
+  ###*
+   * Format a date string/object to a time string with the format %H:%M
+   *
+   * @param d {string,object} date string or object
+   * @returns {string} time in the format %H-%M
+  ###
+  format_time: (d) ->
+      date = new Date(d)
+      hours = String(date.getHours()).padStart(2, "0")
+      minutes = String(date.getMinutes()).padStart(2, "0")
+      return "#{hours}:#{minutes}"
 
   ###*
    * Event handler when the value changed of the datetime field
@@ -95,19 +135,21 @@ class DateTime extends React.Component
                min={@props.min_date}
                max={@props.max_date}
                {...@props.attrs}/>
-        <input type="time"
-               ref={@dt_time}
-               name="#{@props.name}-time"
-               className={@props.className}
-               title={@props.title}
-               disabled={@props.disabled}
-               required={@props.required}
-               onChange={@props.onChange or @on_change}
-               tabIndex={@props.tabIndex}
-               value={@state.time_value}
-               min={@props.min_time}
-               max={@props.max_time}
-               {...@props.attrs}/>
+        {@props.type == "datetime" and
+          <input type="time"
+                 ref={@dt_time}
+                 name="#{@props.name}-time"
+                 className={@props.className}
+                 title={@props.title}
+                 disabled={@props.disabled}
+                 required={@props.required}
+                 onChange={@props.onChange or @on_change}
+                 tabIndex={@props.tabIndex}
+                 value={@state.time_value}
+                 min={@props.min_time}
+                 max={@props.max_time}
+                 {...@props.attrs}/>
+        }
       </div>
       <input
         type="hidden"

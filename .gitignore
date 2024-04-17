@@ -18,3 +18,4 @@ var
 *.swp
 /downloads
 /src/senaite/app/listing/browser/static/bundles/senaite.app.listing.js.LICENSE.txt
+/.idea
