@@ -1,6 +1,7 @@
 2.6.0 (unreleased)
 ------------------
 
+- #144 Added TextField React component for listings
 - #143 Allow date only fields in listings
 - #141 Fix non-latin string used as filter parameter sends as encoded string
 - #140 Fix missing category for updated items
