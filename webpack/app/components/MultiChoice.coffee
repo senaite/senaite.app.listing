@@ -65,7 +65,7 @@ class MultiChoice extends React.Component
    * options passed-in. The values are the ids of the options to be selected
    * @param values {array} list of selected ResultValues
    * @param options {array} list of option objects, e.g.:
-   *                        {"ResultText": ..., "ResultValue": ...}
+   *                        {"ResultText": ..., "ResultValue": ..., "ResultDescription": ...}
   ###
   build_checkboxes: ->
     checkboxes = []
@@ -82,6 +82,7 @@ class MultiChoice extends React.Component
     for option in @props.options
       value = option.ResultValue
       title = option.ResultText
+      description = option.ResultDescription
       selected = value.toString() in values
       checkboxes.push(
         <li key={value}>
@@ -92,7 +93,7 @@ class MultiChoice extends React.Component
                  value={value}
                  onChange={@props.onChange or @on_change}
                  column_key={@props.column_key}
-                 title={@props.help or @props.title}
+                 title={description or @props.help or @props.title}
                  tabIndex={@props.tabIndex}
                  {...@props.attrs}/> {title}
         </li>)

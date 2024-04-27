@@ -51,7 +51,7 @@ class MultiSelect extends React.Component
    * Select options builder
    * @param selected_value the option to be selected
    * @param options {array} list of option objects, e.g.:
-   *                        {"ResultText": ..., "ResultValue": ...}
+   *                        {"ResultText": ..., "ResultValue": ..., "ResultDescription": ...}
    * @param exclude_values {array} list of option values to exclude
   ###
   build_options: (exclude_values) ->
@@ -74,8 +74,14 @@ class MultiSelect extends React.Component
     for option in props_options
       value = option.ResultValue
       title = option.ResultText
+      description = option.ResultDescription
       options.push(
-        <option value={value}>{title}</option>
+        <option
+            key={value}
+            description={description}
+            value={value}>
+          {title}
+        </option>
       )
 
     return options
@@ -100,7 +106,7 @@ class MultiSelect extends React.Component
    * with the option that matches with the value selected
    * @param values {array} list of selected ResultValues
    * @param options {array} list of option objects, e.g.:
-   *                        {"ResultText": ..., "ResultValue": ...}
+   *                        {"ResultText": ..., "ResultValue": ..., "ResultDescription": ...}
   ###
   build_selectors: ->
     # Convert the result to an array

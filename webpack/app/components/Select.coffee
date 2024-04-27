@@ -86,8 +86,10 @@ class Select extends React.Component
     for option in @props.options
       value = option.ResultValue
       title = option.ResultText
+      description = option.ResultDescription
       options.push(
         <option key={value}
+                title={description}
                 value={value}>
           {title}
         </option>)
