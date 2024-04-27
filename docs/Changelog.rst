@@ -1,6 +1,7 @@
 2.6.0 (unreleased)
 ------------------
 
+- #145 Allow Result Description for Select Fields
 - #144 Added TextField React component for listings
 - #143 Allow date only fields in listings
 - #141 Fix non-latin string used as filter parameter sends as encoded string
