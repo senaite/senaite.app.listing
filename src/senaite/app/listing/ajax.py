@@ -35,18 +35,15 @@ from senaite.app.listing.interfaces import IAjaxListingView
 from senaite.app.listing.interfaces import IChildFolderItems
 from senaite.app.listing.interfaces import IListingTransitions
 from senaite.app.listing.interfaces import IListingWorkflowTransition
-from senaite.app.listing.interfaces import ITransitionChain
 from senaite.app.listing.interfaces import ITransposedListingView
 from senaite.core.decorators import readonly_transaction
 from senaite.core.interfaces import IDataManager
 from senaite.core.registry import get_registry_record
 from six.moves.urllib.parse import urlencode
 from zope import event
-from zope.annotation.interfaces import IAnnotations
 from zope.component import getMultiAdapter
 from zope.component import queryAdapter
 from zope.component import queryMultiAdapter
-from zope.interface import alsoProvides
 from zope.interface import implementer
 from zope.lifecycleevent import modified
 from zope.publisher.interfaces import IPublishTraverse
@@ -543,7 +540,6 @@ class AjaxListingView(BrowserView):
 
         # Get the HTTP POST JSON Payload
         payload = self.get_json()
-        request = api.get_request()
 
         required = ["uids", "transition", "chained_uids"]
         if not all(map(lambda k: k in payload, required)):
@@ -553,15 +549,6 @@ class AjaxListingView(BrowserView):
         uids = payload.get("uids")
         chained_uids = payload.get("chained_uids")
         transition = payload.get("transition")
-
-        # store the transition chain as request annotation
-        # NOTE: This allows better logic handling if the transitions were
-        #       executed sequentially, i.e. 1 request per transitioned UID
-        if len(chained_uids) > 0:
-            annotations = IAnnotations(request)
-            annotations["transition_chain"] = chained_uids
-            # mark the request as transition chain
-            alsoProvides(ITransitionChain)
 
         errors = {}
         redirects = {}

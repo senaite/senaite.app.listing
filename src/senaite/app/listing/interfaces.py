@@ -103,8 +103,3 @@ class IListingTransitions(Interface):
     def get_transitions(uids):
         """Returns all possible transitions for the given UIDs
         """
-
-
-class ITransitionChain(Interface):
-    """Marker interface when processing multiple transitions
-    """
