@@ -1140,6 +1140,7 @@ class ListingController extends React.Component
           @toggleUIDLoading uid, on
           api_call = @api.do_action_for
             uids: [uid]
+            chained_uids: uids
             transition: transition
           api_call.then (data) =>
             # handle eventual errors

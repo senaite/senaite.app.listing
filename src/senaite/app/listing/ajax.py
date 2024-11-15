@@ -35,15 +35,18 @@ from senaite.app.listing.interfaces import IAjaxListingView
 from senaite.app.listing.interfaces import IChildFolderItems
 from senaite.app.listing.interfaces import IListingTransitions
 from senaite.app.listing.interfaces import IListingWorkflowTransition
+from senaite.app.listing.interfaces import ITransitionChain
 from senaite.app.listing.interfaces import ITransposedListingView
 from senaite.core.decorators import readonly_transaction
 from senaite.core.interfaces import IDataManager
 from senaite.core.registry import get_registry_record
 from six.moves.urllib.parse import urlencode
 from zope import event
+from zope.annotation.interfaces import IAnnotations
 from zope.component import getMultiAdapter
 from zope.component import queryAdapter
 from zope.component import queryMultiAdapter
+from zope.interface import alsoProvides
 from zope.interface import implementer
 from zope.lifecycleevent import modified
 from zope.publisher.interfaces import IPublishTraverse
@@ -540,18 +543,30 @@ class AjaxListingView(BrowserView):
 
         # Get the HTTP POST JSON Payload
         payload = self.get_json()
+        request = api.get_request()
 
-        required = ["uids", "transition"]
+        required = ["uids", "transition", "chained_uids"]
         if not all(map(lambda k: k in payload, required)):
             return self.json_message("Payload needs to provide the keys {}"
                                      .format(", ".join(required)), status=400)
 
         uids = payload.get("uids")
+        chained_uids = payload.get("chained_uids")
         transition = payload.get("transition")
+
+        # store the transition chain as request annotation
+        # NOTE: This allows better logic handling if the transitions were
+        #       executed sequentially, i.e. 1 request per transitioned UID
+        if len(chained_uids) > 0:
+            annotations = IAnnotations(request)
+            annotations["transition_chain"] = chained_uids
+            # mark the request as transition chain
+            alsoProvides(ITransitionChain)
 
         errors = {}
         redirects = {}
         affected_uids = set(uids)
+        failed_transitions = 0
 
         for uid in uids:
             obj = api.get_object_by_uid(uid)
@@ -568,10 +583,13 @@ class AjaxListingView(BrowserView):
                     interface=IListingWorkflowTransition)
 
             # execute the transition
-            adapter.do_transition(transition)
+            adapter.do_transition(transition,
+                                  chained_uids=chained_uids,
+                                  failed_transitions=failed_transitions)
 
             # collect errors
             if adapter.failed:
+                failed_transitions += 1
                 errors[uid] = adapter.get_error()
 
             # collect redirects

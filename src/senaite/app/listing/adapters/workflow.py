@@ -61,8 +61,15 @@ class ListingWorkflowTransition(object):
         """
         return [api.get_uid(self.context)]
 
-    def do_transition(self, transition):
+    def do_transition(self, transition,
+                      chained_uids,
+                      failed_transitions, **kw):
         """Execute the workflow transition
+
+        :param transition: Name of the transition to perform, e.g. 'verify'
+        :param chained_uids: All UIDs that are chained for this transition
+        :param failed_transitions: Number of previously failed transitions in
+                                   the chain of UIDs
         """
         obj = self.context
         oid = api.get_id(obj)
