@@ -11,6 +11,9 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const TerserPlugin = require('terser-webpack-plugin');
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
+const gitCmd = "git rev-list -1 HEAD -- `pwd`";
+let gitHash = childProcess.execSync(gitCmd).toString().substring(0, 7);
+
 const staticPath = path.resolve(__dirname, src_path);
 
 const devMode = process.env.mode == "development";
@@ -27,7 +30,7 @@ module.exports = {
     listing: "./listing.coffee"
   },
   output: {
-    filename: devMode ? "senaite.app.[name].js" : "senaite.app.[name].[chunkhash].js",
+    filename: devMode ? "senaite.app.[name].js" : `senaite.app.[name].${gitHash}.js`,
     path: path.resolve(staticPath, "bundles"),
     publicPath: "++plone++senaite.app.listing.static/bundles"
   },
@@ -83,7 +86,7 @@ module.exports = {
   plugins: [
     // https://webpack.js.org/plugins/mini-css-extract-plugin
     new MiniCssExtractPlugin({
-      filename: devMode ? "senaite.app.[name].css" : "senaite.app.[name].[chunkhash].css",
+      filename: devMode ? "senaite.app.[name].css" : `senaite.app.[name].${gitHash}.css`,
     }),
     // https://github.com/webpack-contrib/webpack-bundle-analyzer
     // new BundleAnalyzerPlugin(),
