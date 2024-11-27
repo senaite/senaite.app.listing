@@ -1,7 +1,7 @@
 2.6.0 (unreleased)
 ------------------
 
-- #147 Append chunkhash for static resources js and css in production mode
+- #147 Append last commit hash to js and css filenames in production mode
 - #146 Annotate the UID chain for sequential transitions on the request
 - #145 Allow Result Description for Select Fields
 - #144 Added TextField React component for listings
