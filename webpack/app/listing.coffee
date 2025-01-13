@@ -1856,6 +1856,11 @@ class ListingController extends React.Component
     # lookup child_uids from the folderitem
     if not child_uids
       by_uid = @group_by_uid()
+
+      # include folderitems of children to allow nested toggles
+      for uid, childitems of @state.children
+        by_uid = Object.assign({}, by_uid, @group_by_uid(childitems))
+
       child_uids = []
       if parent_uid of by_uid
         folderitem = by_uid[parent_uid]
