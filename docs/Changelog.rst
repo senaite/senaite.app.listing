@@ -1,6 +1,7 @@
 2.6.0 (unreleased)
 ------------------
 
+- #148 Fix rendering of nested folderitems
 - #147 Append last commit hash to js and css filenames in production mode
 - #146 Annotate the UID chain for sequential transitions on the request
 - #145 Allow Result Description for Select Fields
