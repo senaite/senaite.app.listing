@@ -74,6 +74,7 @@
   "dependencies": {
     "react-contexify": "^6.0.0",
     "react-dnd": "^16.0.1",
-    "react-dnd-html5-backend": "^16.0.1"
+    "react-dnd-html5-backend": "^16.0.1",
+    "uuid": "^11.0.5"
   }
 }
