@@ -12,14 +12,15 @@ const ToastNotification = ({ id, message, title, onClose }) => {
 
     return (
         <div ref={toastRef}
+             style={{width: "300px"}}
              className="toast fade show"
              role="alert"
              data-animation="true"
-             data-autohide="true"
+             data-autohide="false"
              data-delay="5000">
           <div className="toast-header">
-            <strong className="me-auto">{title}</strong>
-            <button type="button" className="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close" onClick={() => onClose(id)}>
+            <strong className="mr-auto">{title}</strong>
+            <button type="button" className="mr-2 mb-1 close" data-dismiss="toast" aria-label="Close" onClick={() => onClose(id)}>
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
