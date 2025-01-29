@@ -1084,7 +1084,7 @@ class ListingController extends React.Component
       .then (response) ->
         return response.json()
       .then (json) ->
-        me.showToast(json.message)
+        me.showToast(json.message, title=json.title)
       .catch((error) ->
         me.showToast("Action failed: ", error))
 
