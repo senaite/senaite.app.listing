@@ -1080,13 +1080,19 @@ class ListingController extends React.Component
   ###
   ajaxLoadActionURL: (url, reload=yes) ->
     me = this
+
+    # turn loader on
+    @toggle_loader on
+
     fetch(url, { method: "GET" })
       .then (response) ->
         return response.json()
       .then (json) ->
         me.showToast(json.message, title=json.title)
-      .catch((error) ->
-        me.showToast("Action failed: ", error))
+        me.toggle_loader off
+      .catch (error) ->
+        me.showToast("Action failed: ", error)
+        me.toggle_loader off
 
   ###*
    * Execute an action
