@@ -1088,6 +1088,7 @@ class ListingController extends React.Component
       .then (response) ->
         return response.json()
       .then (json) ->
+        if reload then me.fetch_folderitems()
         me.showToast(json.message, title=json.title)
         me.toggle_loader off
       .catch (error) ->
