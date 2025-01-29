@@ -1,6 +1,7 @@
 2.6.0 (unreleased)
 ------------------
 
+- #149 Allow ajax listing actions
 - #148 Fix rendering of nested folderitems
 - #147 Append last commit hash to js and css filenames in production mode
 - #146 Annotate the UID chain for sequential transitions on the request
