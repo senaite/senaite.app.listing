@@ -222,7 +222,7 @@ class TableTransposedCell extends TableCell
           fields = fields.concat @create_numeric_field props:props
         else if type == "string"
           fields = fields.concat @create_string_field props:props
-        else if type == "datetime"
+        else if type in ["date", "datetime"]
           fields = fields.concat @create_datetime_field props:props
         else if type == "fraction"
           fields = fields.concat @create_fraction_field props:props
@@ -335,7 +335,7 @@ class TableTransposedCell extends TableCell
         result_field = @create_numeric_field props:props
       else if type == "string"
         result_field = @create_string_field props:props
-      else if type == "datetime"
+      else if type in ["date", "datetime"]
         result_field = @create_datetime_field props:props
       else if type == "fraction"
         result_field = @create_fraction_field props:props

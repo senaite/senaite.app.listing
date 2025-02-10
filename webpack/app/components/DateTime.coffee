@@ -88,7 +88,11 @@ class DateTime extends React.Component
 
     # extract the current date and time values
     dt_date = @dt_date.current.value
-    dt_time = @dt_time.current.value
+
+    # if type is 'date', the time component is not rendered
+    dt_time = ""
+    if @dt_time.current isnt null
+      dt_time = @dt_time.current.value
 
     # ensure both components are set
     if dt_date and not dt_time
