@@ -1,6 +1,7 @@
 2.6.0 (unreleased)
 ------------------
 
+- #151 Rerender field components if the server value changed
 - #150 Fix date widget not working for `date` type component
 - #149 Allow ajax listing actions
 - #148 Fix rendering of nested folderitems
