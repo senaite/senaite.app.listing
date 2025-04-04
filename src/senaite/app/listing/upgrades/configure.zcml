@@ -5,6 +5,14 @@
 
   <genericsetup:upgradeStep
       title="Upgrade SENAITE APP LISTING"
+      description="Version 2.7.0"
+      source="2600"
+      destination="2700"
+      handler="senaite.app.listing.upgrades.handlers.to_2700"
+      profile="senaite.app.listing:default" />
+
+  <genericsetup:upgradeStep
+      title="Upgrade SENAITE APP LISTING"
       description="Version 2.6.0"
       source="2501"
       destination="2600"
