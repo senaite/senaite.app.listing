@@ -1,4 +1,4 @@
-2.6.0 (unreleased)
+2.6.0 (2025-04-04)
 ------------------
 
 - #151 Rerender field components if the server value changed
