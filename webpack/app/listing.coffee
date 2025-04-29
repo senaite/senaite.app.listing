@@ -323,7 +323,12 @@ class ListingController extends React.Component
   ###
   componentDidMount: ->
     window.addEventListener("popstate", @on_popstate, false);
-    @fetch_folderitems()
+    @fetch_folderitems().then (data) =>
+      # send a listing loaded event as soon as the folderitems are initially loaded
+      @trigger_event "listing:loaded",
+       form_id: @form_id
+       root_el: @root_el
+       data: data
     @root_el.addEventListener("click", @on_click)
 
   ###*
