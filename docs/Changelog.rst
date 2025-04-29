@@ -1,7 +1,7 @@
 2.7.0 (unreleased)
 ------------------
 
-- no changes yet
+- #153 Trigger custom event after folderitems are initially loaded
 
 
 2.6.0 (2025-04-04)
