@@ -39,12 +39,15 @@ document.addEventListener "DOMContentLoaded", ->
     window._t = (text, ...) -> text
 
   tables = document.getElementsByClassName "ajax-contents-table"
-  window.listings ?= {}
+
+  window.senaite ?= {}
+  window.senaite.core ?= {}
+  window.senaite.core.listings ?= {}
   for table in tables
     form_id = table.dataset.form_id
     controller = ReactDOM.render <ListingController root_el={table} />, table
     # Keep a reference to the listing
-    window.listings[form_id] = controller
+    window.senaite.core.listings[form_id] = controller
 
 
 ###*

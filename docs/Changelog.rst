@@ -1,6 +1,7 @@
 2.7.0 (unreleased)
 ------------------
 
+- #154 Change namespace for listings
 - #153 Trigger custom event after folderitems are initially loaded
 
 
