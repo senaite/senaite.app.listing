@@ -1124,6 +1124,9 @@ class ListingController extends React.Component
   loadModal: (url, selected_uids) ->
     el = $("#modal_#{@form_id}")
 
+    # make it draggable
+    el.draggable()
+
     # allow to override selected uids
     selected_uids ?= @state.selected_uids
 
