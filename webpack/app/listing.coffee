@@ -303,6 +303,87 @@ class ListingController extends React.Component
     @setState (prevState) ->
       toasts: prevState.toasts.filter (toast) -> toast.id isnt id
 
+
+  ###*
+   * Show element loader
+   *
+   * This method renders an overlay in the element with an animated loader
+   *
+   * @param element {Object} The loading element
+  ###
+  showLoader: (el = "body") ->
+    loader = $('<div class="loader-overlay d-flex justify-content-center align-items-center">
+                  <i class="fas fa-spinner fa-spin fa-3x text-primary"></i>
+                </div>')
+    loader.css
+      position: "absolute"
+      top: 0
+      left: 0
+      width: "100%"
+      height: "100%"
+      background: "rgba(255, 255, 255, 0.5)"
+      zIndex: 1051
+    # always hide any existing loaders first
+    @hideLoader()
+    $(el).css("position", "relative").append(loader)
+
+
+  ###*
+   * Hide element loader
+   *
+   * This method removes the loader from the modal
+   *
+   * @param element {Object} The loading element
+  ###
+  hideLoader: (el = "body") ->
+    $(el).find('.loader-overlay').remove()
+
+
+  ###*
+   * Set the cursor to loading
+   *
+   * This method changes the cursor to a loading cursor
+   *
+   * @param element {Object} The loading element
+  ###
+  setLoadingCursor: (el = "body") ->
+    $(el).css("cursor", "wait")
+
+
+  ###*
+   * Unset the cursor to loading
+   *
+   * This method changes the loading cursor back to normal
+   *
+   * @param element {Object} The loading element
+  ###
+  resetLoadingCursor: (el = "body") ->
+    $(el).css("cursor", "")
+
+
+  ###*
+   * Load a listing action asynchronously
+   *
+   * @param url {string} URL to load
+   * @param reload {boolean} reload folderitems if true
+  ###
+  ajaxLoadActionURL: (url, reload=yes) ->
+    me = this
+
+    # turn loader on
+    @toggle_loader on
+
+    fetch(url, { method: "GET" })
+      .then (response) ->
+        return response.json()
+      .then (json) ->
+        if reload then me.fetch_folderitems()
+        me.showToast(json.message, title=json.title)
+        me.toggle_loader off
+      .catch (error) ->
+        me.showToast("Action failed: ", error)
+        me.toggle_loader off
+
   ###*
    * Parameters to be sent in each Ajax POST request
    * @returns {object} current state values
@@ -605,6 +686,9 @@ class ListingController extends React.Component
   showRowMenu: (event, item) ->
     event.preventDefault()
 
+    # show a loading cursor
+    @setLoadingCursor(@root_el)
+
     # https://fkhadra.github.io/react-contexify/api/use-context-menu
     menu = useContextMenu({
       id: @row_context_menu_id
@@ -679,7 +763,9 @@ class ListingController extends React.Component
         new_state["transitions"] = []
 
       # set the new state and show the context menu afterwards
-      @setState new_state, ->
+      @setState new_state, =>
+        # show a loading cursor
+        @resetLoadingCursor(@root_el)
         # show the context menu
         menu.show(
           event: event
@@ -1038,6 +1124,9 @@ class ListingController extends React.Component
   loadModal: (url, selected_uids) ->
     el = $("#modal_#{@form_id}")
 
+    # make it draggable
+    el.draggable()
+
     # allow to override selected uids
     selected_uids ?= @state.selected_uids
 
@@ -1048,12 +1137,14 @@ class ListingController extends React.Component
     on_submit = (event) =>
       event.preventDefault()
       form = event.target
-      # always hide the modal on submit
-      el.modal("hide")
 
       if not form.action
         console.error "Modal form has no action defined"
         return
+
+      # show the loader in the modal content
+      content = el.find(".modal-content")
+      @showLoader(content)
 
       # process form submit
       fetch form.action,
@@ -1069,7 +1160,11 @@ class ListingController extends React.Component
           else
             @fetch_folderitems()
       .catch (error) =>
-        console.error(error)
+        @on_api_error(error)
+      .finally =>
+        # always hide the loader and modal
+        @hideLoader(content)
+        el.modal("hide")
 
     request = new Request(url)
     fetch(request)
@@ -1079,29 +1174,6 @@ class ListingController extends React.Component
         el.append(text)
         el.one "submit", on_submit
         el.modal("show")
-
-  ###*
-   * Load a listing action asynchronously
-   *
-   * @param url {string} URL to load
-   * @param reload {boolean} reload folderitems if true
-  ###
-  ajaxLoadActionURL: (url, reload=yes) ->
-    me = this
-
-    # turn loader on
-    @toggle_loader on
-
-    fetch(url, { method: "GET" })
-      .then (response) ->
-        return response.json()
-      .then (json) ->
-        if reload then me.fetch_folderitems()
-        me.showToast(json.message, title=json.title)
-        me.toggle_loader off
-      .catch (error) ->
-        me.showToast("Action failed: ", error)
-        me.toggle_loader off
 
   ###*
    * Execute an action
