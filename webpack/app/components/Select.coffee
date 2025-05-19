@@ -81,20 +81,15 @@ class Select extends React.Component
    *                        {"ResultText": ..., "ResultValue": ...}
   ###
   build_options: ->
-    options = []
-
-    for option in @props.options
+    @props.options.map (option, index) =>
       value = option.ResultValue
       title = option.ResultText
       description = option.ResultDescription
-      options.push(
-        <option key={value}
-                title={description}
-                value={value}>
-          {title}
-        </option>)
-
-    return options
+      <option key={"#{@props.name}-#{value || index}"}
+              title={description}
+              value={value}>
+        {title}
+      </option>
 
   render: ->
     <span className={@props.field_css or "form-group"}>
