@@ -7,6 +7,7 @@
 ###
 import React from "react"
 import ReactDOM from "react-dom"
+import { createRoot } from 'react-dom/client';
 import { v4 as uuidv4 } from "uuid"
 
 import ButtonBar from "./components/ButtonBar.coffee"
@@ -40,14 +41,16 @@ document.addEventListener "DOMContentLoaded", ->
 
   tables = document.getElementsByClassName "ajax-contents-table"
 
+  # ensure global namespace for listing controllers
+  # -> see componentDidMount for the reference
   window.senaite ?= {}
   window.senaite.core ?= {}
   window.senaite.core.listings ?= {}
+
   for table in tables
-    form_id = table.dataset.form_id
-    controller = ReactDOM.render <ListingController root_el={table} />, table
-    # Keep a reference to the listing
-    window.senaite.core.listings[form_id] = controller
+    if not table._reactRootContainer?
+      table._reactRootContainer = createRoot(table)
+    table._reactRootContainer.render <ListingController root_el={table} />
 
 
 ###*
@@ -414,6 +417,8 @@ class ListingController extends React.Component
        root_el: @root_el
        data: data
     @root_el.addEventListener("click", @on_click)
+    window.senaite.core.listings[@form_id] = @
+
 
   ###*
    * ReactJS event handler when the component unmounts
@@ -767,10 +772,12 @@ class ListingController extends React.Component
         # show a loading cursor
         @resetLoadingCursor(@root_el)
         # show the context menu
-        menu.show(
-          event: event
-          props:
-            item: item
+        queueMicrotask(() =>
+          menu.show(
+            event: event
+            props:
+              item: item
+          )
         )
 
   ###*

@@ -393,7 +393,7 @@ class TableTransposedCell extends TableCell
             {not @has_interimfields() and @get_resultfield_title()}
           </div>
           {@has_interimfields() and
-            <div class="collapse p-1 my-2 border rounded" id="interims_#{@get_uid()}">
+            <div className="collapse p-1 my-2 border rounded" id="interims_#{@get_uid()}">
               <div className="small text-secondary border-bottom mb-2">{window._t("Result variables")}</div>
               {@render_interims()}
             </div>

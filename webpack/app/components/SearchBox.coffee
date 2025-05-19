@@ -68,7 +68,7 @@ class SearchBox extends React.Component
 
     <div className="input-group input-group-sm">
       <input type="text"
-             autofocus="true"
+             autoFocus={true}
              className="form-control"
              ref={@search_input_field}
              defaultValue={@props.filter}
