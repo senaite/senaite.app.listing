@@ -1,6 +1,7 @@
 2.7.0 (unreleased)
 ------------------
 
+- #156 Update ReactJS 18 -> 19
 - #155 Show modal and context menu loaders
 - #154 Change namespace for listings
 - #153 Trigger custom event after folderitems are initially loaded
