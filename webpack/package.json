@@ -1,7 +1,6 @@
 {
   "name": "senaite.app.listing",
   "version": "2.7.0",
-  "description": "",
   "main": "app/senaite.app.listing.coffee",
   "scripts": {
     "build": "mode=production webpack",

@@ -36,23 +36,20 @@ module.exports = {
         test: /\.coffee$/,
         exclude: [/node_modules/],
         use: ["babel-loader", "coffee-loader"]
-      }, {
+      },
+      {
         test: /\.(js|jsx)$/,
         exclude: [/node_modules/],
         use: ["babel-loader"]
-      }, {
+      },
+      {
         test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, "css-loader"]
-      }
+        use: ["style-loader", "css-loader"]
+      },
     ]
   },
   // https://webpack.js.org/configuration/optimization
   optimization: {
-    splitChunks: {
-      chunks: "all",
-      name: false,
-    },
-    runtimeChunk: "single",
     minimize: isProd,
     minimizer: [
       // https://webpack.js.org/plugins/terser-webpack-plugin/
