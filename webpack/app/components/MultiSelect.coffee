@@ -71,20 +71,15 @@ class MultiSelect extends React.Component
       props_options.splice(0, 0, {ResultValue: "", ResultText: ""})
 
     # Add the options to the selection list
-    for option in props_options
+    props_options.map (option, index) =>
       value = option.ResultValue
       title = option.ResultText
       description = option.ResultDescription
-      options.push(
-        <option
-            key={value}
-            description={description}
-            value={value}>
-          {title}
-        </option>
-      )
-
-    return options
+      <option key={"#{@props.name}-#{value || index}"}
+              description={description}
+              value={value}>
+        {title}
+      </option>
 
   ###
    * Converts the value to an array
