@@ -6,7 +6,7 @@ class Modal extends React.Component
     super(props)
 
   render: ->
-    <div id="#{@props.id}" className="#{@props.className}" tabindex="-1">
+    <div id="#{@props.id}" className="#{@props.className}" tabIndex="-1">
     </div>
 
 export default Modal

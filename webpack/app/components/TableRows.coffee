@@ -154,7 +154,7 @@ class TableRows extends React.Component
       transposed = no
 
       # transposed items have no uid, so use the index instead
-      if uid is null
+      if not uid
         transposed = yes
         uid = item_index
 

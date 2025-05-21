@@ -147,7 +147,7 @@ class TableCells extends React.Component
    * Create an empty placeholder cell
   ###
   create_placeholder_cell: () ->
-    cell = (<td className="placeholder"></td>)
+    cell = (<td key="placeholder" className="placeholder"></td>)
     return cell
 
   ###*

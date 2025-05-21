@@ -1,28 +1,24 @@
-const src_path = "../src/senaite/app/listing/browser/static"
-
 const path = require("path");
 const webpack = require("webpack");
-const childProcess = require("child_process");
 
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+// const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const TerserPlugin = require('terser-webpack-plugin');
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
-const gitCmd = "git rev-list -1 HEAD -- `pwd`";
-let gitHash = childProcess.execSync(gitCmd).toString().substring(0, 7);
 
-const staticPath = path.resolve(__dirname, src_path);
-
-const devMode = process.env.mode == "development";
-const prodMode = process.env.mode == "production";
 const mode = process.env.mode;
+const isDev = mode === "development";
+const isProd = mode === "production";
+const staticPath = path.resolve(__dirname, "../src/senaite/app/listing/browser/static");
+
 console.log(`RUNNING WEBPACK IN '${mode}' MODE`);
 
-
 module.exports = {
+  // https://webpack.js.org/configuration/devtool
+  devtool: isDev ? "eval" : "source-map",
   // https://webpack.js.org/configuration/mode/#usage
   mode: mode,
   context: path.resolve(__dirname, "app"),
@@ -30,7 +26,7 @@ module.exports = {
     listing: "./listing.coffee"
   },
   output: {
-    filename: devMode ? "senaite.app.[name].js" : `senaite.app.[name].${gitHash}.js`,
+    filename: isDev ? "senaite.app.[name].js" : `senaite.app.[name].[contenthash].js`,
     path: path.resolve(staticPath, "bundles"),
     publicPath: "++plone++senaite.app.listing.static/bundles"
   },
@@ -40,19 +36,21 @@ module.exports = {
         test: /\.coffee$/,
         exclude: [/node_modules/],
         use: ["babel-loader", "coffee-loader"]
-      }, {
+      },
+      {
         test: /\.(js|jsx)$/,
         exclude: [/node_modules/],
         use: ["babel-loader"]
-      }, {
+      },
+      {
         test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, "css-loader"]
-      }
+        use: ["style-loader", "css-loader"]
+      },
     ]
   },
   // https://webpack.js.org/configuration/optimization
   optimization: {
-    minimize: prodMode,
+    minimize: isProd,
     minimizer: [
       // https://webpack.js.org/plugins/terser-webpack-plugin/
       new TerserPlugin({
@@ -86,7 +84,7 @@ module.exports = {
   plugins: [
     // https://webpack.js.org/plugins/mini-css-extract-plugin
     new MiniCssExtractPlugin({
-      filename: devMode ? "senaite.app.[name].css" : `senaite.app.[name].${gitHash}.css`,
+      filename: isDev ? "senaite.app.[name].css" : `senaite.app.[name].[contenthash].css`,
     }),
     // https://github.com/webpack-contrib/webpack-bundle-analyzer
     // new BundleAnalyzerPlugin(),
@@ -111,8 +109,6 @@ module.exports = {
   ],
   externals: {
     // https://webpack.js.org/configuration/externals
-    react: "React",
-    "react-dom": "ReactDOM",
     $: "jQuery",
     jquery: "jQuery"
   }
