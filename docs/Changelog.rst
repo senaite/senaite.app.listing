@@ -1,6 +1,7 @@
 2.7.0 (unreleased)
 ------------------
 
+- #157 Remove confirmation for invalidate transition
 - #156 Update ReactJS 18 -> 19
 - #155 Show modal and context menu loaders
 - #154 Change namespace for listings
