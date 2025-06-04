@@ -45,7 +45,6 @@ from zope.component import getMultiAdapter
 from zope.component import queryAdapter
 from zope.component import queryMultiAdapter
 from zope.interface import implementer
-from zope.lifecycleevent import modified
 from zope.publisher.interfaces import IPublishTraverse
 
 
@@ -344,9 +343,6 @@ class AjaxListingView(BrowserView):
 
         # reindex the objects
         map(lambda obj: obj.reindexObject(), updated_objects)
-
-        # notify that the objects were modified
-        map(modified, updated_objects)
 
         return updated_objects
 
