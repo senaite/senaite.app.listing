@@ -2,6 +2,7 @@
 ------------------
 
 - #157 Remove confirmation for invalidate transition
+- #158 Fix 2 snapshots created for DX contents on "Save"
 - #156 Update ReactJS 18 -> 19
 - #155 Show modal and context menu loaders
 - #154 Change namespace for listings
