@@ -1,6 +1,7 @@
 2.7.0 (unreleased)
 ------------------
 
+- #160 Fix detection limit result is flushed on edit
 - #159 Update sort_order and sort_on according to the review state contentFilter on change
 - #157 Remove confirmation for invalidate transition
 - #158 Fix 2 snapshots created for DX contents on "Save"
