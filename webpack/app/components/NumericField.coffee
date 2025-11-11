@@ -98,8 +98,11 @@ class NumericField extends React.Component
     #
     # New in version 2.3: Allow exponential notation
     # Valid: 1e-5 for 0.00005; 1e5 for 10000; 1.35e2 for 135
+    #
+    # Allow spaces between operators and numbers (e.g., "< 4.958")
     regex = new RegExp(
         '(^[-,<,>]?)' +
+        '\\s*' +
         '([-,\+]?\\d*)' +
         '([e,E][-,\+]?\\d*|[\.,\,]?[0-9]+?[e,E][-,\+]?\\d*|[\.,\,]?\\d*)' +
         '(.*)')
@@ -123,8 +126,8 @@ class NumericField extends React.Component
    * @param value {string} the value
   ###
   validate: (value) ->
-    # strip off detection limits
-    number = value.replace /(^[<,>]?)(.*)/, "$2"
+    # strip off detection limits and spaces
+    number = value.replace /(^[<,>]?)\s*(.*)/, "$2"
     return not Number.isNaN(Number(number))
 
 
