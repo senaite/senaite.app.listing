@@ -255,3 +255,108 @@ selected elements from multiselect
 /* Drag&Drop behavior */
 .ajax-contents-table tr.dragging { opacity: 0; }
 .ajax-contents-table td.dnd { cursor: move; }
+
+/* Column Filter Styles */
+.ajax-contents-table th .column-filter-toggle {
+  padding: 0 0.25rem;
+  margin-left: 0.25rem;
+  opacity: 0.4;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 0.75em;
+  vertical-align: middle;
+}
+.ajax-contents-table th .column-filter-toggle:hover {
+  opacity: 0.8;
+}
+.ajax-contents-table th .column-filter-toggle.active {
+  opacity: 1;
+  color: #007bff;
+}
+.ajax-contents-table tr.column-filter-row td {
+  padding: 0.25rem 0.5rem;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+.ajax-contents-table tr.column-filter-row td.empty {
+  background-color: transparent;
+  border-bottom: none;
+}
+.ajax-contents-table tr.column-filter-row .input-group {
+  flex-wrap: nowrap;
+}
+.ajax-contents-table tr.column-filter-row input.form-control,
+.ajax-contents-table tr.column-filter-row select.form-control {
+  min-width: 80px;
+}
+.ajax-contents-table tr.column-filter-row input[type="date"].form-control {
+  min-width: 130px;
+}
+.ajax-contents-table tr.column-filter-row input:disabled,
+.ajax-contents-table tr.column-filter-row select:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+}
+.ajax-contents-table tr.column-filter-row select.form-control {
+  padding-right: 1.5rem;
+  appearance: auto;
+}
+.ajax-contents-table tr.column-filter-row .input-group-append .btn {
+  border-color: #ced4da;
+}
+/* Ensure searchable-select input has correct border radius in input-group */
+.ajax-contents-table tr.column-filter-row .input-group > .searchable-select > .form-control {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* Searchable Select Styles */
+.searchable-select {
+  position: relative;
+  flex: 1;
+}
+.searchable-select input.form-control {
+  width: 100%;
+}
+.searchable-select-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 250px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ced4da;
+  border-top: none;
+  border-radius: 0 0 0.25rem 0.25rem;
+  z-index: 1050;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.searchable-select-option {
+  padding: 0.375rem 0.75rem;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.searchable-select-option:hover,
+.searchable-select-option.highlighted {
+  background-color: #e9ecef;
+}
+.searchable-select-option.selected {
+  background-color: #007bff;
+  color: white;
+}
+.searchable-select-option.selected.highlighted {
+  background-color: #0056b3;
+}
+.searchable-select-hint {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  color: #6c757d;
+  background: #f8f9fa;
+  border: 1px solid #ced4da;
+  border-top: 1px dashed #dee2e6;
+  text-align: center;
+}
