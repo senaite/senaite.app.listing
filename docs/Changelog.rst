@@ -1,6 +1,7 @@
 2.7.0 (unreleased)
 ------------------
 
+- #161 Add column filtering
 - #160 Fix detection limit result is flushed on edit
 - #159 Update sort_order and sort_on according to the review state contentFilter on change
 - #157 Remove confirmation for invalidate transition
