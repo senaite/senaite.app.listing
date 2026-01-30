@@ -18,7 +18,7 @@ import Messages from "./components/Messages.coffee"
 import Modal from "./components/Modal.coffee"
 import Pagination from "./components/Pagination.coffee"
 import SearchBox from "./components/SearchBox.coffee"
-import Table from "./components/Table.coffee"
+import Table from "./components/Table.js"
 import TableColumnConfig from "./components/TableColumnConfig.coffee"
 import ToastNotification from "./components/Toast.js"
 
