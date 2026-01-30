@@ -20,6 +20,7 @@
 
 import collections
 import copy
+import json
 import re
 import time
 from functools import cmp_to_key
@@ -498,6 +499,21 @@ class ListingView(AjaxListingView):
         sort_order = filter(lambda order: order in allowed, sort_order)
         return sort_order and sort_order[0] or "descending"
 
+    def get_column_filters(self):
+        """Get column filters from request
+
+        Returns a dictionary of {column_key: filter_value}
+        """
+        form_id = self.get_form_id()
+        key = "{}_column_filters".format(form_id)
+        filters_json = self.request.form.get(key, "{}")
+        if isinstance(filters_json, dict):
+            return filters_json
+        try:
+            return json.loads(filters_json)
+        except (ValueError, TypeError):
+            return {}
+
     def get_sort_on(self):
         """Get the sort_on criteria from the request
 
@@ -634,7 +650,103 @@ class ListingView(AjaxListingView):
         # set the sort_order criteria
         query["sort_order"] = self.get_sort_order()
 
+        # Apply column filters to the query
+        query = self.apply_column_filters(query)
+
         logger.info(u"ListingView::get_catalog_query: query={}".format(query))
+        return query
+
+    def apply_column_filters(self, query):
+        """Apply column filters to the catalog query
+
+        :param query: The catalog query dictionary
+        :returns: Modified catalog query with column filters applied
+        """
+        column_filters = self.get_column_filters()
+        if not column_filters:
+            return query
+
+        catalog = self.get_catalog()
+        catalog_indexes = catalog.indexes()
+
+        for column_key, filter_value in column_filters.items():
+            if not filter_value:
+                continue
+
+            # Ensure filter_value is properly encoded for catalog queries
+            # ZCatalog in Python 2 expects UTF-8 encoded byte strings
+            if isinstance(filter_value, six.text_type):
+                filter_value = filter_value.encode("utf-8")
+
+            # Get the column definition
+            column = self.columns.get(column_key, {})
+
+            # Use filter_index if defined, otherwise apply default mapping,
+            # otherwise fall back to index
+            orig_index = column.get("index")
+            index_name = column.get("filter_index")
+
+            # Apply default mapping for common indexes
+            if not index_name and orig_index in self.FILTER_INDEX_MAPPING:
+                index_name = self.FILTER_INDEX_MAPPING[orig_index][0]
+
+            index_name = index_name or orig_index
+
+            if not index_name:
+                logger.debug(
+                    u"ListingView::apply_column_filters: No index for "
+                    u"column '%s'", column_key)
+                continue
+
+            if index_name not in catalog_indexes:
+                logger.debug(
+                    u"ListingView::apply_column_filters: Index '%s' not in "
+                    u"catalog", index_name)
+                continue
+
+            # Get the index type to determine how to query
+            index = catalog.Indexes.get(index_name)
+            index_type = index.__class__.__name__
+
+            # Apply filter based on index type
+            if index_type in ("ZCTextIndex", "TextIndex"):
+                # Text indexes support wildcard search
+                query[index_name] = "*{}*".format(filter_value)
+            elif index_type in ("DateIndex", "DateRecurringIndex"):
+                # Date indexes expect a date value or range
+                try:
+                    # Parse the date and create a range for the whole day
+                    date = DateTime.DateTime(filter_value)
+                    # Query for the entire day
+                    start = DateTime.DateTime(
+                        date.year(), date.month(), date.day(), 0, 0, 0)
+                    end = DateTime.DateTime(
+                        date.year(), date.month(), date.day(), 23, 59, 59)
+                    query[index_name] = {"query": [start, end], "range": "min:max"}
+                except Exception as e:
+                    logger.debug(
+                        u"ListingView::apply_column_filters: Invalid date "
+                        u"'%s' for index '%s': %s", filter_value, index_name,
+                        str(e))
+                    continue
+            elif index_type == "BooleanIndex":
+                # Boolean indexes expect True/False
+                bool_value = filter_value.lower() in ("true", "yes", "1")
+                query[index_name] = bool_value
+            elif index_type == "FieldIndex":
+                # Field indexes: try exact match
+                query[index_name] = filter_value
+            elif index_type == "KeywordIndex":
+                # Keyword indexes: search in list
+                query[index_name] = filter_value
+            else:
+                # Default: try exact match to be safe
+                query[index_name] = filter_value
+
+            logger.info(
+                u"ListingView::apply_column_filters: Applied filter "
+                u"%s=%s (index_type=%s)", index_name, filter_value, index_type)
+
         return query
 
     def make_regex_for(self, searchterm, ignorecase=True):

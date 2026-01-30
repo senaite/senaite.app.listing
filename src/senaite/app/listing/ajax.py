@@ -18,11 +18,13 @@
 # Copyright 2018-2025 by it's authors.
 # Some rights reserved, see README and LICENSE.
 
+import copy
 import inspect
 import json
 
 import six
 from bika.lims import api
+from bika.lims import senaiteMessageFactory as _
 from bika.lims.browser import BrowserView
 from plone.memoize import view
 from Products.Archetypes.event import ObjectEditedEvent
@@ -37,6 +39,7 @@ from senaite.app.listing.interfaces import IListingTransitions
 from senaite.app.listing.interfaces import IListingWorkflowTransition
 from senaite.app.listing.interfaces import ITransposedListingView
 from senaite.core.decorators import readonly_transaction
+from senaite.core.i18n import translate as t
 from senaite.core.interfaces import IDataManager
 from senaite.core.registry import get_registry_record
 from six.moves.urllib.parse import urlencode
@@ -55,6 +58,17 @@ class AjaxListingView(BrowserView):
     The main purpose of this class is to provide a JSON API endpoint for the
     ReactJS based listing table.
     """
+
+    # Mapping for indexes that need different filter indexes
+    # Format: {sort_index: (filter_index, filter_attr)}
+    # - filter_index: The catalog index to query (e.g., FieldIndex)
+    # - filter_attr: The brain attribute to extract values from
+    # Note: Use FieldIndex (title) not ZCTextIndex (Title) for exact matching
+    FILTER_INDEX_MAPPING = {
+        "sortable_title": ("title", "Title"),
+        "getSortableTitle": ("title", "Title"),
+        "sortable_id": ("getId", "getId"),
+    }
     contents_table_template = ViewPageTemplateFile(
         "templates/contents_table.pt")
     contents_table_template_view = ViewPageTemplateFile(
@@ -151,8 +165,22 @@ class AjaxListingView(BrowserView):
     @translate
     def get_columns(self):
         """Returns the `columns` dictionary of the view
+
+        Enriches columns with index type information for filtering
         """
-        return self.columns
+        columns = copy.deepcopy(self.columns)
+        catalog = self.get_catalog()
+        catalog_indexes = catalog.indexes()
+
+        for key, column in columns.items():
+            index_name = column.get("index")
+            if index_name and index_name in catalog_indexes:
+                index = catalog.Indexes.get(index_name)
+                column["index_type"] = index.__class__.__name__
+            else:
+                column["index_type"] = None
+
+        return columns
 
     @translate
     def get_review_states(self):
@@ -697,6 +725,155 @@ class AjaxListingView(BrowserView):
         """Returns the config of the listing
         """
         return self.get_listing_config()
+
+    @readonly_transaction
+    @set_application_json_header
+    @returns_safe_json
+    @inject_runtime
+    def ajax_get_index_values(self):
+        """Get unique values for a catalog index
+
+        Queries the catalog with the listing's contentFilter and extracts
+        unique values for the specified column. This ensures only relevant
+        values for the current listing context are returned.
+
+        Required POST JSON Payload:
+        :column_key: The column key to get index values for
+
+        Column definition supports:
+        :index: The catalog index for sorting
+        :filter_index: Override index for filtering (optional)
+        :filter_attr: Brain attribute to extract values from (optional)
+        """
+        # Get the HTTP POST JSON Payload
+        payload = self.get_json()
+        column_key = payload.get("column_key")
+
+        if not column_key:
+            return self.json_message(
+                "column_key is required", status=400)
+
+        # Get the column definition
+        column = self.columns.get(column_key, {})
+
+        # Get the filter index (or fall back to sort index)
+        orig_index = column.get("index")
+        filter_index = column.get("filter_index")
+
+        # Apply default mapping for common indexes like sortable_title -> title
+        if not filter_index and orig_index in self.FILTER_INDEX_MAPPING:
+            filter_index = self.FILTER_INDEX_MAPPING[orig_index][0]
+
+        filter_index = filter_index or orig_index
+
+        if not filter_index:
+            return {"values": [], "index_type": None}
+
+        catalog = self.get_catalog()
+        catalog_indexes = catalog.indexes()
+
+        if filter_index not in catalog_indexes:
+            return {"values": [], "index_type": None}
+
+        # Get the index
+        index = catalog.Indexes.get(filter_index)
+        index_type = index.__class__.__name__
+
+        values = []
+
+        # Get unique values based on index type
+        if index_type == "BooleanIndex":
+            values = [
+                {"value": "true", "title": t(_("Yes"))},
+                {"value": "false", "title": t(_("No"))},
+            ]
+        elif index_type in ("DateIndex", "DateRecurringIndex"):
+            # Date indexes - no predefined values, frontend uses date picker
+            pass
+        else:
+            # Query catalog with contentFilter to get relevant values only
+            values = self.get_unique_column_values(column_key, column)
+
+        return {
+            "values": values,
+            "index_type": index_type,
+            "index_name": filter_index,
+        }
+
+    def get_unique_column_values(self, column_key, column):
+        """Extract unique values for a column from catalog brains
+
+        Uses the listing's contentFilter to query only relevant items.
+
+        :param column_key: The column key
+        :param column: The column definition dict
+        :returns: List of {value, title} dicts
+        """
+        # Build base query from contentFilter
+        query = copy.deepcopy(self.contentFilter)
+
+        # Add review_state filter if applicable
+        if self.review_state:
+            for k, v in self.review_state.get("contentFilter", {}).items():
+                query[k] = v
+
+        # Determine which index and attribute to use
+        # Priority: explicit column config > default mapping > column index
+        orig_index = column.get("index")
+        filter_index = column.get("filter_index")
+        filter_attr = column.get("filter_attr")
+
+        # Apply default mapping for common indexes like sortable_title -> title
+        if not filter_index and not filter_attr and orig_index \
+           in self.FILTER_INDEX_MAPPING:
+            mapping = self.FILTER_INDEX_MAPPING[orig_index]
+            filter_index = mapping[0]
+            filter_attr = mapping[1]
+
+        # Fall back to original index if no mapping
+        filter_index = filter_index or orig_index
+        attr_name = filter_attr or filter_index or column_key
+
+        catalog = self.get_catalog()
+        metadata_columns = catalog.schema()
+
+        # Check if the attribute is available as metadata
+        if attr_name not in metadata_columns:
+            # Fall back to using index.uniqueValues() if available
+            # Note: ZCTextIndex raises NotImplementedError for uniqueValues()
+            index = catalog.Indexes.get(filter_index)
+            if hasattr(index, "uniqueValues"):
+                try:
+                    unique_vals = list(index.uniqueValues())
+                    unique_vals = sorted([v for v in unique_vals
+                                          if v is not None and v != ""])
+                    return [{"value": v, "title": str(v)} for v in unique_vals]
+                except NotImplementedError:
+                    pass
+            return []
+
+        # Query catalog and extract unique values from brains
+        try:
+            brains = catalog(query)
+        except Exception:
+            return []
+
+        unique_values = set()
+        for brain in brains:
+            try:
+                value = getattr(brain, attr_name, None)
+                if value is None or value == "":
+                    continue
+                # Handle callable attributes
+                if callable(value):
+                    value = value()
+                unique_values.add(value)
+            except Exception:
+                continue
+
+        # Sort and convert to list of dicts
+        sorted_values = sorted(unique_values)
+        return [{"value": v, "title": str(v)} for v in sorted_values]
 
     def notify_edited(self, obj):
         """Notify object edited event
