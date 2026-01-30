@@ -1,6 +1,6 @@
 import React from "react";
 import ColumnFilterRow from "./ColumnFilterRow.js";
-import TableHeaderRow from "./TableHeaderRow.coffee";
+import TableHeaderRow from "./TableHeaderRow.js";
 import TableRows from "./TableRows.coffee";
 
 
