@@ -18,7 +18,7 @@ import Messages from "./components/Messages.coffee"
 import Modal from "./components/Modal.coffee"
 import Pagination from "./components/Pagination.coffee"
 import SearchBox from "./components/SearchBox.coffee"
-import Table from "./components/Table.coffee"
+import Table from "./components/Table.js"
 import TableColumnConfig from "./components/TableColumnConfig.coffee"
 import ToastNotification from "./components/Toast.js"
 
@@ -97,6 +97,9 @@ class ListingController extends React.Component
     @on_row_order_change = @on_row_order_change.bind @
     @on_click = @on_click.bind @
     @removeToast = @removeToast.bind @
+    @toggleColumnFilter = @toggleColumnFilter.bind @
+    @onColumnFilterChange = @onColumnFilterChange.bind @
+    @onColumnFilterSubmit = @onColumnFilterSubmit.bind @
 
     # root element
     @root_el = @props.root_el
@@ -129,6 +132,11 @@ class ListingController extends React.Component
     @sort_on = @api.get_url_parameter("sort_on")
     @sort_order = @api.get_url_parameter("sort_order")
     @review_state = @api.get_url_parameter("review_state") or @default_review_state
+
+    # column filter parameters from URL
+    @column_filters = @parse_json(
+      @api.get_url_parameter("column_filters"), {})
+    @active_column_filters = Object.keys(@column_filters)
 
     # last selected item
     @last_select = null
@@ -220,6 +228,10 @@ class ListingController extends React.Component
       progress_label: null
       # toast notifications
       toasts: []
+      # column filters: {columnKey: filterValue}
+      column_filters: @column_filters or {}
+      # active column filters (which filters are shown)
+      active_column_filters: @active_column_filters or []
 
   ###*
    * Translate the given i18n string
@@ -399,7 +411,8 @@ class ListingController extends React.Component
       "sort_order": @state.sort_order
       "pagesize": @state.pagesize
       "limit_from": @state.limit_from
-      "selected_uids": @state.selected_uids,
+      "selected_uids": @state.selected_uids
+      "column_filters": @state.column_filters
 
     console.debug("Request Options=", options)
     return options
@@ -1005,6 +1018,76 @@ class ListingController extends React.Component
       sort_on: sort_on
       sort_order: sort_order
       pagesize: @get_item_count() # keep the current number of items on sort
+      limit_from: 0
+    return true
+
+  ###*
+   * Toggle visibility of column filter input
+   *
+   * @param column_key {string} The column key to toggle filter for
+   * @returns {bool} true
+  ###
+  toggleColumnFilter: (column_key) ->
+    console.debug "ListingController::toggleColumnFilter: key=#{column_key}"
+
+    # Get current active filters
+    active_filters = [].concat @state.active_column_filters
+
+    # Check if the filter is already active
+    index = active_filters.indexOf column_key
+
+    if index > -1
+      # Remove the filter
+      active_filters.splice index, 1
+      # Also clear the filter value
+      column_filters = Object.assign {}, @state.column_filters
+      delete column_filters[column_key]
+      @setState
+        active_column_filters: active_filters
+        column_filters: column_filters
+      , =>
+        # Refetch if there was a filter value
+        if @state.column_filters[column_key]
+          @fetch_folderitems()
+    else
+      # Add the filter
+      active_filters.push column_key
+      @setState
+        active_column_filters: active_filters
+
+    return true
+
+  ###*
+   * Handle column filter value change
+   *
+   * @param column_key {string} The column key
+   * @param value {string} The filter value
+   * @returns {bool} true
+  ###
+  onColumnFilterChange: (column_key, value) ->
+    console.debug "ListingController::onColumnFilterChange: " +
+                  "key=#{column_key} value=#{value}"
+
+    column_filters = Object.assign {}, @state.column_filters
+    if value
+      column_filters[column_key] = value
+    else
+      delete column_filters[column_key]
+
+    @setState
+      column_filters: column_filters
+
+    return true
+
+  ###*
+   * Submit column filters and refetch results
+   *
+   * @returns {bool} true
+  ###
+  onColumnFilterSubmit: () ->
+    console.debug "ListingController::onColumnFilterSubmit"
+    @set_state
+      pagesize: @pagesize  # reset to initial pagesize on filter
       limit_from: 0
     return true
 
@@ -2205,6 +2288,14 @@ class ListingController extends React.Component
         continue
       name = @api.to_form_name key
       params = params.concat "#{name}=#{value}"
+
+    # Add column_filters as JSON if present
+    column_filters = options.column_filters or {}
+    if Object.keys(column_filters).length > 0
+      name = @api.to_form_name "column_filters"
+      encoded = encodeURIComponent(JSON.stringify(column_filters))
+      params = params.concat "#{name}=#{encoded}"
+
     hash = params.join("&")
     location.hash = "#?#{hash}"
 
@@ -2318,6 +2409,7 @@ class ListingController extends React.Component
   on_popstate: (event) ->
     console.debug "°°° ListingController::on_popstate:event=", event
     params = @api.parse_hash location.hash
+    reload = no
     for idx, param of params
       [key, value] = param.split("=")
       # skip parameters that does not belong to our listing
@@ -2331,6 +2423,15 @@ class ListingController extends React.Component
         value = parseInt(value)
       if name == "filter"
         value = decodeURI(value)
+      # Handle column_filters as JSON
+      if name == "column_filters"
+        value = decodeURIComponent(value)
+        try
+          value = JSON.parse(value)
+          # Also update active_column_filters
+          @state.active_column_filters = Object.keys(value)
+        catch
+          value = {}
       if value isnt @state[name]
         @state[name] = value
         reload = yes
@@ -2428,6 +2529,7 @@ class ListingController extends React.Component
                 on_menu_item_click={@handleRowMenuAction} />
               <Table
                 className="contentstable table table-hover small"
+                form_id={@form_id}
                 allow_edit={@state.allow_edit}
                 on_header_column_click={@sortBy}
                 on_select_checkbox_checked={@on_select_checkbox_checked}
@@ -2469,6 +2571,12 @@ class ListingController extends React.Component
                 move_row={@moveRow}
                 allow_row_reorder={@state.allow_row_reorder}
                 on_row_order_change={@on_row_order_change}
+                column_filters={@state.column_filters}
+                active_column_filters={@state.active_column_filters}
+                on_filter_toggle={@toggleColumnFilter}
+                on_column_filter_change={@onColumnFilterChange}
+                on_column_filter_submit={@onColumnFilterSubmit}
+                api={@api}
               />
             </div>
           </div>

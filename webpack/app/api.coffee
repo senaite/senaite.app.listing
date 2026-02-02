@@ -186,6 +186,17 @@ class ListingAPI
       method: "POST"
     return @get_json "listing_config", options
 
+  fetch_index_values: (data) ->
+    ###
+     * Fetch unique values for a catalog index
+     * @param data.column_key {string} The column key
+     * @returns {Promise}
+    ###
+    options =
+      data: data or {}
+      method: "POST"
+    return @get_json "get_index_values", options
+
   get_csrf_token: () ->
     ###
      * Get the plone.protect CSRF token
