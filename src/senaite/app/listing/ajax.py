@@ -173,9 +173,10 @@ class AjaxListingView(BrowserView):
         catalog_indexes = catalog.indexes()
 
         for key, column in columns.items():
-            index_name = column.get("index")
+            index_name = column.get("index") or key
             if index_name and index_name in catalog_indexes:
                 index = catalog.Indexes.get(index_name)
+                column["index"] = index_name
                 column["index_type"] = index.__class__.__name__
             else:
                 column["index_type"] = None
@@ -757,7 +758,7 @@ class AjaxListingView(BrowserView):
         column = self.columns.get(column_key, {})
 
         # Get the filter index (or fall back to sort index)
-        orig_index = column.get("index")
+        orig_index = column.get("index") or column_key
         filter_index = column.get("filter_index")
 
         # Apply default mapping for common indexes like sortable_title -> title

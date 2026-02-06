@@ -683,7 +683,7 @@ class ListingView(AjaxListingView):
 
             # Use filter_index if defined, otherwise apply default mapping,
             # otherwise fall back to index
-            orig_index = column.get("index")
+            orig_index = column.get("index") or column_key
             index_name = column.get("filter_index")
 
             # Apply default mapping for common indexes
