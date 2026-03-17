@@ -66,6 +66,7 @@
   },
   "jest": {
     "testEnvironment": "jsdom",
+    "passWithNoTests": true,
     "transform": {
       "^.+\\.js$": "babel-jest"
     },
