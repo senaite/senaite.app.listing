@@ -1,6 +1,7 @@
 2.7.0 (unreleased)
 ------------------
 
+- #163 Add Jest testing setup
 - #162 Add fallback for filter index
 - #161 Add column filtering
 - #160 Fix detection limit result is flushed on edit
