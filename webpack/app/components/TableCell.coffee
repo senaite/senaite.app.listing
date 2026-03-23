@@ -1,7 +1,7 @@
 import React from "react"
 
 import Checkbox from "./Checkbox.coffee"
-import HiddenField from "./HiddenField.coffee"
+import HiddenField from "./HiddenField"
 import MultiChoice from "./MultiChoice.coffee"
 import MultiSelect from "./MultiSelect.coffee"
 import MultiValue from "./MultiValue.coffee"
