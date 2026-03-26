@@ -1,6 +1,7 @@
 2.7.0 (unreleased)
 ------------------
 
+- #166 Refactor StringField to a modern ReactJS Component
 - #165 refactor ReadonlyField to a modern ReactJS Component
 - #164 Refactor Hiddenfield to a modern ReactJS Component
 - #163 Add Jest testing setup
