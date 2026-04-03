@@ -1,26 +1,25 @@
-function HiddenField({ field_css, before, before_css, after, after_css,
-                        uid, name, value, column_key, className, attrs }) {
+function HiddenField(props) {
   return (
-    <span className={field_css || "form-group"}>
-      {before && (
+    <span className={props.field_css || "form-group"}>
+      {props.before && (
         <span
-          className={before_css || "before_field"}
-          dangerouslySetInnerHTML={{__html: before}}
+          className={props.before_css || "before_field"}
+          dangerouslySetInnerHTML={{__html: props.before}}
         />
       )}
       <input
         type="hidden"
-        uid={uid}
-        name={name}
-        value={value}
-        column_key={column_key}
-        className={className}
-        {...attrs}
+        uid={props.uid}
+        name={props.name}
+        value={props.value}
+        column_key={props.column_key}
+        className={props.className}
+        {...props.attrs}
       />
-      {after && (
+      {props.after && (
         <span
-          className={after_css || "after_field"}
-          dangerouslySetInnerHTML={{__html: after}}
+          className={props.after_css || "after_field"}
+          dangerouslySetInnerHTML={{__html: props.after}}
         />
       )}
     </span>

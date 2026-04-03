@@ -1,6 +1,7 @@
 2.7.0 (unreleased)
 ------------------
 
+- #168 Refactor field props pattern
 - #167 refactor StringField to a modern ReactJS Component
 - #165 refactor ReadonlyField to a modern ReactJS Component
 - #164 Refactor Hiddenfield to a modern ReactJS Component

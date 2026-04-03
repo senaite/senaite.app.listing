@@ -1,22 +1,22 @@
-function ReadonlyField({ value, field_css, before, before_css, after,
-                         after_css, formatted_value, attrs }) {
-  if (typeof value === "boolean") {
-    return <span>{value ? _t("Yes") : _t("No")}</span>
+function ReadonlyField(props) {
+  if (typeof props.value === "boolean") {
+    return <span>{props.value ? _t("Yes") : _t("No")}</span>
   }
 
   return (
-    <span className={field_css || "form-group"}>
-      {before && (
+    <span className={props.field_css || "form-group"}>
+      {props.before && (
         <span
-          className={before_css || "before_field"}
-          dangerouslySetInnerHTML={{__html: before}}
+          className={props.before_css || "before_field"}
+          dangerouslySetInnerHTML={{__html: props.before}}
         />
       )}
-      <span dangerouslySetInnerHTML={{__html: formatted_value}} {...attrs} />
-      {after && (
+      <span dangerouslySetInnerHTML={{__html: props.formatted_value}}
+            {...props.attrs} />
+      {props.after && (
         <span
-          className={after_css || "after_field"}
-          dangerouslySetInnerHTML={{__html: after}}
+          className={props.after_css || "after_field"}
+          dangerouslySetInnerHTML={{__html: props.after}}
         />
       )}
     </span>
