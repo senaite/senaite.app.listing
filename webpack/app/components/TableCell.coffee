@@ -222,6 +222,11 @@ class TableCell extends React.Component
     column_key = @get_column_key()
     item = @get_item()
 
+    # per-item field type override (e.g. {"Uncertainty": "hidden"})
+    field_types = item.field_types or {}
+    if column_key of field_types
+      return field_types[column_key]
+
     # true if the field is editable
     editable = @is_edit_allowed()
     resultfield = @is_result_column()
@@ -979,6 +984,8 @@ class TableCell extends React.Component
 
     if type == "readonly"
       field = field.concat @create_readonly_field()
+    else if type == "hidden"
+      field = field.concat @create_hidden_field()
     else if type == "calculated"
       field = field.concat @create_calculated_field()
     else if type in ["select", "choices"]
