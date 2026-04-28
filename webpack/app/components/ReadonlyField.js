@@ -5,15 +5,6 @@ function ReadonlyField(props) {
 
   return (
     <span className={props.field_css || "form-group"}>
-      {props.name && (
-        <input
-          type="hidden"
-          uid={props.uid}
-          name={props.name}
-          value={props.value != null ? props.value : ""}
-          column_key={props.column_key}
-        />
-      )}
       {props.before && (
         <span
           className={props.before_css || "before_field"}
