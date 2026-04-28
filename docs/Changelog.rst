@@ -1,6 +1,7 @@
 2.7.0 (unreleased)
 ------------------
 
+- #169 Submit readonly field values and allow per-cell field type override
 - #168 Refactor field props pattern
 - #167 refactor StringField to a modern ReactJS Component
 - #165 refactor ReadonlyField to a modern ReactJS Component

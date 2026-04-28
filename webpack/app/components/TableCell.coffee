@@ -306,6 +306,7 @@ class TableCell extends React.Component
         name={name}
         value={value}
         formatted_value={formatted_value}
+        column_key={column_key}
         className={css_class}
         {...props}
         />)
@@ -375,6 +376,7 @@ class TableCell extends React.Component
     item = props.item or @get_item()
     name = props.name or @get_name()
     value = props.value or @get_value()
+    formatted_value = props.formatted_value or @get_formatted_value()
     uid = props.uid or @get_uid()
     title = props.title or @props.column.title or column_key
 
@@ -384,6 +386,7 @@ class TableCell extends React.Component
         uid={uid}
         name={name}
         value={value}
+        formatted_value={formatted_value}
         column_key={column_key}
         {...props}
         />)
