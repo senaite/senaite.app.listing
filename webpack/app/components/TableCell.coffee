@@ -299,11 +299,17 @@ class TableCell extends React.Component
     uid = props.uid or @get_uid()
     css_class = props.css_class or "readonly"
 
+    # Use the records converter so the hidden input emitted by the
+    # readonly field is folded into request.form[column_key] as a
+    # records dict keyed by uid, matching the editable field convention
+    converter = @ZPUBLISHER_CONVERTER["default"]
+    fieldname = name + converter
+
     return (
       <ReadonlyField
         key={name}
         uid={uid}
-        name={name}
+        name={fieldname}
         value={value}
         formatted_value={formatted_value}
         column_key={column_key}
