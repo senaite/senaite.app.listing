@@ -16,6 +16,10 @@ function HiddenField(props) {
         className={props.className}
         {...props.attrs}
       />
+      {props.formatted_value && (
+        <span className="readonly"
+              dangerouslySetInnerHTML={{__html: props.formatted_value}} />
+      )}
       {props.after && (
         <span
           className={props.after_css || "after_field"}
