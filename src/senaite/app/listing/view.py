@@ -670,13 +670,10 @@ class ListingView(AjaxListingView):
             sample_key = next(iter(index._index.keys()), None)
         except Exception:
             return value
-        if isinstance(sample_key, bytes) and isinstance(value, six.text_type):
-            return value.encode("utf-8")
-        if isinstance(sample_key, six.text_type) and isinstance(value, bytes):
-            try:
-                return value.decode("utf-8")
-            except UnicodeDecodeError:
-                return value
+        if isinstance(sample_key, bytes):
+            return api.to_utf8(value, default=value)
+        if isinstance(sample_key, six.text_type):
+            return api.safe_unicode(value, default=value)
         return value
 
     def apply_column_filters(self, query):
@@ -736,11 +733,8 @@ class ListingView(AjaxListingView):
 
             # Apply filter based on index type
             if index_type in ("ZCTextIndex", "TextIndex"):
-                # Text indexes support wildcard search
-                if isinstance(filter_value, six.text_type):
-                    text_value = filter_value.encode("utf-8")
-                else:
-                    text_value = filter_value
+                # Text indexes conventionally expect utf-8 bytes
+                text_value = api.to_utf8(filter_value, default=filter_value)
                 query[index_name] = "*{}*".format(text_value)
             elif index_type in ("DateIndex", "DateRecurringIndex"):
                 # Date indexes expect a date value or range
