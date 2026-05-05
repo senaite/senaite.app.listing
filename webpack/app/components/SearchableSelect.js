@@ -44,8 +44,8 @@ class SearchableSelect extends React.Component {
     }
 
     return options.filter((opt) => {
-      const title = (opt.title || opt.value || "").toLowerCase();
-      const value = (opt.value || "").toLowerCase();
+      const title = String(opt.title || opt.value || "").toLowerCase();
+      const value = String(opt.value || "").toLowerCase();
       return title.indexOf(search) > -1 || value.indexOf(search) > -1;
     });
   }
