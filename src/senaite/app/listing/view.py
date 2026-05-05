@@ -656,6 +656,29 @@ class ListingView(AjaxListingView):
         logger.info(u"ListingView::get_catalog_query: query={}".format(query))
         return query
 
+    def _coerce_filter_value(self, index, value):
+        """Coerce ``value`` to the same string type as the BTree keys.
+
+        Py2 BTree comparison of unicode against utf-8 bytes (or vice
+        versa) implicitly decodes the bytes side as ASCII and raises
+        UnicodeDecodeError on non-ASCII content. Sample the first key
+        of the index and convert ``value`` to match it. Falls back to
+        the original value when the index is empty or the key type is
+        not a string.
+        """
+        try:
+            sample_key = next(iter(index._index.keys()), None)
+        except Exception:
+            return value
+        if isinstance(sample_key, bytes) and isinstance(value, six.text_type):
+            return value.encode("utf-8")
+        if isinstance(sample_key, six.text_type) and isinstance(value, bytes):
+            try:
+                return value.decode("utf-8")
+            except UnicodeDecodeError:
+                return value
+        return value
+
     def apply_column_filters(self, query):
         """Apply column filters to the catalog query
 
@@ -714,7 +737,11 @@ class ListingView(AjaxListingView):
             # Apply filter based on index type
             if index_type in ("ZCTextIndex", "TextIndex"):
                 # Text indexes support wildcard search
-                query[index_name] = "*{}*".format(filter_value)
+                if isinstance(filter_value, six.text_type):
+                    text_value = filter_value.encode("utf-8")
+                else:
+                    text_value = filter_value
+                query[index_name] = "*{}*".format(text_value)
             elif index_type in ("DateIndex", "DateRecurringIndex"):
                 # Date indexes expect a date value or range
                 try:
@@ -738,13 +765,16 @@ class ListingView(AjaxListingView):
                 query[index_name] = bool_value
             elif index_type == "FieldIndex":
                 # Field indexes: try exact match
-                query[index_name] = filter_value
+                query[index_name] = self._coerce_filter_value(
+                    index, filter_value)
             elif index_type == "KeywordIndex":
                 # Keyword indexes: search in list
-                query[index_name] = filter_value
+                query[index_name] = self._coerce_filter_value(
+                    index, filter_value)
             else:
                 # Default: try exact match to be safe
-                query[index_name] = filter_value
+                query[index_name] = self._coerce_filter_value(
+                    index, filter_value)
 
             logger.info(
                 u"ListingView::apply_column_filters: Applied filter "
