@@ -848,7 +848,8 @@ class AjaxListingView(BrowserView):
                     unique_vals = list(index.uniqueValues())
                     unique_vals = sorted([v for v in unique_vals
                                           if v is not None and v != ""])
-                    return [{"value": v, "title": str(v)} for v in unique_vals]
+                    return [{"value": v, "title": api.safe_unicode(v)}
+                            for v in unique_vals]
                 except NotImplementedError:
                     pass
             return []
@@ -874,7 +875,8 @@ class AjaxListingView(BrowserView):
 
         # Sort and convert to list of dicts
         sorted_values = sorted(unique_values)
-        return [{"value": v, "title": str(v)} for v in sorted_values]
+        return [{"value": v, "title": api.safe_unicode(v)}
+                for v in sorted_values]
 
     def notify_edited(self, obj):
         """Notify object edited event
