@@ -673,10 +673,13 @@ class ListingView(AjaxListingView):
             if not filter_value:
                 continue
 
-            # Ensure filter_value is properly encoded for catalog queries
-            # ZCatalog in Python 2 expects UTF-8 encoded byte strings
-            if isinstance(filter_value, six.text_type):
-                filter_value = filter_value.encode("utf-8")
+            # FieldIndex/KeywordIndex keys are stored as whatever the
+            # indexer returned (often unicode). Encoding the query
+            # value to UTF-8 bytes upfront makes the catalog implicitly
+            # ascii-decode bytes against unicode keys, which raises
+            # UnicodeDecodeError on non-ASCII filter values. Keep the
+            # value as unicode here and only encode when an index type
+            # truly needs bytes (handled below).
 
             # Get the column definition
             column = self.columns.get(column_key, {})
