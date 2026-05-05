@@ -673,10 +673,11 @@ class ListingView(AjaxListingView):
             if not filter_value:
                 continue
 
-            # Ensure filter_value is properly encoded for catalog queries
-            # ZCatalog in Python 2 expects UTF-8 encoded byte strings
-            if isinstance(filter_value, six.text_type):
-                filter_value = filter_value.encode("utf-8")
+            # senaite.core indexers normalize string values via
+            # safe_unicode, so catalog index keys are unicode. Match
+            # that here to keep BTree comparisons type-aligned and
+            # avoid implicit ascii decodes on Py2.
+            filter_value = api.safe_unicode(filter_value)
 
             # Get the column definition
             column = self.columns.get(column_key, {})
@@ -711,7 +712,7 @@ class ListingView(AjaxListingView):
             # Apply filter based on index type
             if index_type in ("ZCTextIndex", "TextIndex"):
                 # Text indexes support wildcard search
-                query[index_name] = "*{}*".format(filter_value)
+                query[index_name] = u"*{}*".format(filter_value)
             elif index_type in ("DateIndex", "DateRecurringIndex"):
                 # Date indexes expect a date value or range
                 try:
@@ -745,7 +746,8 @@ class ListingView(AjaxListingView):
 
             logger.info(
                 u"ListingView::apply_column_filters: Applied filter "
-                u"%s=%s (index_type=%s)", index_name, filter_value, index_type)
+                u"%s=%s (index_type=%s)",
+                index_name, filter_value, index_type)
 
         return query
 
