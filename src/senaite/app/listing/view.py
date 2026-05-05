@@ -772,7 +772,10 @@ class ListingView(AjaxListingView):
 
             logger.info(
                 u"ListingView::apply_column_filters: Applied filter "
-                u"%s=%s (index_type=%s)", index_name, filter_value, index_type)
+                u"%s=%s (index_type=%s)",
+                api.safe_unicode(index_name),
+                api.safe_unicode(filter_value),
+                api.safe_unicode(index_type))
 
         return query
 
