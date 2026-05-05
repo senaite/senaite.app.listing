@@ -656,26 +656,6 @@ class ListingView(AjaxListingView):
         logger.info(u"ListingView::get_catalog_query: query={}".format(query))
         return query
 
-    def _coerce_filter_value(self, index, value):
-        """Coerce ``value`` to the same string type as the BTree keys.
-
-        Py2 BTree comparison of unicode against utf-8 bytes (or vice
-        versa) implicitly decodes the bytes side as ASCII and raises
-        UnicodeDecodeError on non-ASCII content. Sample the first key
-        of the index and convert ``value`` to match it. Falls back to
-        the original value when the index is empty or the key type is
-        not a string.
-        """
-        try:
-            sample_key = next(iter(index._index.keys()), None)
-        except Exception:
-            return value
-        if isinstance(sample_key, bytes):
-            return api.to_utf8(value, default=value)
-        if isinstance(sample_key, six.text_type):
-            return api.safe_unicode(value, default=value)
-        return value
-
     def apply_column_filters(self, query):
         """Apply column filters to the catalog query
 
@@ -693,13 +673,11 @@ class ListingView(AjaxListingView):
             if not filter_value:
                 continue
 
-            # FieldIndex/KeywordIndex keys are stored as whatever the
-            # indexer returned (often unicode). Encoding the query
-            # value to UTF-8 bytes upfront makes the catalog implicitly
-            # ascii-decode bytes against unicode keys, which raises
-            # UnicodeDecodeError on non-ASCII filter values. Keep the
-            # value as unicode here and only encode when an index type
-            # truly needs bytes (handled below).
+            # senaite.core indexers normalize string values via
+            # safe_unicode, so catalog index keys are unicode. Match
+            # that here to keep BTree comparisons type-aligned and
+            # avoid implicit ascii decodes on Py2.
+            filter_value = api.safe_unicode(filter_value)
 
             # Get the column definition
             column = self.columns.get(column_key, {})
@@ -733,9 +711,8 @@ class ListingView(AjaxListingView):
 
             # Apply filter based on index type
             if index_type in ("ZCTextIndex", "TextIndex"):
-                # Text indexes conventionally expect utf-8 bytes
-                text_value = api.to_utf8(filter_value, default=filter_value)
-                query[index_name] = "*{}*".format(text_value)
+                # Text indexes support wildcard search
+                query[index_name] = u"*{}*".format(filter_value)
             elif index_type in ("DateIndex", "DateRecurringIndex"):
                 # Date indexes expect a date value or range
                 try:
@@ -759,23 +736,18 @@ class ListingView(AjaxListingView):
                 query[index_name] = bool_value
             elif index_type == "FieldIndex":
                 # Field indexes: try exact match
-                query[index_name] = self._coerce_filter_value(
-                    index, filter_value)
+                query[index_name] = filter_value
             elif index_type == "KeywordIndex":
                 # Keyword indexes: search in list
-                query[index_name] = self._coerce_filter_value(
-                    index, filter_value)
+                query[index_name] = filter_value
             else:
                 # Default: try exact match to be safe
-                query[index_name] = self._coerce_filter_value(
-                    index, filter_value)
+                query[index_name] = filter_value
 
             logger.info(
                 u"ListingView::apply_column_filters: Applied filter "
                 u"%s=%s (index_type=%s)",
-                api.safe_unicode(index_name),
-                api.safe_unicode(filter_value),
-                api.safe_unicode(index_type))
+                index_name, filter_value, index_type)
 
         return query
 
