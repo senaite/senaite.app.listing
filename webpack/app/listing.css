@@ -111,6 +111,10 @@
 
 /* Render table form-controls smaller */
 .ajax-contents-table tr td div.form-group { display: inline-table; }
+.ajax-contents-table tr td div.form-group input.result-other-input {
+  display: block;
+  width: 100%;
+}
 
 /* Top toolbar */
 .ajax-contents-table .top-toolbar { padding-bottom: .5em; }

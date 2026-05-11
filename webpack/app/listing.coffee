@@ -1205,6 +1205,32 @@ class ListingController extends React.Component
       cells.push cell
     cells.join(',')
 
+  ###*
+   * Bind manual-entry toggle for edit-analysis modal.
+   *
+   * Modal HTML is loaded dynamically, therefore this binding is done
+   * explicitly after injection.
+   *
+   * @param modal_el {Object} Modal root element
+  ###
+  bind_modal_manual_result_toggle: (modal_el) ->
+    return unless modal_el
+    root = $(modal_el)
+    select = root.find("#edit-analysis-result-select")
+    input = root.find("#edit-analysis-result-other")
+    return unless select.length and input.length
+
+    toggle = ->
+      option = select.find("option:selected")
+      show = option.attr("data-manual-entry") is "1"
+      input.toggle(show)
+      if not show
+        input.val("")
+
+    select.off("change.manualEntryToggle")
+    select.on("change.manualEntryToggle", toggle)
+    toggle()
+
 
   ###*
    * Load modal popup
@@ -1265,6 +1291,7 @@ class ListingController extends React.Component
       return response.text().then (text) ->
         el.empty()
         el.append(text)
+        me.bind_modal_manual_result_toggle(el)
         el.one "submit", on_submit
         el.modal("show")
 
