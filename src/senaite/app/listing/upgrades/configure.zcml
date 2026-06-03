@@ -4,11 +4,14 @@
     xmlns:genericsetup="http://namespaces.zope.org/genericsetup">
 
   <genericsetup:upgradeStep
-      title="Upgrade SENAITE APP LISTING"
-      description="Version 2.7.1: Add 'fetch transitions on select' setting"
+      title="Add 'Fetch transitions on select' setting"
+      description="
+        Registers the 'listing_fetch_transitions_on_select' record in the
+        registry, a global default that controls whether listings fetch the
+        possible workflow transitions automatically when items get selected."
       source="2700"
-      destination="2710"
-      handler="senaite.app.listing.upgrades.handlers.to_2710"
+      destination="2701"
+      handler="senaite.app.listing.upgrades.handlers.to_2701"
       profile="senaite.app.listing:default" />
 
   <genericsetup:upgradeStep

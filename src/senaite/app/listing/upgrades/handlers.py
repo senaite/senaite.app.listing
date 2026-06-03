@@ -23,8 +23,8 @@ from senaite.app.listing import logger
 PROFILE_ID = "profile-senaite.app.listing:default"
 
 
-def to_2710(portal_setup):
-    """Update to version 2.7.1
+def to_2701(portal_setup):
+    """Update to version 2701
 
     Registers the new `listing_fetch_transitions_on_select` registry record.
 
