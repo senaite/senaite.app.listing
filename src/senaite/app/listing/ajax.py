@@ -258,6 +258,19 @@ class AjaxListingView(BrowserView):
         """
         return self.show_column_toggles
 
+    def get_fetch_transitions_on_select(self):
+        """Returns whether the possible workflow transitions should be fetched
+        automatically when items get selected in the listing.
+
+        A per-listing value (`fetch_transitions_on_select` attribute) takes
+        precedence. If it is left as `None`, the global default stored in the
+        `listing_fetch_transitions_on_select` registry record is used.
+        """
+        override = getattr(self, "fetch_transitions_on_select", None)
+        if override is not None:
+            return override
+        return get_registry_record("listing_fetch_transitions_on_select", True)
+
     @view.memoize
     @returns_safe_json
     def ajax_transitions_enabled(self):
@@ -336,7 +349,7 @@ class AjaxListingView(BrowserView):
             "sort_order": self.get_sort_order(),
             "sortable_columns": self.get_sortable_columns(),
             "show_search": self.show_search,
-            "fetch_transitions_on_select": self.fetch_transitions_on_select,
+            "fetch_transitions_on_select": self.get_fetch_transitions_on_select(),
             "view_context_state": api.get_workflow_status_of(self.context),
             "allow_row_reorder": self.allow_row_reorder,
             "transposed": ITransposedListingView.providedBy(self),

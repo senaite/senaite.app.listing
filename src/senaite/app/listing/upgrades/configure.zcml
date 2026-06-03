@@ -5,6 +5,14 @@
 
   <genericsetup:upgradeStep
       title="Upgrade SENAITE APP LISTING"
+      description="Version 2.7.1: Add 'fetch transitions on select' setting"
+      source="2700"
+      destination="2710"
+      handler="senaite.app.listing.upgrades.handlers.to_2710"
+      profile="senaite.app.listing:default" />
+
+  <genericsetup:upgradeStep
+      title="Upgrade SENAITE APP LISTING"
       description="Version 2.7.0"
       source="2600"
       destination="2700"
