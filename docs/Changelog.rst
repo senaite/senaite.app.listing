@@ -1,6 +1,7 @@
 2.7.0 (unreleased)
 ------------------
 
+- #173 Add global "Fetch transitions on select" listing setting
 - #171 Fix TypeError in SearchableSelect when option values are non-string
 - #170 Fix UnicodeEncodeError when column filter values contain non-ASCII
 - #169 Allow per-cell field type override and display value in HiddenField
