@@ -33,9 +33,22 @@ class IListingRegistry(ISenaiteRegistry):
         label=_(u"Listings"),
         description=_("Configuration for listings"),
         fields=[
+            "listing_fetch_transitions_on_select",
             "listing_enable_ajax_transitions",
             "listing_active_ajax_transitions",
         ],
+    )
+
+    listing_fetch_transitions_on_select = schema.Bool(
+        title=_("Fetch transitions on select"),
+        description=_(
+            "Automatically fetch the possible workflow transitions when items "
+            "get selected in listings. Disabling this can speed up listings "
+            "(especially samples with many analyses) at the cost of having to "
+            "fetch the transitions manually via the row context menu. "
+            "Individual listings can still override this default."),
+        default=True,
+        required=False,
     )
 
     listing_enable_ajax_transitions = schema.Bool(

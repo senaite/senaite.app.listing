@@ -150,7 +150,11 @@ class ListingView(AjaxListingView):
     show_select_column = False
 
     # Automatically fetch all possible transitions for selected items.
-    fetch_transitions_on_select = True
+    # Leave as `None` to follow the global default stored in the
+    # `listing_fetch_transitions_on_select` registry record (control panel).
+    # Set explicitly to `True`/`False` to override the global default for this
+    # particular listing.
+    fetch_transitions_on_select = None
 
     # Submit transitions via ajax
     enable_ajax_transitions = None

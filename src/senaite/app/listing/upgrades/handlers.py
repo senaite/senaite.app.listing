@@ -23,6 +23,21 @@ from senaite.app.listing import logger
 PROFILE_ID = "profile-senaite.app.listing:default"
 
 
+def to_2701(portal_setup):
+    """Update to version 2701
+
+    Registers the new `listing_fetch_transitions_on_select` registry record.
+
+    :param portal_setup: The portal_setup tool
+    """
+
+    logger.info("Import registry for SENAITE APP LISTING ...")
+    context = portal_setup._getImportContext(PROFILE_ID)
+    portal = context.getSite()  # noqa
+    portal_setup.runImportStepFromProfile(PROFILE_ID, "plone.app.registry")
+    logger.info("Import registry for SENAITE APP LISTING [DONE]")
+
+
 def to_2700(portal_setup):
     """Update to version 2.7.0
 
