@@ -265,13 +265,20 @@
 .ajax-contents-table tr.contentrow.collapsed td:first-child:before,
 .ajax-contents-table tr.contentrow.expanded td:first-child:before,
 .ajax-contents-table tr.contentrow.child td:first-child:before {
+    /* Render Font Awesome 6 Free glyphs via ::before */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;       /* solid family — Free only ships solid for these */
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
     line-height: normal;
     padding-right: 0.5rem;
     vertical-align: bottom;
     color: var(--listing-fg-toggle);
     cursor: pointer;
     float: left;
-    width: 20px; /* aligns the toggle symbols */
+    width: 20px;            /* preserves indentation per nesting level */
 }
 /* node levels (0.75rem is the default td padding) */
 .ajax-contents-table th.select-column { width: 10px; }
@@ -283,20 +290,33 @@
 .ajax-contents-table td.level-5 { padding-left: 5.75rem; }
 .ajax-contents-table td.level-6 { padding-left: 6.75rem; }
 
+/* Expand / collapse markers:
+   - collapsed parent       → fa-chevron-right (\f054)
+   - expanded  parent       → fa-chevron-down  (\f078)
+   - non-expandable leaf    → fa-ellipsis      (\f141, dim, non-clickable) */
 .ajax-contents-table tr.contentrow.collapsed td:first-child::before {
-    content: "▶";
+    content: "\f054";
 }
 .ajax-contents-table tr.contentrow.expanded td:first-child::before {
-    content: "▼";
+    content: "\f078";
 }
+/* Leaf child: a quiet ellipsis (closest equivalent to the legacy "⋯")
+   with no pointer cursor so it doesn't read as interactive. */
 .ajax-contents-table tr.contentrow.child td:first-child::before {
-    content: "⋯";
+    content: "\f141";
+    cursor: default;
+    opacity: 0.45;
 }
+/* Child rows that ARE themselves expandable use the parent chevrons. */
 .ajax-contents-table tr.contentrow.child.collapsed td:first-child::before {
-    content: "▶";
+    content: "\f054";
+    cursor: pointer;
+    opacity: 1;
 }
 .ajax-contents-table tr.contentrow.child.expanded td:first-child::before {
-    content: "▼";
+    content: "\f078";
+    cursor: pointer;
+    opacity: 1;
 }
 
 /* Remark Rows */
