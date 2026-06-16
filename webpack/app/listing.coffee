@@ -869,13 +869,13 @@ class ListingController extends React.Component
    * Internal — call sites should use the public get_columns* methods.
   ###
   _merged_column_config: ->
+    # Include every server-defined column.  Downstream consumers
+    # (e.g. TableTransposedCell) look up columns by key from this
+    # dict and would crash if a key were missing.  Visibility
+    # filtering by review_state happens later in get_visible_columns.
     server_keys = Object.keys(@state.columns or {})
-    allowed_keys = if @state.show_column_toggles
-      undefined  # the popover lets users see every defined column
-    else
-      @get_allowed_column_keys()
     stored = read_column_config @get_storage_id()
-    return merge_column_config stored, server_keys, allowed_keys
+    return merge_column_config stored, server_keys
 
   _persist_column_config: (config) ->
     write_column_config @get_storage_id(), config
