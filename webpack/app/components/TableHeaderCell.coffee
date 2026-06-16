@@ -113,9 +113,16 @@ class TableHeaderCell extends React.Component
         className={@props.className}
         onClick={@props.onClick}>
       <div className="column-header-inner">
-        <span className="column-title" title={@props.title}>
-          {@props.title}
-        </span>
+        {###
+         Column titles can carry HTML markup (e.g. an <img> for an
+         icon-only header like "Retested", or <sub>/<sup> for unit
+         labels). Titles come from server-side view.py config — not
+         user input — so the trust class matches ReadonlyField etc.
+         which already render via dangerouslySetInnerHTML.
+        ###}
+        <span
+          className="column-title"
+          dangerouslySetInnerHTML={{__html: @props.title}}></span>
         {(sortable or show_filter_button) and
           <span className="column-header-controls">
             {sortable and
