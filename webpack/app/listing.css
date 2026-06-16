@@ -378,18 +378,61 @@ selected elements from multiselect
 /* ------------------------------------------------------------------ */
 /*  1. Saved filters — toggle pill                                    */
 /* ------------------------------------------------------------------ */
-/* Toggle pill: shape, height, and state colours come from Bootstrap
-   (`btn btn-sm btn-outline-secondary|success rounded-pill` with
-   `.active` for the open state). Only minor placement tweaks here. */
 .saved-filters {
   position: relative;
   display: inline-flex;
   margin-left: 0.5rem;
 }
-.saved-filters-toggle { display: inline-flex; align-items: center; gap: 0.4rem; }
+.saved-filters-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: calc(1.5em + 0.5rem + 2px);  /* matches Bootstrap btn-sm */
+  padding: 0 0.6rem;
+  background: #fff;
+  color: #495057;
+  border: 1px solid #ced4da;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color .12s ease, border-color .12s ease,
+              color .12s ease, box-shadow .12s ease;
+}
+.saved-filters-toggle:hover,
+.saved-filters-toggle.is-open {
+  background: #f1f3f5;
+  border-color: #adb5bd;
+  color: #212529;
+}
+.saved-filters-toggle:focus {
+  outline: none;
+  box-shadow: 0 0 0 .15rem rgba(0,123,255,.20);
+}
+/* Applied (success) — wins over hover/open */
+.saved-filters-toggle.has-applied {
+  background: #e9f7ef;
+  border-color: #a3d9b1;
+  color: #198754;
+}
+.saved-filters-toggle .saved-filters-count {
+  display: inline-block;
+  min-width: 1.25rem;
+  padding: 0 .3rem;
+  background: #6c757d;
+  color: #fff;
+  font-size: .6875rem;
+  font-weight: 600;
+  line-height: 1.05rem;
+  border-radius: 999px;
+  text-align: center;
+}
+.saved-filters-toggle.has-applied .saved-filters-count {
+  background: #198754;
+}
 
 /* When the toggle sits inside a Bootstrap input-group prepend slot
-   (SearchBox), flatten the right edge so it joins the input cleanly. */
+   (SearchBox), match the input-group radii and height. */
 .searchbox-prepend {
   display: flex;
   align-items: stretch;
@@ -401,8 +444,12 @@ selected elements from multiselect
 }
 .searchbox-prepend .saved-filters-toggle {
   height: 100%;
-  border-top-right-radius: 0 !important;
-  border-bottom-right-radius: 0 !important;
+  padding: 0 0.65rem;
+  border-right: 0;
+  border-radius: 0.2rem 0 0 0.2rem;
+}
+.searchbox-prepend .saved-filters-toggle .saved-filters-count {
+  margin-left: 0.15rem;
 }
 .searchbox-prepend .saved-filters-menu {
   left: 0;
@@ -607,23 +654,80 @@ selected elements from multiselect
   padding: .5rem .65rem .65rem;
   border-top: 1px solid #eef0f3;
 }
-/* "Save current view" footer button uses .btn .btn-outline-primary
-   .btn-block; nothing to add. */
+.saved-filters-save {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  width: 100%;
+  padding: .4rem .65rem;
+  background: #fff;
+  color: #0b5ed7;
+  border: 1px dashed #9ec5ff;
+  border-radius: 6px;
+  font-size: .8125rem;
+  cursor: pointer;
+  transition: background-color .12s ease, border-color .12s ease;
+}
+.saved-filters-save:hover {
+  background: #eaf3ff;
+  border-color: #0b5ed7;
+  border-style: solid;
+}
+.saved-filters-save i { font-size: .7rem; }
 
 
 /* ------------------------------------------------------------------ */
 /*  6. Saved filters — inline editors (save / rename)                 */
 /* ------------------------------------------------------------------ */
-/* The inline editor itself is a Bootstrap .input-group .input-group-sm.
-   Only the surrounding row tint and the monospace font on the input
-   stay bespoke. */
-.saved-filter-edit       { padding: .35rem .5rem; background: #f4f7fb; }
-.saved-filters-save-row  { padding: .5rem .65rem; background: #f4f7fb;
-                           border-top: 1px solid #eef0f3; }
+.saved-filter-edit,
+.saved-filters-save-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  background: #f4f7fb;
+}
+.saved-filter-edit       { padding: .35rem .5rem; }
+.saved-filters-save-row  { padding: .5rem .65rem; border-top: 1px solid #eef0f3; }
+
 .saved-filter-edit-input {
+  flex: 1 1 auto;
+  min-width: 0;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: .8125rem;
+  padding: .25rem .5rem;
+  background: #fff;
+  border: 1px solid #c5d6ee;
+  border-radius: 4px;
+  color: #212529;
+  outline: none;
+  transition: border-color .12s ease, box-shadow .12s ease;
 }
+.saved-filter-edit-input:focus {
+  border-color: #6ea8fe;
+  box-shadow: 0 0 0 .15rem rgba(11,94,215,.15);
+}
+.saved-filter-edit-confirm,
+.saved-filter-edit-cancel {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  background: #fff;
+  border: 1px solid #d8dde3;
+  border-radius: 4px;
+  font-size: .75rem;
+  color: #495057;
+  cursor: pointer;
+  transition: background-color .12s ease, border-color .12s ease,
+              color .12s ease;
+}
+.saved-filter-edit-confirm        { color: #0b5ed7; border-color: #9ec5ff; }
+.saved-filter-edit-confirm:hover  { background: #0b5ed7; border-color: #0b5ed7; color: #fff; }
+.saved-filter-edit-cancel:hover   { background: #f1f3f5; border-color: #adb5bd; color: #212529; }
 
 
 /* ------------------------------------------------------------------ */

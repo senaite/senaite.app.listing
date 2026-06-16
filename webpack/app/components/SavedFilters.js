@@ -68,35 +68,33 @@ function InlineNameEditor(props) {
   }, [handle_confirm, on_cancel]);
 
   return (
-    <div className="saved-filter-edit input-group input-group-sm">
+    <div className="saved-filter-edit">
       <input
         ref={input_ref}
         type="text"
-        className="form-control saved-filter-edit-input"
+        className="saved-filter-edit-input"
         value={value || ""}
         maxLength={80}
         placeholder={placeholder}
         onChange={handle_change}
         onKeyDown={handle_keydown}
       />
-      <div className="input-group-append">
-        <button
-          type="button"
-          className="btn btn-outline-primary saved-filter-edit-confirm"
-          title={_t("Save")}
-          onClick={handle_confirm}
-        >
-          <i className="fas fa-check"></i>
-        </button>
-        <button
-          type="button"
-          className="btn btn-outline-secondary saved-filter-edit-cancel"
-          onClick={on_cancel}
-          title={_t("Cancel")}
-        >
-          <i className="fas fa-times"></i>
-        </button>
-      </div>
+      <button
+        type="button"
+        className="saved-filter-edit-confirm"
+        title={_t("Save")}
+        onClick={handle_confirm}
+      >
+        <i className="fas fa-check"></i>
+      </button>
+      <button
+        type="button"
+        className="saved-filter-edit-cancel"
+        onClick={on_cancel}
+        title={_t("Cancel")}
+      >
+        <i className="fas fa-times"></i>
+      </button>
     </div>
   );
 }
@@ -316,13 +314,9 @@ function SavedFilters(props) {
 
 function PresetToggle(props) {
   const { open, applied, count, on_click } = props;
-  // Lean on Bootstrap for shape and state colours; only keep the
-  // saved-filters-toggle hook so the searchbox-prepend override can
-  // still target this button.
-  const variant = applied ? "btn-outline-success" : "btn-outline-secondary";
-  const active = open ? " active" : "";
-  const cls = `saved-filters-toggle btn btn-sm rounded-pill ${variant}${active}`;
-  const badge_variant = applied ? "badge-success" : "badge-secondary";
+  const cls = "saved-filters-toggle" +
+    (open ? " is-open" : "") +
+    (applied ? " has-applied" : "");
   return (
     <button
       type="button"
@@ -334,9 +328,7 @@ function PresetToggle(props) {
     >
       <i className="fas fa-bookmark"></i>
       {count > 0 && (
-        <span className={`saved-filters-count badge badge-pill ${badge_variant} ml-1`}>
-          {count}
-        </span>
+        <span className="saved-filters-count">{count}</span>
       )}
     </button>
   );
@@ -596,10 +588,10 @@ function SaveFooter(props) {
     <div className="saved-filters-footer">
       <button
         type="button"
-        className="saved-filters-save btn btn-sm btn-outline-primary btn-block"
+        className="saved-filters-save"
         onClick={on_save_open}>
-        <i className="fas fa-plus mr-1"></i>
-        {_t("Save current view")}
+        <i className="fas fa-plus"></i>
+        <span>{_t("Save current view")}</span>
       </button>
     </div>
   );
