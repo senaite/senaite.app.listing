@@ -221,9 +221,16 @@ function ColumnFilterRow(props) {
   }, [notify_change, submit_soon]);
 
   const on_date_change = useCallback((event) => {
+    // Date inputs submit on blur (and on Enter), not on every change.
+    // The native date picker fires onChange for each spinner click,
+    // which would otherwise trigger one refetch per click and show an
+    // empty table for the intermediate values.
     notify_change(event.target.dataset.columnKey, event.target.value);
+  }, [notify_change]);
+
+  const on_date_blur = useCallback(() => {
     submit_soon();
-  }, [notify_change, submit_soon]);
+  }, [submit_soon]);
 
   const on_keydown = useCallback((event) => {
     if (event.key === "Enter") {
@@ -290,6 +297,8 @@ function ColumnFilterRow(props) {
             data-column-key={key}
             value={filter_value}
             onChange={on_date_change}
+            onBlur={on_date_blur}
+            onKeyDown={on_keydown}
           />
         );
       case "FieldIndex":

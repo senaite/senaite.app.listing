@@ -2436,7 +2436,14 @@ class ListingController extends React.Component
       params = params.concat "#{name}=#{encoded}"
 
     hash = params.join("&")
-    location.hash = "#?#{hash}"
+    next_hash = "#?#{hash}"
+    return if location.hash is next_hash
+    # Mark this hash write as self-induced so on_popstate can tell
+    # it apart from a real back/forward navigation and skip resetting
+    # active_column_filters (which would close any open editor cell
+    # while the user is still typing — see #174 follow-up).
+    @suppress_next_popstate = yes
+    location.hash = next_hash
 
   ###*
    * EVENT HANDLERS
@@ -2547,6 +2554,12 @@ class ListingController extends React.Component
 
   on_popstate: (event) ->
     console.debug "°°° ListingController::on_popstate:event=", event
+    # Browsers fire popstate for hash changes too. set_url() flags
+    # its own writes so we can ignore them here and only react to
+    # real back/forward navigation.
+    if @suppress_next_popstate
+      @suppress_next_popstate = no
+      return
     params = @api.parse_hash location.hash
     reload = no
     for idx, param of params
@@ -2567,8 +2580,10 @@ class ListingController extends React.Component
         value = decodeURIComponent(value)
         try
           value = JSON.parse(value)
-          # Keep editor cells hidden on back/forward; the funnel
-          # icons mark filtered columns.
+          # Real back/forward to a URL that carries column_filters:
+          # keep the editor cells closed (the funnel icons already
+          # mark filtered columns) and let the user re-open per
+          # column if they want to edit.
           @state.active_column_filters = []
         catch
           value = {}
