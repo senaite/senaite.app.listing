@@ -2,12 +2,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   capture_payload,
-  find_default_preset,
   generate_preset_id,
   load_presets,
   payloads_equal,
   save_presets,
-} from "./preset_storage.js";
+} from "../storage/preset_storage.js";
 
 
 // Mode reducer states for the dropdown's local UI state.
@@ -598,6 +597,4 @@ function SaveFooter(props) {
 }
 
 
-// Re-export for the listing controller's auto-apply-on-mount path.
-export { find_default_preset };
 export default SavedFilters;
