@@ -2572,7 +2572,7 @@ class ListingController extends React.Component
           <div className="row">
             <div className="col-sm-12 table-responsive">
               {@state.show_column_toggles and
-                <div className="float-right tcc-trigger-group">
+                <div className="tcc-trigger-group">
                   <button
                     type="button"
                     ref={@column_config_anchor_ref}
