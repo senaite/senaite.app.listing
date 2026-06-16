@@ -1,27 +1,26 @@
 import React, {
-  useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
+  useCallback, useEffect, useMemo, useRef, useState,
 } from "react";
 import ReactDOM from "react-dom";
 
-
-// Column visibility helper: parity with the legacy is_column_visible —
-// a missing `toggle` defaults to visible.
-function is_visible(column) {
-  return column && column.toggle !== false;
-}
+import usePopoverPosition from "../hooks/usePopoverPosition.js";
+import useDismissOn from "../hooks/useDismissOn.js";
 
 
-function column_label(column, key) {
-  return (column && column.title) || key;
-}
+// A column is visible unless its `toggle` flag is explicitly false.
+const is_visible = (column) => !!column && column.toggle !== false;
 
+// Display label for a column row; falls back to the key when the
+// server-supplied title is empty.
+const column_label = (column, key) =>
+  (column && column.title) || key;
 
-function matches_search(key, column, needle) {
+const matches_search = (key, column, needle) => {
   if (!needle) return true;
   const title = String(column_label(column, key)).toLowerCase();
   return title.indexOf(needle) > -1
     || key.toLowerCase().indexOf(needle) > -1;
-}
+};
 
 
 /**
@@ -45,78 +44,14 @@ function TableColumnConfig(props) {
     anchor_ref, on_request_close,
   } = props;
 
-  // Live position + width of the popover. Computed from the anchor's
-  // bounding rect (the `⋯` trigger in the toolbar). Stored in state
-  // so resize/scroll re-render in the new place.
-  const [pos, set_pos] = useState({ top: 0, left: 0, width: 320 });
   const panel_ref = useRef(null);
-
-  const update_position = useCallback(() => {
-    const el = anchor_ref && anchor_ref.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    // Width: never wider than ~32rem, never wider than viewport - 16px.
-    const max_w = Math.min(window.innerWidth - 16, 512);
-    const min_w = Math.min(max_w, 280);
-    const width = Math.max(min_w, max_w);
-    // Left-align the panel with the trigger so the popover opens
-    // rightward from the `⋯` icon, then clamp so it always sits
-    // fully inside the viewport.
-    const desired_left = rect.left;
-    const left = Math.max(
-      8, Math.min(desired_left, window.innerWidth - width - 8));
-    // Drop below the trigger, but if that would push it past the
-    // bottom of the viewport, anchor above instead.
-    let top = rect.bottom + 6;
-    if (top + 200 > window.innerHeight) {
-      // best-effort: open above
-      top = Math.max(8, rect.top - 6 - 200);
-    }
-    set_pos({ top: Math.round(top), left: Math.round(left), width });
-  }, [anchor_ref]);
-
-  useLayoutEffect(() => {
-    update_position();
-  }, [update_position]);
-
-  useEffect(() => {
-    const on_resize = () => update_position();
-    // Capture-phase scroll so we catch scroll events on inner
-    // containers (e.g. `.table-responsive`), not just the window.
-    window.addEventListener("resize", on_resize);
-    window.addEventListener("scroll", on_resize, true);
-    return () => {
-      window.removeEventListener("resize", on_resize);
-      window.removeEventListener("scroll", on_resize, true);
-    };
-  }, [update_position]);
-
-  // Close on outside click — but ignore clicks on the anchor itself
-  // since those are the open/close toggle.
-  useEffect(() => {
-    if (!on_request_close) return undefined;
-    const on_doc_click = (event) => {
-      const panel = panel_ref.current;
-      const anchor = anchor_ref && anchor_ref.current;
-      const t = event.target;
-      if (panel && panel.contains(t)) return;
-      if (anchor && anchor.contains(t)) return;
-      on_request_close();
-    };
-    // mousedown so we react before the click resolves on the table
-    document.addEventListener("mousedown", on_doc_click);
-    return () => document.removeEventListener("mousedown", on_doc_click);
-  }, [anchor_ref, on_request_close]);
-
-  // Close on Esc.
-  useEffect(() => {
-    if (!on_request_close) return undefined;
-    const on_key = (event) => {
-      if (event.key === "Escape") on_request_close();
-    };
-    document.addEventListener("keydown", on_key);
-    return () => document.removeEventListener("keydown", on_key);
-  }, [on_request_close]);
+  const pos = usePopoverPosition(anchor_ref);
+  useDismissOn({
+    when: !!on_request_close,
+    on_dismiss: on_request_close,
+    panel_ref,
+    ignore_refs: [anchor_ref],
+  });
 
   // Local order so drag operations are smooth; sync with the parent
   // both ways.
