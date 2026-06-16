@@ -971,7 +971,14 @@ selected elements from multiselect
 }
 
 /* --- Column-config trigger group: trigger button + small reset --- */
-.tcc-trigger-group { display: inline-flex; align-items: center; gap: .15rem; }
+/* The wrapper is right-aligned via Bootstrap's `.float-right`; the
+   `inline-flex` here is only for the children's layout (gap between
+   trigger + reset icon). */
+.tcc-trigger-group {
+  display: inline-flex;
+  align-items: center;
+  gap: .15rem;
+}
 .tcc-reset {
   /* Icon-only, muted; promotes to accent on hover so it reads as
      "secondary action" next to the main trigger. */
