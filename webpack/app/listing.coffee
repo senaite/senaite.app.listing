@@ -20,7 +20,7 @@ import Pagination from "./components/Pagination.coffee"
 import SearchBox from "./components/SearchBox.coffee"
 import SavedFilters, { find_default_preset } from "./components/SavedFilters.js"
 import Table from "./components/Table.js"
-import TableColumnConfig from "./components/TableColumnConfig.coffee"
+import TableColumnConfig from "./components/TableColumnConfig.js"
 import ToastNotification from "./components/Toast.js"
 
 import { DndProvider } from "react-dnd"
@@ -76,6 +76,11 @@ class ListingController extends React.Component
     @filterByState = @filterByState.bind @
     @on_api_error = @on_api_error.bind @
     @on_column_config_click = @on_column_config_click.bind @
+    @close_column_config = @close_column_config.bind @
+    # Anchor for the column-config popover so it can attach to a
+    # portal at the document root yet still position itself under the
+    # `⋯` trigger button.
+    @column_config_anchor_ref = React.createRef()
     @on_select_checkbox_checked = @on_select_checkbox_checked.bind @
     @on_multi_select_checkbox_checked = @on_multi_select_checkbox_checked.bind @
     @on_category_click = @on_category_click.bind @
@@ -2471,6 +2476,9 @@ class ListingController extends React.Component
     @setState
       show_column_config: toggle
 
+  close_column_config: ->
+    @setState show_column_config: no
+
   on_select_checkbox_checked: (event) ->
     console.debug "°°° ListingController::on_select_checkbox_checked"
     me = this
@@ -2681,18 +2689,23 @@ class ListingController extends React.Component
           <div className="row">
             <div className="col-sm-12 table-responsive">
               {@state.show_column_toggles and
-                <a
-                  href="#"
+                <button
+                  type="button"
+                  ref={@column_config_anchor_ref}
                   onClick={@on_column_config_click}
-                  className="pull-right">
-                  <i className="fas fa-ellipsis-h"></i>
-                </a>}
+                  className="btn btn-sm btn-outline-secondary pull-right column-config-toggle"
+                  title={_t("Configure Table Columns")}>
+                  <i className="fas fa-table-columns mr-1"></i>
+                  {_t("Display Columns")}
+                </button>}
               {@state.show_column_config and
                 <TableColumnConfig
                   title={_t("Configure Table Columns")}
                   description={_t("Click to toggle the visibility or drag&drop to change the order")}
                   columns={columns}
                   columns_order={columns_order}
+                  anchor_ref={@column_config_anchor_ref}
+                  on_request_close={@close_column_config}
                   on_column_toggle_click={@toggleColumn}
                   on_columns_order_change={@setColumnsOrder}/>}
               <ContextMenu
