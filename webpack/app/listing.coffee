@@ -18,6 +18,7 @@ import Messages from "./components/Messages.coffee"
 import Modal from "./components/Modal.coffee"
 import Pagination from "./components/Pagination.coffee"
 import SearchBox from "./components/SearchBox.coffee"
+import SavedFilters, { find_default_preset } from "./components/SavedFilters.js"
 import Table from "./components/Table.js"
 import TableColumnConfig from "./components/TableColumnConfig.coffee"
 import ToastNotification from "./components/Toast.js"
@@ -100,6 +101,9 @@ class ListingController extends React.Component
     @toggleColumnFilter = @toggleColumnFilter.bind @
     @onColumnFilterChange = @onColumnFilterChange.bind @
     @onColumnFilterSubmit = @onColumnFilterSubmit.bind @
+    @applySavedFilter = @applySavedFilter.bind @
+    @clearAppliedPreset = @clearAppliedPreset.bind @
+    @resetView = @resetView.bind @
 
     # root element
     @root_el = @props.root_el
@@ -136,7 +140,15 @@ class ListingController extends React.Component
     # column filter parameters from URL
     @column_filters = @parse_json(
       @api.get_url_parameter("column_filters"), {})
-    @active_column_filters = Object.keys(@column_filters)
+    # Keep the editor cells hidden on initial load — funnel icons in
+    # the column headers already mark which columns are filtered. The
+    # user can click a funnel to open the editor for that column.
+    @active_column_filters = []
+
+    # Auto-apply the user's default saved preset only when the URL
+    # carries no explicit listing state, so bookmarked share-links
+    # win over the personal default.
+    @apply_default_preset_unless_url_state()
 
     # last selected item
     @last_select = null
@@ -232,6 +244,11 @@ class ListingController extends React.Component
       column_filters: @column_filters or {}
       # active column filters (which filters are shown)
       active_column_filters: @active_column_filters or []
+      # id of the saved preset currently driving the view, if any.
+      # The SavedFilters menu uses this both to mark the preset as
+      # applied and to compare current state against the preset's
+      # stored payload (dirty detection).
+      applied_preset_id: @applied_preset_id or null
 
   ###*
    * Translate the given i18n string
@@ -972,6 +989,128 @@ class ListingController extends React.Component
    * @param review_state {string} The state to filter, e.g. verified, published
    * @returns {bool} true
   ###
+  ###*
+   * Listing parameters that participate in saved presets and in the
+   * "URL state present?" detection used during auto-apply.
+  ###
+  PRESET_URL_PARAMS: [
+    "filter", "review_state", "column_filters",
+    "sort_on", "sort_order", "pagesize"
+  ]
+
+  ###*
+   * localStorage scope key for saved presets and other per-listing
+   * client-side state.
+   *
+   * Prefers `listing_identifier` (calculated server-side per listing
+   * kind — e.g. "AnalysisRequestsListing" for the global samples
+   * folder vs the per-client folder, "Batch", "Worksheet", …) so
+   * presets do not bleed between unrelated listings that happen to
+   * reuse the same `form_id` ("folder_contents" et al). Falls back
+   * to `form_id` only when no identifier is provided.
+   *
+   * @returns {string}
+  ###
+  get_storage_id: ->
+    return @listing_identifier or @form_id
+
+  ###*
+   * Auto-apply the user's default saved preset on first mount —
+   * unless the URL already carries explicit listing state, so a
+   * bookmarked share-link still wins.
+   *
+   * Mutates @filter / @review_state / @column_filters / @sort_on /
+   * @sort_order / @pagesize / @applied_preset_id in place; intended
+   * to be called from the constructor before @state is built.
+  ###
+  apply_default_preset_unless_url_state: ->
+    for name in @PRESET_URL_PARAMS
+      if @api.get_url_parameter(name) != ""
+        return  # URL state wins
+    preset = find_default_preset(@get_storage_id())
+    return unless preset?.payload
+    payload = preset.payload
+    @filter = payload.filter or @filter
+    @review_state = payload.review_state if payload.review_state
+    if payload.column_filters
+      @column_filters = Object.assign {}, payload.column_filters
+      # keep editor cells closed; the funnel icons mark filtered cols
+      @active_column_filters = []
+    @sort_on = payload.sort_on if payload.sort_on
+    @sort_order = payload.sort_order if payload.sort_order
+    @pagesize = payload.pagesize if payload.pagesize
+    @applied_preset_id = preset.id
+    return
+
+  ###*
+   * Apply a saved filter preset
+   *
+   * Replaces the current review_state, column_filters, sort, pagesize
+   * and search term in one go and triggers a single refetch.
+   *
+   * @param preset {object} preset object from localStorage
+   * @returns {bool} true
+  ###
+  applySavedFilter: (preset={}) ->
+    console.debug "ListingController::applySavedFilter: preset=", preset
+    payload = preset.payload or {}
+    # Do not open the column-filter editor cells on preset apply. The
+    # filter is in effect via column_filters and the header funnel
+    # already marks the column as filtered.
+    @set_state
+      review_state: payload.review_state or @default_review_state
+      column_filters: Object.assign {}, payload.column_filters or {}
+      active_column_filters: []
+      filter: payload.filter or ""
+      sort_on: payload.sort_on or @state.sort_on
+      sort_order: payload.sort_order or @state.sort_order
+      pagesize: payload.pagesize or @pagesize
+      limit_from: 0
+      applied_preset_id: preset.id or null
+    return true
+
+  ###*
+   * Release the currently applied preset and reset the view in one
+   * step. The user asked for a clean slate, not a half-applied view
+   * they would have to clear by hand.
+   *
+   * @returns {bool} true
+  ###
+  clearAppliedPreset: ->
+    console.debug "ListingController::clearAppliedPreset (→ resetView)"
+    return @resetView()
+
+  ###*
+   * Re-apply the currently applied preset, discarding any user edits.
+   * Used by the SavedFilters dropdown's "Revert" action.
+   *
+   * @param preset {object} the preset object {id, name, payload, ...}
+   * @returns {bool} true
+  ###
+  revertToSavedFilter: (preset) ->
+    return @applySavedFilter(preset)
+
+  ###*
+   * Reset the listing to its initial state — drops every filter,
+   * the search term, the sort, the active preset, and resets the
+   * review state to its default. Triggers one refetch.
+   *
+   * @returns {bool} true
+  ###
+  resetView: ->
+    console.debug "ListingController::resetView"
+    @set_state
+      review_state: @default_review_state
+      column_filters: {}
+      active_column_filters: []
+      filter: ""
+      sort_on: ""
+      sort_order: ""
+      pagesize: @pagesize
+      limit_from: 0
+      applied_preset_id: null
+    return true
+
   filterByState: (review_state="default") ->
     console.debug "ListingController::filterByState: review_state=#{review_state}"
     state = @get_review_state_by_id review_state
@@ -1040,14 +1179,14 @@ class ListingController extends React.Component
       # Remove the filter
       active_filters.splice index, 1
       # Also clear the filter value
+      had_value = !!@state.column_filters[column_key]
       column_filters = Object.assign {}, @state.column_filters
       delete column_filters[column_key]
       @setState
         active_column_filters: active_filters
         column_filters: column_filters
       , =>
-        # Refetch if there was a filter value
-        if @state.column_filters[column_key]
+        if had_value
           @fetch_folderitems()
     else
       # Add the filter
@@ -2428,8 +2567,9 @@ class ListingController extends React.Component
         value = decodeURIComponent(value)
         try
           value = JSON.parse(value)
-          # Also update active_column_filters
-          @state.active_column_filters = Object.keys(value)
+          # Keep editor cells hidden on back/forward; the funnel
+          # icons mark filtered columns.
+          @state.active_column_filters = []
         catch
           value = {}
       if value isnt @state[name]
@@ -2494,8 +2634,25 @@ class ListingController extends React.Component
                 <SearchBox
                   show_search={@state.show_search}
                   on_search={@filterBySearchterm}
+                  on_reset={@resetView}
                   filter={@state.filter}
-                  placeholder={_t("Search")} />
+                  placeholder={_t("Search")}
+                  prepend={
+                    <SavedFilters
+                      storage_id={@get_storage_id()}
+                      applied_preset_id={@state.applied_preset_id}
+                      current={{
+                        review_state: @state.review_state,
+                        column_filters: @state.column_filters,
+                        sort_on: @state.sort_on,
+                        sort_order: @state.sort_order,
+                        pagesize: @state.pagesize,
+                        filter: @state.filter,
+                      }}
+                      on_apply={@applySavedFilter}
+                      on_clear={@clearAppliedPreset}
+                      on_reset={@resetView} />
+                  } />
               </div>
             </div>
           }

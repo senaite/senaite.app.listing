@@ -74,8 +74,8 @@
 .ajax-contents-table th.sortable:hover { background-color: #ccc; }
 .ajax-contents-table th:not(.sortable) { cursor: not-allowed; }
 
-.ajax-contents-table th.active.ascending span:after { content: "▲"; margin-left: 0.5em; }
-.ajax-contents-table th.active.descending span:after { content: "▼"; margin-left: 0.5em; }
+/* split-arrow sort indicators are rendered as buttons by
+   TableHeaderCell; the old ::after triangle is no longer needed */
 
 /* category */
 .ajax-contents-table tr.categoryrow { background-color: rgba(96, 125, 139, 0.1)!important; cursor: pointer; font-weight: bold; font-size: 115%; color: #3E4551; }
@@ -359,4 +359,556 @@ selected elements from multiselect
   border: 1px solid #ced4da;
   border-top: 1px dashed #dee2e6;
   text-align: center;
+}
+
+/* ================================================================== */
+/* Saved Filters + Column Filter Controls                             */
+/*                                                                    */
+/* Aesthetic: calm-clinical. One accent (SENAITE blue), hairline      */
+/* dividers, hover-revealed actions, monospaced preset names.         */
+/* Status palette:                                                    */
+/*   neutral grey  #6c757d / #adb5bd                                  */
+/*   accent blue   #0b5ed7 / #9ec5ff                                  */
+/*   success green #198754 / #a3d9b1   — preset applied               */
+/*   dirty amber   #c69400 / #fff7e9   — applied + edited             */
+/*   danger red    #c92a2a / #fdf3f3   — destructive                  */
+/* ================================================================== */
+
+
+/* ------------------------------------------------------------------ */
+/*  1. Saved filters — toggle pill                                    */
+/* ------------------------------------------------------------------ */
+.saved-filters {
+  position: relative;
+  display: inline-flex;
+  margin-left: 0.5rem;
+}
+.saved-filters-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: calc(1.5em + 0.5rem + 2px);  /* matches Bootstrap btn-sm */
+  padding: 0 0.6rem;
+  background: #fff;
+  color: #495057;
+  border: 1px solid #ced4da;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color .12s ease, border-color .12s ease,
+              color .12s ease, box-shadow .12s ease;
+}
+.saved-filters-toggle:hover,
+.saved-filters-toggle.is-open {
+  background: #f1f3f5;
+  border-color: #adb5bd;
+  color: #212529;
+}
+.saved-filters-toggle:focus {
+  outline: none;
+  box-shadow: 0 0 0 .15rem rgba(0,123,255,.20);
+}
+/* Applied (success) — wins over hover/open */
+.saved-filters-toggle.has-applied {
+  background: #e9f7ef;
+  border-color: #a3d9b1;
+  color: #198754;
+}
+.saved-filters-toggle .saved-filters-count {
+  display: inline-block;
+  min-width: 1.25rem;
+  padding: 0 .3rem;
+  background: #6c757d;
+  color: #fff;
+  font-size: .6875rem;
+  font-weight: 600;
+  line-height: 1.05rem;
+  border-radius: 999px;
+  text-align: center;
+}
+.saved-filters-toggle.has-applied .saved-filters-count {
+  background: #198754;
+}
+
+/* When the toggle sits inside a Bootstrap input-group prepend slot
+   (SearchBox), match the input-group radii and height. */
+.searchbox-prepend {
+  display: flex;
+  align-items: stretch;
+}
+.searchbox-prepend .saved-filters {
+  margin-left: 0;
+  display: flex;
+  align-items: stretch;
+}
+.searchbox-prepend .saved-filters-toggle {
+  height: 100%;
+  padding: 0 0.65rem;
+  border-right: 0;
+  border-radius: 0.2rem 0 0 0.2rem;
+}
+.searchbox-prepend .saved-filters-toggle .saved-filters-count {
+  margin-left: 0.15rem;
+}
+.searchbox-prepend .saved-filters-menu {
+  left: 0;
+  right: auto;
+  text-align: left;
+}
+
+
+/* ------------------------------------------------------------------ */
+/*  2. Saved filters — dropdown menu                                  */
+/* ------------------------------------------------------------------ */
+.saved-filters-menu {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  z-index: 1050;
+  min-width: 280px;
+  background: #fff;
+  border: 1px solid #e3e6ea;
+  border-radius: 8px;
+  box-shadow:
+    0 1px 2px  rgba(16,24,40,0.04),
+    0 8px 24px rgba(16,24,40,0.08);
+  animation: savedFiltersIn .12s ease-out;
+}
+@keyframes savedFiltersIn {
+  from { opacity: 0; transform: translateY(-2px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+.saved-filters-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: .65rem .85rem .5rem;
+  border-bottom: 1px solid #eef0f3;
+}
+.saved-filters-title {
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: #6c757d;
+}
+.saved-filters-hint {
+  font-size: .6875rem;
+  color: #adb5bd;
+  font-style: italic;
+}
+.saved-filter-empty {
+  padding: 1.1rem .85rem;
+  font-size: .8125rem;
+  text-align: center;
+  color: #868e96;
+}
+
+
+/* ------------------------------------------------------------------ */
+/*  3. Saved filters — list rows                                      */
+/* ------------------------------------------------------------------ */
+.saved-filter-list {
+  list-style: none;
+  margin: 0;
+  padding: .25rem 0;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.saved-filter-item {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  position: relative;
+}
+.saved-filter-item + .saved-filter-item {
+  border-top: 1px solid #f3f4f6;
+}
+.saved-filter-item:hover            { background: #f7f9fc; }
+.saved-filter-item.is-default       { background: #fbfaf3; }
+.saved-filter-item.is-default:hover { background: #f7f3e3; }
+.saved-filter-item.is-applied       { background: #f0f8f3; }
+.saved-filter-item.is-applied:hover { background: #e3f1e9; }
+.saved-filter-item.is-applied.is-default { background: #f6f7e9; }
+/* dirty = applied + user edits diverge from stored payload */
+.saved-filter-item.is-applied.is-dirty       { background: #fff7e9; }
+.saved-filter-item.is-applied.is-dirty:hover { background: #fdeed2; }
+
+/* Row body: marker + name + tags (button so the whole row is clickable) */
+.saved-filter-apply {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  min-width: 0;
+  padding: .5rem .85rem;
+  background: transparent;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+  color: #212529;
+}
+.saved-filter-apply:focus {
+  outline: none;
+  background: #eaf3ff;
+}
+.saved-filter-marker {
+  flex: 0 0 auto;
+  width: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ced4da;
+  font-size: .75rem;
+}
+.saved-filter-item.is-applied .saved-filter-marker         { color: #198754; }
+.saved-filter-item.is-applied.is-dirty .saved-filter-marker{ color: #c69400; }
+
+.saved-filter-name {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo,
+               Consolas, "Liberation Mono", monospace;
+  font-size: .8125rem;
+}
+/* Micro tags (auto / modified) — same shape, different colour */
+.saved-filter-default-tag,
+.saved-filter-dirty-tag {
+  flex: 0 0 auto;
+  font-size: .625rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: .05rem .35rem;
+  border-radius: 3px;
+}
+.saved-filter-default-tag { color: #8a6d00; background: #fff4c2; }
+.saved-filter-dirty-tag   { color: #8a4a00; background: #ffe9c2; }
+
+
+/* ------------------------------------------------------------------ */
+/*  4. Saved filters — row actions (rename, star, delete, update,     */
+/*     revert). Hover-revealed except on default and dirty rows.      */
+/* ------------------------------------------------------------------ */
+.saved-filter-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding-right: .35rem;
+  opacity: 0;
+  transition: opacity .12s ease;
+}
+.saved-filter-item:hover         .saved-filter-actions,
+.saved-filter-item:focus-within  .saved-filter-actions,
+.saved-filter-item.is-default    .saved-filter-actions,
+.saved-filter-item.is-dirty      .saved-filter-actions {
+  opacity: 1;
+}
+.saved-filter-action {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  width: 1.4rem;
+  height: 1.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  color: #adb5bd;
+  cursor: pointer;
+  transition: color .12s ease, background-color .12s ease;
+}
+/* Pin every action glyph to the same optical box — FontAwesome's
+   per-icon metrics make star/check/×/pen otherwise vary noticeably. */
+.saved-filter-action i {
+  font-size: .75rem;
+  line-height: 1;
+  width: .8rem;
+  height: .8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.saved-filter-action:hover {
+  background: rgba(0,0,0,.05);
+  color: #212529;
+}
+.saved-filter-action-star.is-on        { color: #e0a800; }
+.saved-filter-action-star.is-on:hover  { color: #c69400; }
+.saved-filter-action-delete:hover {
+  color: #c92a2a;
+  background: rgba(201,42,42,.08);
+}
+.saved-filter-action-update        { color: #0b5ed7; }
+.saved-filter-action-update:hover  { background: rgba(11,94,215,.08); color: #0b5ed7; }
+.saved-filter-action-revert:hover  { background: rgba(0,0,0,.05); color: #495057; }
+
+
+/* ------------------------------------------------------------------ */
+/*  5. Saved filters — footer (Save current view button)              */
+/* ------------------------------------------------------------------ */
+.saved-filters-footer {
+  padding: .5rem .65rem .65rem;
+  border-top: 1px solid #eef0f3;
+}
+.saved-filters-save {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  width: 100%;
+  padding: .4rem .65rem;
+  background: #fff;
+  color: #0b5ed7;
+  border: 1px dashed #9ec5ff;
+  border-radius: 6px;
+  font-size: .8125rem;
+  cursor: pointer;
+  transition: background-color .12s ease, border-color .12s ease;
+}
+.saved-filters-save:hover {
+  background: #eaf3ff;
+  border-color: #0b5ed7;
+  border-style: solid;
+}
+.saved-filters-save i { font-size: .7rem; }
+
+
+/* ------------------------------------------------------------------ */
+/*  6. Saved filters — inline editors (save / rename)                 */
+/* ------------------------------------------------------------------ */
+.saved-filter-edit,
+.saved-filters-save-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  background: #f4f7fb;
+}
+.saved-filter-edit       { padding: .35rem .5rem; }
+.saved-filters-save-row  { padding: .5rem .65rem; border-top: 1px solid #eef0f3; }
+
+.saved-filter-edit-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .8125rem;
+  padding: .25rem .5rem;
+  background: #fff;
+  border: 1px solid #c5d6ee;
+  border-radius: 4px;
+  color: #212529;
+  outline: none;
+  transition: border-color .12s ease, box-shadow .12s ease;
+}
+.saved-filter-edit-input:focus {
+  border-color: #6ea8fe;
+  box-shadow: 0 0 0 .15rem rgba(11,94,215,.15);
+}
+.saved-filter-edit-confirm,
+.saved-filter-edit-cancel {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  background: #fff;
+  border: 1px solid #d8dde3;
+  border-radius: 4px;
+  font-size: .75rem;
+  color: #495057;
+  cursor: pointer;
+  transition: background-color .12s ease, border-color .12s ease,
+              color .12s ease;
+}
+.saved-filter-edit-confirm        { color: #0b5ed7; border-color: #9ec5ff; }
+.saved-filter-edit-confirm:hover  { background: #0b5ed7; border-color: #0b5ed7; color: #fff; }
+.saved-filter-edit-cancel:hover   { background: #f1f3f5; border-color: #adb5bd; color: #212529; }
+
+
+/* ------------------------------------------------------------------ */
+/*  7. Saved filters — inline delete confirm                          */
+/* ------------------------------------------------------------------ */
+.saved-filter-confirm {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: .5rem;
+  padding: .45rem .65rem;
+  background: #fdf3f3;
+  border-top: 1px solid #f3dada;
+  border-bottom: 1px solid #f3dada;
+  font-size: .8125rem;
+  color: #842029;
+}
+.saved-filter-confirm-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.saved-filter-confirm-text strong {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 600;
+  color: #4d0a0a;
+}
+.saved-filter-confirm-actions {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 4px;
+}
+.saved-filter-confirm-cancel,
+.saved-filter-confirm-confirm {
+  flex: 0 0 auto;
+  width: 1.4rem;
+  height: 1.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 4px;
+  border: 1px solid;
+  cursor: pointer;
+  background: #fff;
+  transition: background-color .12s ease, border-color .12s ease,
+              color .12s ease;
+}
+.saved-filter-confirm-cancel       { border-color: #d8dde3; color: #495057; }
+.saved-filter-confirm-cancel:hover { background: #f1f3f5; border-color: #adb5bd; color: #212529; }
+.saved-filter-confirm-confirm      { border-color: #e6b4b4; color: #842029; }
+.saved-filter-confirm-confirm:hover{ background: #c92a2a; border-color: #c92a2a; color: #fff; }
+.saved-filter-confirm-cancel i,
+.saved-filter-confirm-confirm i { font-size: .75rem; line-height: 1; }
+
+
+/* ================================================================== */
+/* Column header — title (ellipsis) + sort arrows + filter funnel     */
+/* ================================================================== */
+
+/* Every header cell shares the same height so cells without controls
+   don't collapse to a shorter line and the row bobs up and down. */
+.ajax-contents-table thead th {
+  vertical-align: middle !important;
+  height: 2.5rem;
+  line-height: 1.25;
+}
+
+/* Inner flex container: title flexes (shrinks with ellipsis), the
+   controls cluster stays fully visible on the right edge. */
+.ajax-contents-table thead th .column-header-inner {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  width: 100%;
+  min-width: 0;
+}
+.ajax-contents-table thead th .column-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.ajax-contents-table thead th .column-header-controls {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  white-space: nowrap;  /* arrows + funnel never split */
+}
+
+/* --- Sort arrows: hidden until hover, revealed on the active col --- */
+.column-sort-arrows {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: 0;
+  vertical-align: middle;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity .12s ease;
+}
+.ajax-contents-table th.sortable:hover .column-sort-arrows,
+.ajax-contents-table th.active         .column-sort-arrows {
+  opacity: 1;
+}
+.column-sort-arrow {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  width: 14px;
+  height: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #adb5bd;
+  font-size: .55rem;
+  border-radius: 2px;
+  transition: color .12s ease, background-color .12s ease;
+}
+.column-sort-arrow:hover  { color: #0b5ed7; background: rgba(11,94,215,.08); }
+.column-sort-arrow.active { color: #0b5ed7; }
+/* Mute the non-active arrow when one is active, so the eye reads the
+   current direction at a glance. */
+.ajax-contents-table th.active .column-sort-arrow:not(.active) {
+  color: #ced4da;
+}
+
+/* --- Filter funnel: hidden until hover; permanent when filtering --- */
+.ajax-contents-table th .column-filter-toggle {
+  vertical-align: middle;
+  opacity: 0;
+  transition: opacity .12s ease;
+}
+.ajax-contents-table th:hover         .column-filter-toggle,
+.ajax-contents-table th:focus-within  .column-filter-toggle,
+.ajax-contents-table th .column-filter-toggle.active {
+  opacity: 1;
+}
+
+
+/* ================================================================== */
+/* Column filter row — refined search strip below the header          */
+/* ================================================================== */
+.column-filter-row > td {
+  background: #fafbfc;
+  border-top: 1px solid #eef0f3;
+  border-bottom: 1px solid #eef0f3;
+  padding: .3rem .4rem;
+}
+.column-filter-row > td.empty { background: #fafbfc; }
+
+.column-filter-row .input-group-sm > .form-control,
+.column-filter-row .searchable-select input {
+  background: #fff;
+  border-color: #d8dde3;
+  border-radius: 4px;
+  box-shadow: none;
+  transition: border-color .12s ease, box-shadow .12s ease;
+}
+.column-filter-row .input-group-sm > .form-control:focus,
+.column-filter-row .searchable-select input:focus {
+  border-color: #9ec5ff;
+  box-shadow: 0 0 0 .15rem rgba(0,123,255,.15);
+}
+.column-filter-row .btn-outline-secondary {
+  background: #fff;
+  border-color: #d8dde3;
+  color: #6c757d;
+  transition: color .12s ease, background-color .12s ease,
+              border-color .12s ease;
+}
+.column-filter-row .btn-outline-secondary:hover {
+  background: #f1f3f5;
+  border-color: #adb5bd;
+  color: #212529;
 }

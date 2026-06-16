@@ -43,7 +43,11 @@ class SearchBox extends React.Component
 
   on_clear_button_click: (event) ->
     ###
-     * Event handler when the clear button was clicked
+     * Event handler when the clear button was clicked.
+     *
+     * When the parent provides on_reset, this button resets the
+     * entire view (all column filters, sort, review state, search
+     * term). Otherwise it only clears the search term.
     ###
 
     # prevent form submission
@@ -52,8 +56,10 @@ class SearchBox extends React.Component
     # flush the search field value
     @search_input_field.current.value = ""
 
-    # call the parent event handler with the current search value
-    @props.on_search ""
+    if @props.on_reset
+      @props.on_reset()
+    else
+      @props.on_search ""
 
   get_search_value: ->
     ###
@@ -66,7 +72,11 @@ class SearchBox extends React.Component
     if @props.show_search is no
       return null
 
-    <div className="input-group input-group-sm">
+    <div className="input-group input-group-sm searchbox">
+      {@props.prepend and
+        <span className="input-group-prepend searchbox-prepend">
+          {@props.prepend}
+        </span>}
       <input type="text"
              autoFocus={true}
              className="form-control"
@@ -76,6 +86,7 @@ class SearchBox extends React.Component
              placeholder={this.props.placeholder}/>
       <span className="input-group-append">
         <button className="btn btn-outline-secondary"
+                title={if @props.on_reset then _t("Reset view") else _t("Clear search")}
                 onClick={@on_clear_button_click}>
           <i className="fas fa-undo"></i>
         </button>
