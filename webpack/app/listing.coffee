@@ -869,13 +869,18 @@ class ListingController extends React.Component
    * Internal — call sites should use the public get_columns* methods.
   ###
   _merged_column_config: ->
-    # Include every server-defined column.  Downstream consumers
-    # (e.g. TableTransposedCell) look up columns by key from this
-    # dict and would crash if a key were missing.  Visibility
-    # filtering by review_state happens later in get_visible_columns.
-    server_keys = Object.keys(@state.columns or {})
+    # Pass the full columns dict (not just the keys) so the merge
+    # helper can honor the server's default `toggle` for columns the
+    # user has never customised.  Skipping this caused every column
+    # to appear visible on first load, even ones the server marked
+    # `toggle: false` by default.
+    #
+    # Visibility filtering by review_state still happens later in
+    # get_visible_columns — every server-defined key stays in the
+    # merged config so downstream consumers (e.g. TableTransposedCell)
+    # can still look columns up by key.
     stored = read_column_config @get_storage_id()
-    return merge_column_config stored, server_keys
+    return merge_column_config stored, (@state.columns or {})
 
   _persist_column_config: (config) ->
     write_column_config @get_storage_id(), config

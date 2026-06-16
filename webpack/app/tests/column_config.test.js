@@ -93,6 +93,32 @@ describe("merge_column_config", () => {
     // the first.
     expect(visibility_from(merged).A).toBe(true)
   })
+
+  it("honors server default toggle when columns dict is passed", () => {
+    // Server marks B hidden by default; with no stored config we
+    // must respect that and not blindly default to visible.
+    const server_columns = {
+      A: { toggle: true },
+      B: { toggle: false },
+      C: {},                   // missing toggle → visible
+    }
+    const merged = merge_column_config([], server_columns)
+    expect(visibility_from(merged)).toEqual({
+      A: true, B: false, C: true,
+    })
+  })
+
+  it("stored toggle still wins over server default", () => {
+    // User has explicitly shown B; the server default (hidden) must
+    // not clobber that on subsequent loads.
+    const stored = [{ key: "B", toggle: true }]
+    const server_columns = {
+      A: { toggle: true },
+      B: { toggle: false },
+    }
+    const merged = merge_column_config(stored, server_columns)
+    expect(visibility_from(merged)).toEqual({ A: true, B: true })
+  })
 })
 
 

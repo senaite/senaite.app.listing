@@ -77,18 +77,48 @@ export function clear_column_config(storage_id) {
  * `allowed_keys`, if provided, limits the result to keys the current
  * review_state declares as allowed; unknown keys are dropped.
  *
- * @param {Array}  stored        Stored config `[{key, toggle}]` (may be empty)
- * @param {Array}  server_keys   Keys defined in the server `columns` dict
- * @param {Array=} allowed_keys  Optional keys allowed by the active review_state
+ * `server_columns` may be either:
+ *   - an Array of keys (legacy): all newly-appended entries default to
+ *     `toggle: true` because no server-side default is available
+ *   - an Object dict `{key: {toggle, ...}}`: the server's per-column
+ *     `toggle` value is honored when appending NEW entries, so columns
+ *     the server marks hidden stay hidden on first render.
+ *
+ * Stored entries always win for keys already in the stored config —
+ * the user has expressed a preference and we respect it.
+ *
+ * @param {Array}         stored         Stored config `[{key, toggle}]`
+ * @param {Array|Object}  server_columns Keys or `{key: column}` dict
+ * @param {Array=}        allowed_keys   Optional review_state-allowed keys
  * @returns {Array} merged config `[{key, toggle}]`
  */
-export function merge_column_config(stored, server_keys, allowed_keys) {
+export function merge_column_config(stored, server_columns, allowed_keys) {
   stored = Array.isArray(stored) ? stored : [];
-  server_keys = Array.isArray(server_keys) ? server_keys : [];
+
+  let server_keys;
+  let server_defaults;
+  if (Array.isArray(server_columns)) {
+    server_keys = server_columns;
+    server_defaults = null;
+  } else if (server_columns && typeof server_columns === "object") {
+    server_keys = Object.keys(server_columns);
+    server_defaults = server_columns;
+  } else {
+    server_keys = [];
+    server_defaults = null;
+  }
+
   const allowed = (allowed_keys && allowed_keys.length > 0)
     ? new Set(allowed_keys)
     : null;
   const is_allowed = (key) => !allowed || allowed.has(key);
+
+  const default_toggle_for = (key) => {
+    if (!server_defaults) return true;
+    const col = server_defaults[key];
+    if (!col || typeof col !== "object") return true;
+    return col.toggle !== false;  // server default: visible unless false
+  };
 
   const server_set = new Set(server_keys);
   const seen = new Set();
@@ -108,12 +138,15 @@ export function merge_column_config(stored, server_keys, allowed_keys) {
     seen.add(entry.key);
   }
 
-  // 2: append server keys that weren't in stored, in server order,
-  // visible by default. This auto-detects new add-on columns.
+  // 2: append server keys that weren't in stored, in server order.
+  // Honor the server's default `toggle` so columns the server hides
+  // (e.g. opt-in detail columns) stay hidden until the user reveals
+  // them.  This is what auto-detects new add-on columns AND respects
+  // their declared default visibility.
   for (const key of server_keys) {
     if (seen.has(key)) continue;
     if (!is_allowed(key)) continue;
-    out.push({ key, toggle: true });
+    out.push({ key, toggle: default_toggle_for(key) });
     seen.add(key);
   }
 
