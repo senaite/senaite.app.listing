@@ -2614,6 +2614,7 @@ class ListingController extends React.Component
                 form_id={@form_id}
                 allow_edit={@state.allow_edit}
                 on_header_column_click={@sortBy}
+                on_columns_order_change={@setColumnsOrder if @show_column_toggles}
                 on_select_checkbox_checked={@on_select_checkbox_checked}
                 on_multi_select_checkbox_checked={@on_multi_select_checkbox_checked}
                 on_context_menu={@on_column_config_click}

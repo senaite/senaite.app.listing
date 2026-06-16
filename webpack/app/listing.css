@@ -970,6 +970,54 @@ selected elements from multiselect
   white-space: nowrap;  /* arrows + funnel never split */
 }
 
+/* --- Header DnD: grip handle, grab cursor, ghost, drop indicator ---- */
+/* Sits at the trailing edge of the controls cluster (right of the
+   funnel).  Hidden by default; only the hovered or actively-dragged
+   <th> shows it.  visibility (not display) keeps the slot width
+   stable so the title doesn't reflow when the cursor enters. */
+.ajax-contents-table thead th .column-drag-handle {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  margin-left: .15rem;
+  color: var(--sf-muted, #8a94a6);
+  font-size: .8em;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .12s ease, color .12s ease;
+  cursor: grab;
+}
+.ajax-contents-table thead th .column-drag-handle:active { cursor: grabbing; }
+.ajax-contents-table thead th:hover .column-drag-handle,
+.ajax-contents-table thead th.is-dragging .column-drag-handle {
+  opacity: .9;
+  visibility: visible;
+  color: var(--sf-accent, #1976d2);
+}
+.ajax-contents-table thead th.reorderable {
+  /* Grab cursor lives on the handle only — see .column-drag-handle
+     below — so the funnel and sort buttons keep their normal feel. */
+  position: relative;
+}
+.ajax-contents-table thead th.reorderable.is-dragging { opacity: .4; }
+
+/* Drop indicator: a 2px accent rule along the leading/trailing edge
+   of the hovered cell.  Mirrors the above/below indicator in the
+   column-config popover, just rotated 90°. */
+.ajax-contents-table thead th.is-drop-before::before,
+.ajax-contents-table thead th.is-drop-after::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--sf-accent, #1976d2);
+  pointer-events: none;
+  z-index: 2;
+}
+.ajax-contents-table thead th.is-drop-before::before { left: -1px; }
+.ajax-contents-table thead th.is-drop-after::after  { right: -1px; }
+
 /* --- Sort arrows: hidden until hover, revealed on the active col --- */
 .column-sort-arrows {
   display: inline-flex;

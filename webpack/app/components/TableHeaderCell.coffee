@@ -108,6 +108,7 @@ class TableHeaderCell extends React.Component
       desc_cls.push "active"
 
     <th title={@props.alt}
+        ref={@props.outer_ref}
         index={@props.index}
         sort_order={@props.sort_order}
         className={@props.className}
@@ -123,7 +124,7 @@ class TableHeaderCell extends React.Component
         <span
           className="column-title"
           dangerouslySetInnerHTML={{__html: @props.title}}></span>
-        {(sortable or show_filter_button) and
+        {(sortable or show_filter_button or @props.draggable) and
           <span className="column-header-controls">
             {sortable and
               <span className="column-sort-arrows">
@@ -154,6 +155,20 @@ class TableHeaderCell extends React.Component
                 <i className="fas fa-filter"></i>
               </button>
             }
+            {###
+             Drag affordance sits at the trailing edge of the controls
+             cluster, right of the funnel.  Hidden by default; the
+             parent <th>:hover reveals it (see listing.css).  The <th>
+             itself is the drag source — this is purely the cue.
+            ###}
+            {@props.draggable and
+              <span
+                className="column-drag-handle"
+                aria-hidden="true"
+                title={_t("Drag to reorder")}>
+                <i className="fas fa-grip-vertical"></i>
+              </span>
+            }
           </span>
         }
       </div>
@@ -174,6 +189,12 @@ arePropsEqual = (prev, next) ->
   return false if prev.onClick isnt next.onClick
   return false if prev.on_sort_click isnt next.on_sort_click
   return false if prev.on_filter_toggle isnt next.on_filter_toggle
+  # Header DnD: the outer_ref attaches react-dnd drag/drop sources
+  # to the underlying <th>. Identity changes on every render via the
+  # wrapper, but the underlying DOM node is stable, so re-applying
+  # is cheap.
+  return false if prev.outer_ref isnt next.outer_ref
+  return false if prev.draggable isnt next.draggable
   # sort state only matters for this cell when it IS the sort column
   return false if prev.sort_on isnt next.sort_on
   return false if prev.sort_order isnt next.sort_order

@@ -1,5 +1,6 @@
 export const ItemTypes = {
-  ROW: "row"
+  ROW: "row",
+  COLUMN: "column",
 }
 
 export const CONFIRM_TRANSITION_IDS = [
