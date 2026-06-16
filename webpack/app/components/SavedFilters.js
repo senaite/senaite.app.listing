@@ -124,16 +124,21 @@ function SavedFilters(props) {
 
   // ---------- outside-click → close ----------
 
+  // `mousedown` (not `click`) so the dismiss fires before any outer
+  // control's click handler — matches the behaviour of useDismissOn
+  // for the column-config popover and avoids the case where clicking
+  // an unrelated trigger first registers as "close the menu, then
+  // open the trigger's panel" in the wrong order.
   useEffect(() => {
     if (!open) return undefined;
-    const on_doc_click = (event) => {
+    const on_outside = (event) => {
       if (root_ref.current && !root_ref.current.contains(event.target)) {
         set_open(false);
         set_mode(IDLE);
       }
     };
-    document.addEventListener("click", on_doc_click);
-    return () => document.removeEventListener("click", on_doc_click);
+    document.addEventListener("mousedown", on_outside);
+    return () => document.removeEventListener("mousedown", on_outside);
   }, [open]);
 
   // ---------- write-through helpers ----------

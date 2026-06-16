@@ -1,5 +1,6 @@
 import {
   merge_column_config,
+  move_key,
   toggle_in,
   reorder_in,
   visibility_from,
@@ -118,6 +119,42 @@ describe("merge_column_config", () => {
     }
     const merged = merge_column_config(stored, server_columns)
     expect(visibility_from(merged)).toEqual({ A: true, B: true })
+  })
+})
+
+
+describe("move_key", () => {
+
+  it("moves a key to land BEFORE the target", () => {
+    expect(move_key(["A", "B", "C", "D"], "D", "B", "before"))
+      .toEqual(["A", "D", "B", "C"])
+  })
+
+  it("moves a key to land AFTER the target", () => {
+    expect(move_key(["A", "B", "C", "D"], "A", "C", "after"))
+      .toEqual(["B", "C", "A", "D"])
+  })
+
+  it("is a no-op when moving onto itself", () => {
+    expect(move_key(["A", "B", "C"], "B", "B", "after"))
+      .toEqual(["A", "B", "C"])
+  })
+
+  it("returns the original list when the target is absent", () => {
+    expect(move_key(["A", "B"], "A", "X", "after"))
+      .toEqual(["A", "B"])
+  })
+
+  it("treats null/undefined position as 'before'", () => {
+    // Implementation contract: only "after" inserts after; anything
+    // else inserts before. Documenting this so callers do not pass
+    // garbage and expect a particular slot.
+    expect(move_key(["A", "B", "C"], "C", "B", "weird"))
+      .toEqual(["A", "C", "B"])
+  })
+
+  it("tolerates an empty keys list", () => {
+    expect(move_key([], "A", "B", "after")).toEqual([])
   })
 })
 

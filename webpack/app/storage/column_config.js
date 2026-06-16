@@ -193,6 +193,27 @@ export function toggle_in(config, key) {
 
 
 /**
+ * Move `dragged_key` so it lands at the slot indicated by
+ * (`target_key`, `position`) inside `keys`. Position is one of
+ * "before" | "after". Stable: only the moved key changes its slot.
+ *
+ * Used by the header-cell drag-and-drop reorder; the resulting key
+ * list is what the controller persists via `reorder_in`.
+ */
+export function move_key(keys, dragged_key, target_key, position) {
+  const without = (keys || []).filter((k) => k !== dragged_key);
+  const idx = without.indexOf(target_key);
+  if (idx < 0) return keys || [];
+  const insert_at = position === "after" ? idx + 1 : idx;
+  return [
+    ...without.slice(0, insert_at),
+    dragged_key,
+    ...without.slice(insert_at),
+  ];
+}
+
+
+/**
  * Reorder a config to match the given key sequence.  Keys not in the
  * sequence keep their relative order at the end (defensive against
  * partial orders).

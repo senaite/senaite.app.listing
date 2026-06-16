@@ -2,8 +2,9 @@ import { useCallback, useRef } from "react";
 import { useDrag, useDrop } from "react-dnd";
 
 import Checkbox from "./Checkbox.coffee";
-import TableHeaderCell from "./TableHeaderCell.coffee";
+import TableHeaderCell from "./TableHeaderCell.js";
 import { ItemTypes } from "./Constants";
+import { move_key } from "../storage/column_config.js";
 
 
 function is_required_column(folderitems, key) {
@@ -18,19 +19,6 @@ function is_sortable(column, key, sortable_columns) {
   if (column.index) return true;
   if (sortable_columns && sortable_columns.includes(key)) return true;
   return false;
-}
-
-
-function reorder_keys(keys, dragged, target, position) {
-  const without = keys.filter((k) => k !== dragged);
-  const idx = without.indexOf(target);
-  if (idx < 0) return keys;
-  const insert_at = position === "after" ? idx + 1 : idx;
-  return [
-    ...without.slice(0, insert_at),
-    dragged,
-    ...without.slice(insert_at),
-  ];
 }
 
 
@@ -74,7 +62,7 @@ function DraggableHeaderCell(props) {
     end: (item, monitor) => {
       if (!monitor.didDrop()) return;
       if (!item.target_key || item.target_key === item.key) return;
-      const next = reorder_keys(
+      const next = move_key(
         visible_columns, item.key, item.target_key,
         item.position || "after");
       window.requestAnimationFrame(() => on_columns_order_change(next));

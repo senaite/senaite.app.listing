@@ -88,6 +88,7 @@ class ListingController extends React.Component
     @on_api_error = @on_api_error.bind @
     @on_column_config_click = @on_column_config_click.bind @
     @close_column_config = @close_column_config.bind @
+    @resetColumns = @resetColumns.bind @
     # Anchor for the column-config popover so it can attach to a
     # portal at the document root yet still position itself under the
     # `⋯` trigger button.
@@ -688,11 +689,6 @@ class ListingController extends React.Component
   ###
   toggleColumn: (key) ->
     console.debug "ListingController::toggleColumn: key=#{key}"
-
-    # historical: "reset" was overloaded onto this method as a magic
-    # key; new code should call resetColumns() directly.
-    return @resetColumns() if key is "reset"
-
     config = @_merged_column_config()
     next_config = toggle_in config, key
     @_persist_column_config next_config
@@ -1032,16 +1028,6 @@ class ListingController extends React.Component
   clearAppliedPreset: ->
     console.debug "ListingController::clearAppliedPreset (→ resetView)"
     return @resetView()
-
-  ###*
-   * Re-apply the currently applied preset, discarding any user edits.
-   * Used by the SavedFilters dropdown's "Revert" action.
-   *
-   * @param preset {object} the preset object {id, name, payload, ...}
-   * @returns {bool} true
-  ###
-  revertToSavedFilter: (preset) ->
-    return @applySavedFilter(preset)
 
   ###*
    * Reset the listing to its initial state — drops every filter,
@@ -2586,15 +2572,25 @@ class ListingController extends React.Component
           <div className="row">
             <div className="col-sm-12 table-responsive">
               {@state.show_column_toggles and
-                <button
-                  type="button"
-                  ref={@column_config_anchor_ref}
-                  onClick={@on_column_config_click}
-                  className="btn btn-sm btn-outline-secondary pull-right tcc-trigger"
-                  title={_t("Configure Table Columns")}>
-                  <i className="fas fa-table-columns mr-1"></i>
-                  {_t("Display Columns")}
-                </button>}
+                <div className="pull-right tcc-trigger-group">
+                  <button
+                    type="button"
+                    ref={@column_config_anchor_ref}
+                    onClick={@on_column_config_click}
+                    className="btn btn-sm btn-outline-secondary tcc-trigger"
+                    title={_t("Configure Table Columns")}>
+                    <i className="fas fa-table-columns mr-1"></i>
+                    {_t("Display Columns")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={@resetColumns}
+                    className="btn btn-link btn-sm tcc-reset"
+                    title={_t("Reset column visibility and order to the defaults")}
+                    aria-label={_t("Reset columns")}>
+                    <i className="fas fa-rotate-left"></i>
+                  </button>
+                </div>}
               {@state.show_column_config and
                 <TableColumnConfig
                   title={_t("Configure Table Columns")}
@@ -2604,7 +2600,8 @@ class ListingController extends React.Component
                   anchor_ref={@column_config_anchor_ref}
                   on_request_close={@close_column_config}
                   on_column_toggle_click={@toggleColumn}
-                  on_columns_order_change={@setColumnsOrder}/>}
+                  on_columns_order_change={@setColumnsOrder}
+                  on_reset={@resetColumns}/>}
               <ContextMenu
                 id={@row_context_menu_id}
                 menu={@state.row_context_menu}

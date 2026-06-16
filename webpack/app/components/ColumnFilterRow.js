@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import SearchableSelect from "./SearchableSelect.js";
 
 
@@ -80,6 +80,11 @@ function ColumnFilterRow(props) {
 
   // Map column_key → bool while a fetch is in flight.
   const [loading_values, set_loading_values] = useState({});
+  // Mirror in a ref so `fetch_index_values` can read it without
+  // listing `loading_values` in its dep array (see comment on the
+  // useCallback below).
+  const loading_values_ref = useRef(loading_values);
+  loading_values_ref.current = loading_values;
 
   // Use a ref to force re-render when we hit a fresh cache slot.
   const [, force_render] = useState(0);
@@ -108,6 +113,11 @@ function ColumnFilterRow(props) {
     set_loading_values((prev) => ({ ...prev, [column_key]: is_loading }));
   }, []);
 
+  // The in-flight guard reads the loading map through a ref so it
+  // does not need to live in the deps array. Putting `loading_values`
+  // in deps means every `set_loading` recreates this callback, which
+  // in turn recreates `onFocus={() => fetch_index_values(key)}` on
+  // every SearchableSelect for every keystroke that toggles loading.
   const fetch_index_values = useCallback((column_key, opts) => {
     if (get_cached(column_key)) {
       // bump_render() is only useful when the call originates outside
@@ -118,7 +128,7 @@ function ColumnFilterRow(props) {
       if (opts?.bump !== false) bump_render();
       return;
     }
-    if (loading_values[column_key]) return;
+    if (loading_values_ref.current[column_key]) return;
     if (!api || typeof api.fetch_index_values !== "function") return;
 
     set_loading(column_key, true);
@@ -137,7 +147,7 @@ function ColumnFilterRow(props) {
         set_cached(column_key, { values: [], index_type: null });
         set_loading(column_key, false);
       });
-  }, [api, get_cached, set_cached, set_loading, loading_values, bump_render]);
+  }, [api, get_cached, set_cached, set_loading, bump_render]);
 
   const fetch_active_filter_values = useCallback(() => {
     for (const key of active_column_filters || []) {
@@ -166,14 +176,15 @@ function ColumnFilterRow(props) {
   // Keep helpers accessible to the effect via refs so the effect can
   // omit them from its dependency array — otherwise every useCallback
   // recreation would re-run the effect even when nothing observable
-  // has changed.
-  const loading_values_ref = useRef(loading_values);
-  loading_values_ref.current = loading_values;
+  // has changed. (`loading_values_ref` is established at the top of
+  // the component so the fetch callback can share it.)
   const fetch_active_filter_values_ref = useRef(fetch_active_filter_values);
   fetch_active_filter_values_ref.current = fetch_active_filter_values;
 
   // Precompute the column_filters signature once per render and reuse.
-  const column_filters_sig = stable_stringify(column_filters || {});
+  const column_filters_sig = useMemo(
+    () => stable_stringify(column_filters || {}),
+    [column_filters]);
 
   useEffect(() => {
     const prev_active = prev_active_ref.current;

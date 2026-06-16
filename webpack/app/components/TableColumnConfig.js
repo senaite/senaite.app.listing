@@ -28,19 +28,22 @@ const matches_search = (key, column, needle) => {
  * by drag handle) and hidden (flat, restore with one click) — sharing
  * a search input and a counter at the top.
  *
- * Props (unchanged from the legacy CoffeeScript component):
+ * Props:
  *   id, className, title, description
  *   columns                  {key: {title, toggle, ...}}
  *   columns_order            [key]
- *   on_column_toggle_click   (key) → void; receives "reset" for the
- *                            reset-to-defaults action
+ *   on_column_toggle_click   (key) → void
  *   on_columns_order_change  ([key]) → void
+ *   on_reset                 () → void; optional, falls back to a
+ *                            no-op (the popover hides the button)
+ *   anchor_ref               React ref of the trigger element
+ *   on_request_close         () → void; popover dismiss
  */
 function TableColumnConfig(props) {
   const {
     id, className, title, description,
     columns, columns_order,
-    on_column_toggle_click, on_columns_order_change,
+    on_column_toggle_click, on_columns_order_change, on_reset,
     anchor_ref, on_request_close,
   } = props;
 
@@ -111,8 +114,9 @@ function TableColumnConfig(props) {
   }, [on_column_toggle_click, order, columns]);
 
   const reset = useCallback(() => {
-    on_column_toggle_click && on_column_toggle_click("reset");
-  }, [on_column_toggle_click]);
+    on_reset && on_reset();
+  }, [on_reset]);
+  const can_reset = typeof on_reset === "function";
 
   // ---------- drag & drop ----------
 
@@ -235,16 +239,18 @@ function TableColumnConfig(props) {
         )}
       </div>
 
-      <div className="tcc-footer">
-        <button
-          type="button"
-          className="tcc-reset"
-          onClick={reset}
-          title={_t("Reset to default columns and order")}>
-          <i className="fas fa-rotate-left"></i>
-          <span>{_t("Reset columns")}</span>
-        </button>
-      </div>
+      {can_reset && (
+        <div className="tcc-footer">
+          <button
+            type="button"
+            className="tcc-reset"
+            onClick={reset}
+            title={_t("Reset to default columns and order")}>
+            <i className="fas fa-rotate-left"></i>
+            <span>{_t("Reset columns")}</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 

@@ -970,6 +970,22 @@ selected elements from multiselect
   white-space: nowrap;  /* arrows + funnel never split */
 }
 
+/* --- Column-config trigger group: trigger button + small reset --- */
+.tcc-trigger-group { display: inline-flex; align-items: center; gap: .15rem; }
+.tcc-reset {
+  /* Icon-only, muted; promotes to accent on hover so it reads as
+     "secondary action" next to the main trigger. */
+  padding: .15rem .35rem;
+  line-height: 1;
+  font-size: .85rem;
+  color: var(--sf-muted, #8a94a6);
+  text-decoration: none;
+}
+.tcc-reset:hover, .tcc-reset:focus {
+  color: var(--sf-accent, #1976d2);
+  text-decoration: none;
+}
+
 /* --- Header DnD: grip handle, grab cursor, ghost, drop indicator ---- */
 /* Sits at the trailing edge of the controls cluster (right of the
    funnel).  Hidden by default; only the hovered or actively-dragged
@@ -1272,7 +1288,7 @@ selected elements from multiselect
   cursor: grab;
   flex: 0 0 auto;
 }
-.tcc-handle:hover { background: var(--sf-shadow-overlay)); color: var(--sf-fg-muted); }
+.tcc-handle:hover { background: var(--sf-shadow-overlay); color: var(--sf-fg-muted); }
 .tcc-handle:active { cursor: grabbing; }
 .tcc-handle i { font-size: .8125rem; }
 .tcc-handle.is-placeholder {
@@ -1309,7 +1325,7 @@ selected elements from multiselect
               color var(--sf-trans-fast);
 }
 .tcc-hide        { color: var(--sf-fg-faint); }
-.tcc-hide:hover  { color: var(--sf-fg);       background: var(--sf-shadow-overlay)); }
+.tcc-hide:hover  { color: var(--sf-fg);       background: var(--sf-shadow-overlay); }
 .tcc-show        { color: var(--sf-accent);   background: var(--sf-accent-soft); }
 .tcc-show:hover  { color: var(--sf-bg);       background: var(--sf-accent); }
 .tcc-hide i, .tcc-show i { font-size: .75rem; }
