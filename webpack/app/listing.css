@@ -1,381 +1,12 @@
 /* Listing Styles */
 
-/* Colors taken from https://mdbootstrap.com/css/colors/ */
-.ajax-contents-table tbody tr { border-left:2px solid #ddd; }
-.ajax-contents-table tbody tr:last-child { border-bottom:1px solid #ddd; }
-
-/* state sample_due */
-.ajax-contents-table tr.state-sample_due { border-left:2px solid #ffff8d !important; }
-.ajax-contents-table td.result.state-sample_due { border-left:2px solid #ffff8d !important; }
-.ajax-contents-table tr.state-sample_due:hover { background-color: rgba(255, 235, 59, 0.1); }
-
-/* state sample_received */
-.ajax-contents-table tr.state-sample_received { border-left:2px solid #a1887f !important; }
-.ajax-contents-table td.result.state-sample_received { border-left:2px solid #a1887f !important; }
-.ajax-contents-table tr.state-sample_received:hover { background-color: rgba(121, 85, 72, 0.1); }
-
-/* state retracted */
-.ajax-contents-table tr.state-retracted { border-left:2px solid #ff6f00 !important; }
-.ajax-contents-table tr.state-retracted>td:not([rowspan]) { background-color: #eceff1 !important; color: #78909c; font-style: italic; }
-.ajax-contents-table td.result.state-retracted { border-left:2px solid #ff6f00 !important; }
-.ajax-contents-table tr.state-retracted:hover { background-color: rgba(255, 152, 0, 0.1); }
-
-/* state to_be_verified */
-.ajax-contents-table tr.state-to_be_verified { border-left:2px solid #18ffff !important; }
-.ajax-contents-table td.result.state-to_be_verified { border-left:2px solid #18ffff !important; }
-.ajax-contents-table tr.state-to_be_verified:hover { background-color: rgba(0, 188, 212, 0.1); }
-
-/* state verified */
-.ajax-contents-table tr.state-verified { border-left:2px solid #0091ea !important; }
-.ajax-contents-table td.result.state-verified { border-left:2px solid #0091ea !important; }
-.ajax-contents-table tr.state-verified:hover { background-color: rgba(3, 169, 244, 0.2); }
-
-/* state published */
-.ajax-contents-table tr.state-published { border-left:2px solid #00c853 !important; }
-.ajax-contents-table td.result.state-published { border-left:2px solid #00c853 !important; }
-.ajax-contents-table tr.state-published:hover { background-color: rgba(76, 175, 80, 0.2); }
-
-/* state invalid */
-.ajax-contents-table tr.state-invalid { border-left:2px solid #e65100 !important; }
-.ajax-contents-table td.result.state-invalid { border-left:2px solid #e65100 !important; }
-.ajax-contents-table tr.state-invalid:hover { background-color: rgba(244, 67, 54, 0.2); }
-
-/* state rejected */
-.ajax-contents-table tr.state-rejected { border-left:2px solid #abc !important; }
-.ajax-contents-table td.result.state-rejected { border-left:2px solid #abc !important; }
-.ajax-contents-table tr.state-rejected:hover { background-color: #abc; }
-
-/* state assigned */
-.ajax-contents-table tr.state-assigned { border-left:2px solid #ddd; }
-.ajax-contents-table td.result.state-assigned { border-left:2px solid transparent; }
-
-/* state unassigned */
-.ajax-contents-table tr.state-unassigned { border-left:2px solid #ddd; }
-.ajax-contents-table td.result.state-unassigned { border-left:2px solid transparent; }
-
-/* state cancelled */
-.ajax-contents-table tr.state-cancelled { border-left:2px solid #000000 !important; }
-.ajax-contents-table tr.state-cancelled:hover { background-color: rgba(0, 0, 0, 0.1); }
-
-/* worksheet states */
-.ajax-contents-table tr.state-open { border-left:2px solid #ddd  !important; }
-.ajax-contents-table tr.state-empty-worksheet { border-left:2px solid #ddd !important; }
-
-/* transposed worksheet layout*/
-.ajax-contents-table td.transposed.result.empty { cursor: not-allowed; }
-.ajax-contents-table td.transposed.result:hover { background-color: #e3e3e3!important; }
-.ajax-contents-table td.transposed.result.empty:hover { background-color: #e3e3e3; }
-
-/* active/inactive states*/
-.ajax-contents-table tr.state-active { border-left:2px solid transparent; }
-.ajax-contents-table tr.state-inactive { border-left:2px solid #616161; }
-
-.ajax-contents-table th.sortable { cursor: pointer; }
-.ajax-contents-table th.sortable:hover { background-color: #ccc; }
-.ajax-contents-table th:not(.sortable) { cursor: not-allowed; }
-
-/* split-arrow sort indicators are rendered as buttons by
-   TableHeaderCell; the old ::after triangle is no longer needed */
-
-/* category */
-.ajax-contents-table tr.categoryrow { background-color: rgba(96, 125, 139, 0.1)!important; cursor: pointer; font-weight: bold; font-size: 115%; color: #3E4551; }
-
-/* table load mask */
-#table-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1000;
-  height: 100%;
-  width: 100%;
-  background: rgba(255,255,255, 0.6);
-  opacity: 0.6;
-}
-
-/* progress bar */
-.ajax-contents-table tr td div.progress { width: 55px; margin-bottom: 0; height: 17px; }
-.ajax-contents-table tr td div.progress div.progress-bar { color: #f5f5f5; background-color: #33b5e5; line-height: 17px; font-size: 9px; font-weight:bold; }
-.ajax-contents-table tr.state-invalid td div.progress div.progress-bar,
-.ajax-contents-table tr.state-cancelled td div.progress div.progress-bar { background-color: #c9c9c9; }
-
-/* collapsible rows */
-.ajax-contents-table tr.togglerow { cursor: pointer; }
-.ajax-contents-table tr.childrow td:first-child { padding-left: 1em; }
-.ajax-contents-table tr.childrow td:first-child:before { content: "➥ "; }
-
-/* before item */
-.ajax-contents-table tr span.before-item { display: table-cell; line-height: 0; vertical-align: middle; padding-right: 5px; }
-
-/* after item */
-.ajax-contents-table tr span.after-item { display: table-cell; line-height: 0; vertical-align: middle;  padding-left: 5px; }
-
-/* Render table form-controls smaller */
-.ajax-contents-table tr td div.form-group { display: inline-table; }
-
-/* Top toolbar */
-.ajax-contents-table .top-toolbar { padding-bottom: .5em; }
-
-/* Expandable Rows */
-.ajax-contents-table tr.contentrow.child td {
-    border-top:none;
-}
-.ajax-contents-table tr.contentrow.collapsed td:first-child:before,
-.ajax-contents-table tr.contentrow.expanded td:first-child:before,
-.ajax-contents-table tr.contentrow.child td:first-child:before {
-    line-height: normal;
-    padding-right: 0.5rem;
-    vertical-align: bottom;
-    color: #555;
-    cursor: pointer;
-    float: left;
-    width: 20px; /* aligns the toggle symbols */
-}
-/* node levels (0.75rem is the default td padding) */
-.ajax-contents-table th.select-column { width: 10px; }
-.ajax-contents-table td.level-0 { padding-left: 0.75rem; }
-.ajax-contents-table td.level-1 { padding-left: 1.75rem; }
-.ajax-contents-table td.level-2 { padding-left: 2.75rem; }
-.ajax-contents-table td.level-3 { padding-left: 3.75rem; }
-.ajax-contents-table td.level-4 { padding-left: 4.75rem; }
-.ajax-contents-table td.level-5 { padding-left: 5.75rem; }
-.ajax-contents-table td.level-6 { padding-left: 6.75rem; }
-
-.ajax-contents-table tr.contentrow.collapsed td:first-child::before {
-    content: "▶";
-}
-.ajax-contents-table tr.contentrow.expanded td:first-child::before {
-    content: "▼";
-}
-.ajax-contents-table tr.contentrow.child td:first-child::before {
-    content: "⋯";
-}
-.ajax-contents-table tr.contentrow.child.collapsed td:first-child::before {
-    content: "▶";
-}
-.ajax-contents-table tr.contentrow.child.expanded td:first-child::before {
-    content: "▼";
-}
-
-/* Remark Rows */
-.ajax-contents-table tr.remarksrow td {
-    padding: 0;
-    border: none;
-}
-.ajax-contents-table tr.remarksrow td div.remarks {
-    min-height: 20px;
-    padding: 5px;
-    margin: 5px;
-    background-color: #f5f5f5;
-    border: 1px solid #e3e3e3;
-    border-radius: 3px;
-}
-
-/* Multi choice */
-.ajax-contents-table tr td div.multichoice {
-    max-height: 120px;
-    width: 200px;
-    overflow: auto;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-}
-.ajax-contents-table tr td div.multichoice ul {
-    padding: 0;
-    margin: 0;
-}
-.ajax-contents-table tr td div.multichoice li {
-    padding: 6px;
-}
-.ajax-contents-table tr td div.multichoice li:hover {
-    background-color: #f9f9f9;
-}
-
-/* Result multi choice */
-.ajax-contents-table tr td.Result div.multichoice {
-    border: none;
-}
-.ajax-contents-table tr td.Result div.multichoice li {
-    padding: 4px 6px;
-}
-
-/* Multi select */
-.ajax-contents-table tr td div.multiselect ul {
-    padding: 0;
-    margin: 0;
-}
-.ajax-contents-table tr td div.multiselect li {
-    padding: 2px 6px;
-}
-
-/* Multi value
-Same styling as multi-select, cause we do want multi value elements to be fully
-aligned when they are rendered close to multiselect counterpart. Since values
-are always stored in same order, this styling allows multi values to "refer" to
-selected elements from multiselect
-*/
-.ajax-contents-table tr td div.multivalue ul {
-    padding: 0;
-    margin: 0;
-}
-.ajax-contents-table tr td div.multivalue li {
-    padding: 2px 6px;
-}
-
-/* Rowspan support */
-.ajax-contents-table tr td[rowspan] {
-    border: 1px solid #ddd;
-    background-color: white!important;
-}
-.ajax-contents-table tr td[rowspan]:hover {
-    background-color: white!important;
-}
-
-/* borderless table */
-.ajax-contents-table table.table-borderless td { border: none!important; }
-.ajax-contents-table table.table-borderless tr { border: none!important; }
-
-/* Worksheet's slots table */
-.ajax-contents-table table.slot-header-table { margin-bottom: 0px; }
-
-/* Results Unit */
-.ajax-contents-table span.unit { padding: 0 0.25em; color: black; }
-
-
-/* Transposed Cell */
-.ajax-contents-table td.transposed span.before-item { width: 60px }
-.ajax-contents-table td.transposed span.before-item > * { display: block; float: left; padding-right: 5px; }
-.ajax-contents-table td.transposed span.before-item input[type=checkbox] { margin: 0; }
-.ajax-contents-table td.transposed input { margin-right: 10px; }
-.ajax-contents-table td.transposed .before_field { font-size: 85%; display: table-cell; }
-.ajax-contents-table td.transposed .after_field { font-size: 85%; display: table-cell; }
-.ajax-contents-table td.transposed span.readonly { padding-right: 0.5em; }
-
-/* Regular Cell */
-.ajax-contents-table td a.remarks { display: block; }
-
-/* Drag&Drop behavior */
-.ajax-contents-table tr.dragging { opacity: 0; }
-.ajax-contents-table td.dnd { cursor: move; }
-
-/* Column Filter Styles */
-.ajax-contents-table th .column-filter-toggle {
-  padding: 0 0.25rem;
-  margin-left: 0.25rem;
-  opacity: 0.4;
-  border: none;
-  background: transparent;
-  color: inherit;
-  font-size: 0.75em;
-  vertical-align: middle;
-}
-.ajax-contents-table th .column-filter-toggle:hover {
-  opacity: 0.8;
-}
-.ajax-contents-table th .column-filter-toggle.active {
-  opacity: 1;
-  color: #007bff;
-}
-.ajax-contents-table tr.column-filter-row td {
-  padding: 0.25rem 0.5rem;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
-}
-.ajax-contents-table tr.column-filter-row td.empty {
-  background-color: transparent;
-  border-bottom: none;
-}
-.ajax-contents-table tr.column-filter-row .input-group {
-  flex-wrap: nowrap;
-}
-.ajax-contents-table tr.column-filter-row input.form-control,
-.ajax-contents-table tr.column-filter-row select.form-control {
-  min-width: 80px;
-}
-.ajax-contents-table tr.column-filter-row input[type="date"].form-control {
-  min-width: 130px;
-}
-.ajax-contents-table tr.column-filter-row input:disabled,
-.ajax-contents-table tr.column-filter-row select:disabled {
-  background-color: #e9ecef;
-  cursor: not-allowed;
-}
-.ajax-contents-table tr.column-filter-row select.form-control {
-  padding-right: 1.5rem;
-  appearance: auto;
-}
-.ajax-contents-table tr.column-filter-row .input-group-append .btn {
-  border-color: #ced4da;
-}
-/* Ensure searchable-select input has correct border radius in input-group */
-.ajax-contents-table tr.column-filter-row .input-group > .searchable-select > .form-control {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-/* Searchable Select Styles */
-.searchable-select {
-  position: relative;
-  flex: 1;
-}
-.searchable-select input.form-control {
-  width: 100%;
-}
-.searchable-select-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  max-height: 250px;
-  overflow-y: auto;
-  background: white;
-  border: 1px solid #ced4da;
-  border-top: none;
-  border-radius: 0 0 0.25rem 0.25rem;
-  z-index: 1050;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-.searchable-select-option {
-  padding: 0.375rem 0.75rem;
-  cursor: pointer;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.searchable-select-option:hover,
-.searchable-select-option.highlighted {
-  background-color: #e9ecef;
-}
-.searchable-select-option.selected {
-  background-color: #007bff;
-  color: white;
-}
-.searchable-select-option.selected.highlighted {
-  background-color: #0056b3;
-}
-.searchable-select-hint {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.75rem;
-  color: #6c757d;
-  background: #f8f9fa;
-  border: 1px solid #ced4da;
-  border-top: 1px dashed #dee2e6;
-  text-align: center;
-}
-
 /* ================================================================== */
-/* Saved Filters + Column Filter Controls                             */
+/* Palette tokens                                                     */
 /*                                                                    */
-/* Aesthetic: calm-clinical. One accent (SENAITE blue), hairline      */
-/* dividers, hover-revealed actions, monospaced preset names.         */
-/*                                                                    */
-/* The palette lives in --sf-* custom properties so a single edit     */
-/* re-skins everything. Token roles:                                  */
-/*   bg / fg          surface + text                                  */
-/*   border / hairline   default control + soft divider               */
-/*   accent           SENAITE blue (active / focus)                   */
-/*   success          preset applied                                  */
-/*   warning          default-preset gold + dirty amber               */
-/*   danger           destructive                                     */
-/* Each role exposes a -soft (subtle bg), -border, and -fg variant.   */
+/* All colors used below are declared here so a single edit re-skins  */
+/* the listing. --listing-* covers the original SENAITE workflow      */
+/* state palette; --sf-* covers the Saved Filters + Column Header     */
+/* chrome added later.                                                */
 /* ================================================================== */
 
 :root {
@@ -444,7 +75,452 @@ selected elements from multiselect
   --sf-radius-card: 8px;
   --sf-radius-pill: 999px;
   --sf-trans-fast: .12s ease;
+
+  /* ---------------------------------------------------------------- */
+  /* SENAITE workflow / table palette                                 */
+  /* Original swatches sourced from mdbootstrap.com/css/colors/.       */
+  /* ---------------------------------------------------------------- */
+
+  /* table chrome */
+  --listing-border-table:        #ddd;
+  --listing-border-divider:      #e3e3e3;
+  --listing-border-strong:       #000;
+  --listing-bg-muted:            #f5f5f5;
+  --listing-bg-row-alt:          #f9f9f9;
+  --listing-bg-th-hover:         #ccc;
+  --listing-fg-toggle:           #555;
+  --listing-fg-category:         #3E4551;
+  --listing-category-bg:         rgba(96, 125, 139, .1);
+  --listing-overlay-loader:      rgba(255, 255, 255, .6);
+
+  /* progress bar */
+  --listing-progress-fg:         #f5f5f5;
+  --listing-progress-bg:         #33b5e5;
+  --listing-progress-bg-disabled:#c9c9c9;
+
+  /* workflow states — border + row-hover overlay per state           */
+  --listing-state-sample-due:           #ffff8d;
+  --listing-state-sample-due-hover:     rgba(255, 235, 59, .1);
+
+  --listing-state-sample-received:        #a1887f;
+  --listing-state-sample-received-hover:  rgba(121, 85, 72, .1);
+
+  --listing-state-retracted:        #ff6f00;
+  --listing-state-retracted-hover:  rgba(255, 152, 0, .1);
+  --listing-state-retracted-bg:     #eceff1;
+  --listing-state-retracted-fg:     #78909c;
+
+  --listing-state-to-be-verified:        #18ffff;
+  --listing-state-to-be-verified-hover:  rgba(0, 188, 212, .1);
+
+  --listing-state-verified:        #0091ea;
+  --listing-state-verified-hover:  rgba(3, 169, 244, .2);
+
+  --listing-state-published:        #00c853;
+  --listing-state-published-hover:  rgba(76, 175, 80, .2);
+
+  --listing-state-invalid:        #e65100;
+  --listing-state-invalid-hover:  rgba(244, 67, 54, .2);
+
+  --listing-state-rejected:        #abc;
+  --listing-state-rejected-hover:  #abc;
+
+  --listing-state-cancelled:        #000;
+  --listing-state-cancelled-hover:  rgba(0, 0, 0, .1);
+
+  --listing-state-inactive-border:  #616161;
+
+  /* Bootstrap-matching tokens for the searchable-select dropdown and
+     the column-filter-row strip (pre-existing styles). */
+  --listing-bs-primary:           #007bff;
+  --listing-bs-primary-dark:      #0056b3;
+  --listing-bs-secondary:         #6c757d;
+  --listing-bs-border:            #ced4da;
+  --listing-bs-border-soft:       #dee2e6;
+  --listing-bs-bg-light:          #f8f9fa;
+  --listing-bs-bg-hover:          #e9ecef;
+  --listing-shadow-dropdown:      0 4px 6px rgba(0, 0, 0, .1);
 }
+
+
+/* Colors taken from https://mdbootstrap.com/css/colors/ */
+.ajax-contents-table tbody tr { border-left:2px solid var(--listing-border-table); }
+.ajax-contents-table tbody tr:last-child { border-bottom:1px solid var(--listing-border-table); }
+
+/* state sample_due */
+.ajax-contents-table tr.state-sample_due { border-left:2px solid var(--listing-state-sample-due) !important; }
+.ajax-contents-table td.result.state-sample_due { border-left:2px solid var(--listing-state-sample-due) !important; }
+.ajax-contents-table tr.state-sample_due:hover { background-color: var(--listing-state-sample-due-hover); }
+
+/* state sample_received */
+.ajax-contents-table tr.state-sample_received { border-left:2px solid var(--listing-state-sample-received) !important; }
+.ajax-contents-table td.result.state-sample_received { border-left:2px solid var(--listing-state-sample-received) !important; }
+.ajax-contents-table tr.state-sample_received:hover { background-color: var(--listing-state-sample-received-hover); }
+
+/* state retracted */
+.ajax-contents-table tr.state-retracted { border-left:2px solid var(--listing-state-retracted) !important; }
+.ajax-contents-table tr.state-retracted>td:not([rowspan]) { background-color: var(--listing-state-retracted-bg) !important; color: var(--listing-state-retracted-fg); font-style: italic; }
+.ajax-contents-table td.result.state-retracted { border-left:2px solid var(--listing-state-retracted) !important; }
+.ajax-contents-table tr.state-retracted:hover { background-color: var(--listing-state-retracted-hover); }
+
+/* state to_be_verified */
+.ajax-contents-table tr.state-to_be_verified { border-left:2px solid var(--listing-state-to-be-verified) !important; }
+.ajax-contents-table td.result.state-to_be_verified { border-left:2px solid var(--listing-state-to-be-verified) !important; }
+.ajax-contents-table tr.state-to_be_verified:hover { background-color: var(--listing-state-to-be-verified-hover); }
+
+/* state verified */
+.ajax-contents-table tr.state-verified { border-left:2px solid var(--listing-state-verified) !important; }
+.ajax-contents-table td.result.state-verified { border-left:2px solid var(--listing-state-verified) !important; }
+.ajax-contents-table tr.state-verified:hover { background-color: var(--listing-state-verified-hover); }
+
+/* state published */
+.ajax-contents-table tr.state-published { border-left:2px solid var(--listing-state-published) !important; }
+.ajax-contents-table td.result.state-published { border-left:2px solid var(--listing-state-published) !important; }
+.ajax-contents-table tr.state-published:hover { background-color: var(--listing-state-published-hover); }
+
+/* state invalid */
+.ajax-contents-table tr.state-invalid { border-left:2px solid var(--listing-state-invalid) !important; }
+.ajax-contents-table td.result.state-invalid { border-left:2px solid var(--listing-state-invalid) !important; }
+.ajax-contents-table tr.state-invalid:hover { background-color: var(--listing-state-invalid-hover); }
+
+/* state rejected */
+.ajax-contents-table tr.state-rejected { border-left:2px solid var(--listing-state-rejected) !important; }
+.ajax-contents-table td.result.state-rejected { border-left:2px solid var(--listing-state-rejected) !important; }
+.ajax-contents-table tr.state-rejected:hover { background-color: var(--listing-state-rejected); }
+
+/* state assigned */
+.ajax-contents-table tr.state-assigned { border-left:2px solid var(--listing-border-table); }
+.ajax-contents-table td.result.state-assigned { border-left:2px solid transparent; }
+
+/* state unassigned */
+.ajax-contents-table tr.state-unassigned { border-left:2px solid var(--listing-border-table); }
+.ajax-contents-table td.result.state-unassigned { border-left:2px solid transparent; }
+
+/* state cancelled */
+.ajax-contents-table tr.state-cancelled { border-left:2px solid var(--listing-state-cancelled) !important; }
+.ajax-contents-table tr.state-cancelled:hover { background-color: var(--listing-state-cancelled-hover); }
+
+/* worksheet states */
+.ajax-contents-table tr.state-open { border-left:2px solid var(--listing-border-table)  !important; }
+.ajax-contents-table tr.state-empty-worksheet { border-left:2px solid var(--listing-border-table) !important; }
+
+/* transposed worksheet layout*/
+.ajax-contents-table td.transposed.result.empty { cursor: not-allowed; }
+.ajax-contents-table td.transposed.result:hover { background-color: var(--listing-border-divider)!important; }
+.ajax-contents-table td.transposed.result.empty:hover { background-color: var(--listing-border-divider); }
+
+/* active/inactive states*/
+.ajax-contents-table tr.state-active { border-left:2px solid transparent; }
+.ajax-contents-table tr.state-inactive { border-left:2px solid var(--listing-state-inactive-border); }
+
+.ajax-contents-table th.sortable { cursor: pointer; }
+.ajax-contents-table th.sortable:hover { background-color: var(--listing-bg-th-hover); }
+.ajax-contents-table th:not(.sortable) { cursor: not-allowed; }
+
+/* split-arrow sort indicators are rendered as buttons by
+   TableHeaderCell; the old ::after triangle is no longer needed */
+
+/* category */
+.ajax-contents-table tr.categoryrow { background-color: var(--listing-category-bg)!important; cursor: pointer; font-weight: bold; font-size: 115%; color: var(--listing-fg-category); }
+
+/* table load mask */
+#table-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  height: 100%;
+  width: 100%;
+  background: var(--listing-overlay-loader);
+  opacity: 0.6;
+}
+
+/* progress bar */
+.ajax-contents-table tr td div.progress { width: 55px; margin-bottom: 0; height: 17px; }
+.ajax-contents-table tr td div.progress div.progress-bar { color: var(--listing-bg-muted); background-color: var(--listing-progress-bg); line-height: 17px; font-size: 9px; font-weight:bold; }
+.ajax-contents-table tr.state-invalid td div.progress div.progress-bar,
+.ajax-contents-table tr.state-cancelled td div.progress div.progress-bar { background-color: var(--listing-progress-bg-disabled); }
+
+/* collapsible rows */
+.ajax-contents-table tr.togglerow { cursor: pointer; }
+.ajax-contents-table tr.childrow td:first-child { padding-left: 1em; }
+.ajax-contents-table tr.childrow td:first-child:before { content: "➥ "; }
+
+/* before item */
+.ajax-contents-table tr span.before-item { display: table-cell; line-height: 0; vertical-align: middle; padding-right: 5px; }
+
+/* after item */
+.ajax-contents-table tr span.after-item { display: table-cell; line-height: 0; vertical-align: middle;  padding-left: 5px; }
+
+/* Render table form-controls smaller */
+.ajax-contents-table tr td div.form-group { display: inline-table; }
+
+/* Top toolbar */
+.ajax-contents-table .top-toolbar { padding-bottom: .5em; }
+
+/* Expandable Rows */
+.ajax-contents-table tr.contentrow.child td {
+    border-top:none;
+}
+.ajax-contents-table tr.contentrow.collapsed td:first-child:before,
+.ajax-contents-table tr.contentrow.expanded td:first-child:before,
+.ajax-contents-table tr.contentrow.child td:first-child:before {
+    line-height: normal;
+    padding-right: 0.5rem;
+    vertical-align: bottom;
+    color: var(--listing-fg-toggle);
+    cursor: pointer;
+    float: left;
+    width: 20px; /* aligns the toggle symbols */
+}
+/* node levels (0.75rem is the default td padding) */
+.ajax-contents-table th.select-column { width: 10px; }
+.ajax-contents-table td.level-0 { padding-left: 0.75rem; }
+.ajax-contents-table td.level-1 { padding-left: 1.75rem; }
+.ajax-contents-table td.level-2 { padding-left: 2.75rem; }
+.ajax-contents-table td.level-3 { padding-left: 3.75rem; }
+.ajax-contents-table td.level-4 { padding-left: 4.75rem; }
+.ajax-contents-table td.level-5 { padding-left: 5.75rem; }
+.ajax-contents-table td.level-6 { padding-left: 6.75rem; }
+
+.ajax-contents-table tr.contentrow.collapsed td:first-child::before {
+    content: "▶";
+}
+.ajax-contents-table tr.contentrow.expanded td:first-child::before {
+    content: "▼";
+}
+.ajax-contents-table tr.contentrow.child td:first-child::before {
+    content: "⋯";
+}
+.ajax-contents-table tr.contentrow.child.collapsed td:first-child::before {
+    content: "▶";
+}
+.ajax-contents-table tr.contentrow.child.expanded td:first-child::before {
+    content: "▼";
+}
+
+/* Remark Rows */
+.ajax-contents-table tr.remarksrow td {
+    padding: 0;
+    border: none;
+}
+.ajax-contents-table tr.remarksrow td div.remarks {
+    min-height: 20px;
+    padding: 5px;
+    margin: 5px;
+    background-color: var(--listing-bg-muted);
+    border: 1px solid var(--listing-border-divider);
+    border-radius: 3px;
+}
+
+/* Multi choice */
+.ajax-contents-table tr td div.multichoice {
+    max-height: 120px;
+    width: 200px;
+    overflow: auto;
+    border: 1px solid var(--listing-bg-th-hover);
+    border-radius: 3px;
+}
+.ajax-contents-table tr td div.multichoice ul {
+    padding: 0;
+    margin: 0;
+}
+.ajax-contents-table tr td div.multichoice li {
+    padding: 6px;
+}
+.ajax-contents-table tr td div.multichoice li:hover {
+    background-color: var(--listing-bg-row-alt);
+}
+
+/* Result multi choice */
+.ajax-contents-table tr td.Result div.multichoice {
+    border: none;
+}
+.ajax-contents-table tr td.Result div.multichoice li {
+    padding: 4px 6px;
+}
+
+/* Multi select */
+.ajax-contents-table tr td div.multiselect ul {
+    padding: 0;
+    margin: 0;
+}
+.ajax-contents-table tr td div.multiselect li {
+    padding: 2px 6px;
+}
+
+/* Multi value
+Same styling as multi-select, cause we do want multi value elements to be fully
+aligned when they are rendered close to multiselect counterpart. Since values
+are always stored in same order, this styling allows multi values to "refer" to
+selected elements from multiselect
+*/
+.ajax-contents-table tr td div.multivalue ul {
+    padding: 0;
+    margin: 0;
+}
+.ajax-contents-table tr td div.multivalue li {
+    padding: 2px 6px;
+}
+
+/* Rowspan support */
+.ajax-contents-table tr td[rowspan] {
+    border: 1px solid var(--listing-border-table);
+    background-color: white!important;
+}
+.ajax-contents-table tr td[rowspan]:hover {
+    background-color: white!important;
+}
+
+/* borderless table */
+.ajax-contents-table table.table-borderless td { border: none!important; }
+.ajax-contents-table table.table-borderless tr { border: none!important; }
+
+/* Worksheet's slots table */
+.ajax-contents-table table.slot-header-table { margin-bottom: 0px; }
+
+/* Results Unit */
+.ajax-contents-table span.unit { padding: 0 0.25em; color: black; }
+
+
+/* Transposed Cell */
+.ajax-contents-table td.transposed span.before-item { width: 60px }
+.ajax-contents-table td.transposed span.before-item > * { display: block; float: left; padding-right: 5px; }
+.ajax-contents-table td.transposed span.before-item input[type=checkbox] { margin: 0; }
+.ajax-contents-table td.transposed input { margin-right: 10px; }
+.ajax-contents-table td.transposed .before_field { font-size: 85%; display: table-cell; }
+.ajax-contents-table td.transposed .after_field { font-size: 85%; display: table-cell; }
+.ajax-contents-table td.transposed span.readonly { padding-right: 0.5em; }
+
+/* Regular Cell */
+.ajax-contents-table td a.remarks { display: block; }
+
+/* Drag&Drop behavior */
+.ajax-contents-table tr.dragging { opacity: 0; }
+.ajax-contents-table td.dnd { cursor: move; }
+
+/* Column Filter Styles */
+.ajax-contents-table th .column-filter-toggle {
+  padding: 0 0.25rem;
+  margin-left: 0.25rem;
+  opacity: 0.4;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 0.75em;
+  vertical-align: middle;
+}
+.ajax-contents-table th .column-filter-toggle:hover {
+  opacity: 0.8;
+}
+.ajax-contents-table th .column-filter-toggle.active {
+  opacity: 1;
+  color: var(--listing-bs-primary);
+}
+.ajax-contents-table tr.column-filter-row td {
+  padding: 0.25rem 0.5rem;
+  background-color: var(--listing-bs-bg-light);
+  border-bottom: 1px solid var(--listing-bs-border-soft);
+}
+.ajax-contents-table tr.column-filter-row td.empty {
+  background-color: transparent;
+  border-bottom: none;
+}
+.ajax-contents-table tr.column-filter-row .input-group {
+  flex-wrap: nowrap;
+}
+.ajax-contents-table tr.column-filter-row input.form-control,
+.ajax-contents-table tr.column-filter-row select.form-control {
+  min-width: 80px;
+}
+.ajax-contents-table tr.column-filter-row input[type="date"].form-control {
+  min-width: 130px;
+}
+.ajax-contents-table tr.column-filter-row input:disabled,
+.ajax-contents-table tr.column-filter-row select:disabled {
+  background-color: var(--listing-bs-bg-hover);
+  cursor: not-allowed;
+}
+.ajax-contents-table tr.column-filter-row select.form-control {
+  padding-right: 1.5rem;
+  appearance: auto;
+}
+.ajax-contents-table tr.column-filter-row .input-group-append .btn {
+  border-color: var(--listing-bs-border);
+}
+/* Ensure searchable-select input has correct border radius in input-group */
+.ajax-contents-table tr.column-filter-row .input-group > .searchable-select > .form-control {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* Searchable Select Styles */
+.searchable-select {
+  position: relative;
+  flex: 1;
+}
+.searchable-select input.form-control {
+  width: 100%;
+}
+.searchable-select-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 250px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid var(--listing-bs-border);
+  border-top: none;
+  border-radius: 0 0 0.25rem 0.25rem;
+  z-index: 1050;
+  box-shadow: var(--listing-shadow-dropdown);
+}
+.searchable-select-option {
+  padding: 0.375rem 0.75rem;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.searchable-select-option:hover,
+.searchable-select-option.highlighted {
+  background-color: var(--listing-bs-bg-hover);
+}
+.searchable-select-option.selected {
+  background-color: var(--listing-bs-primary);
+  color: white;
+}
+.searchable-select-option.selected.highlighted {
+  background-color: var(--listing-bs-primary-dark);
+}
+.searchable-select-hint {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  color: var(--listing-bs-secondary);
+  background: var(--listing-bs-bg-light);
+  border: 1px solid var(--listing-bs-border);
+  border-top: 1px dashed var(--listing-bs-border-soft);
+  text-align: center;
+}
+
+/* ================================================================== */
+/* Saved Filters + Column Filter Controls                             */
+/*                                                                    */
+/* Aesthetic: calm-clinical. One accent (SENAITE blue), hairline      */
+/* dividers, hover-revealed actions, monospaced preset names.         */
+/*                                                                    */
+/* The palette lives in --sf-* custom properties so a single edit     */
+/* re-skins everything. Token roles:                                  */
+/*   bg / fg          surface + text                                  */
+/*   border / hairline   default control + soft divider               */
+/*   accent           SENAITE blue (active / focus)                   */
+/*   success          preset applied                                  */
+/*   warning          default-preset gold + dirty amber               */
+/*   danger           destructive                                     */
+/* Each role exposes a -soft (subtle bg), -border, and -fg variant.   */
+/* ================================================================== */
+
 
 
 /* ------------------------------------------------------------------ */
