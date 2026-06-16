@@ -144,18 +144,18 @@ export function keys_from(config) {
 
 /**
  * Apply a visibility toggle to a config without mutating the input.
- * If the key is missing, append it as a visible entry first, then
- * flip.  Used by the controller's toggleColumn handler.
+ *
+ * The caller is expected to pass a merged config (via
+ * `merge_column_config`) so the key is guaranteed to be present.
+ * Keys absent from the config are a no-op — we do not invent
+ * entries here, because doing so would silently mask a bug at the
+ * call site.
  */
 export function toggle_in(config, key) {
-  const next = (config || []).map((entry) =>
+  return (config || []).map((entry) =>
     entry.key === key
       ? { ...entry, toggle: !(entry.toggle !== false) }
       : entry);
-  if (!next.some((entry) => entry.key === key)) {
-    next.push({ key, toggle: false });  // hidden — user just hid a default
-  }
-  return next;
 }
 
 

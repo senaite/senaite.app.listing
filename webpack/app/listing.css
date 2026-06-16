@@ -1293,7 +1293,7 @@ selected elements from multiselect
 /* Column-config trigger — quiet, compact, tertiary affordance.
    Sits flush right above the table; meant to be discoverable but
    not loud. */
-.column-config-toggle {
+.tcc-trigger {
   margin: 0 0 .25rem .5rem;
   padding: .05rem .4rem;
   font-size: .6875rem;
@@ -1303,14 +1303,14 @@ selected elements from multiselect
   border-color: var(--sf-hairline);
   background: transparent;
 }
-.column-config-toggle:hover,
-.column-config-toggle:focus {
+.tcc-trigger:hover,
+.tcc-trigger:focus {
   color: var(--sf-fg-muted);
   border-color: var(--sf-border-soft);
   background: var(--sf-bg-hover);
   box-shadow: none;
 }
-.column-config-toggle i {
+.tcc-trigger i {
   font-size: .65rem;
   opacity: .7;
 }

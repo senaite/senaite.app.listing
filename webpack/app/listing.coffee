@@ -698,15 +698,15 @@ class ListingController extends React.Component
     @_persist_column_config next_config
 
     # Mirror the visibility flag onto @state.columns so consumers that
-    # read column.toggle directly stay in sync.
-    next_columns = {}
-    for ck, column of @state.columns
-      next_columns[ck] = Object.assign {}, column
-    visible = visibility_from next_config
-    if next_columns[key]
-      next_columns[key].toggle = visible[key]
-    @setState {columns: next_columns}
-    return visible[key]
+    # read column.toggle directly stay in sync. Only the changed
+    # column is reallocated; every other entry shares its old object
+    # reference, so React.memo'd children skip re-renders.
+    column = @state.columns[key]
+    return unless column?
+    visible = visibility_from(next_config)[key]
+    @setState columns: Object.assign({}, @state.columns,
+      "#{key}": Object.assign({}, column, toggle: visible))
+    return visible
 
   ###*
    * Reset all column visibility + order back to the server defaults
@@ -2585,7 +2585,7 @@ class ListingController extends React.Component
                   type="button"
                   ref={@column_config_anchor_ref}
                   onClick={@on_column_config_click}
-                  className="btn btn-sm btn-outline-secondary pull-right column-config-toggle"
+                  className="btn btn-sm btn-outline-secondary pull-right tcc-trigger"
                   title={_t("Configure Table Columns")}>
                   <i className="fas fa-table-columns mr-1"></i>
                   {_t("Display Columns")}
