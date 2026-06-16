@@ -153,4 +153,33 @@ class TableHeaderCell extends React.Component
     </th>
 
 
-export default TableHeaderCell
+# Memoization keeps a 20-column header from re-rendering every cell on
+# every parent state change. The custom comparator looks only at the
+# props the cell actually consumes — the parent passes the full
+# {...this.props} spread so a naive shallow memo would never hit.
+arePropsEqual = (prev, next) ->
+  key = next.column_key
+  return false if prev.column_key isnt key
+  return false if prev.title isnt next.title
+  return false if prev.alt isnt next.alt
+  return false if prev.index isnt next.index
+  return false if prev.className isnt next.className
+  return false if prev.onClick isnt next.onClick
+  return false if prev.on_sort_click isnt next.on_sort_click
+  return false if prev.on_filter_toggle isnt next.on_filter_toggle
+  # sort state only matters for this cell when it IS the sort column
+  return false if prev.sort_on isnt next.sort_on
+  return false if prev.sort_order isnt next.sort_order
+  # filter state only matters for this column's own slot
+  prev_active = prev.active_column_filters or []
+  next_active = next.active_column_filters or []
+  return false if (key in prev_active) isnt (key in next_active)
+  prev_value = (prev.column_filters or {})[key] or ""
+  next_value = (next.column_filters or {})[key] or ""
+  return false if prev_value isnt next_value
+  # column definition is static unless the listing reconfigures
+  return false if prev.columns?[key] isnt next.columns?[key]
+  return true
+
+
+export default React.memo(TableHeaderCell, arePropsEqual)

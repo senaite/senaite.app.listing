@@ -108,9 +108,14 @@ function ColumnFilterRow(props) {
     set_loading_values((prev) => ({ ...prev, [column_key]: is_loading }));
   }, []);
 
-  const fetch_index_values = useCallback((column_key) => {
+  const fetch_index_values = useCallback((column_key, opts) => {
     if (get_cached(column_key)) {
-      bump_render();
+      // bump_render() is only useful when the call originates outside
+      // a render cycle (e.g. an onFocus handler on SearchableSelect),
+      // because the module-level cache is invisible to React.
+      // Inside an effect we are already in a commit phase so the next
+      // render will pick up the cached values naturally.
+      if (opts?.bump !== false) bump_render();
       return;
     }
     if (loading_values[column_key]) return;
@@ -138,7 +143,9 @@ function ColumnFilterRow(props) {
     for (const key of active_column_filters || []) {
       const column = columns?.[key];
       if (SELECTABLE_INDEX_TYPES.includes(column?.index_type)) {
-        fetch_index_values(key);
+        // Called from the context-shift effect; we are already
+        // committing, so skip the redundant bump_render on cache hits.
+        fetch_index_values(key, { bump: false });
       }
     }
   }, [active_column_filters, columns, fetch_index_values]);
@@ -156,19 +163,28 @@ function ColumnFilterRow(props) {
   const prev_filters_sig_ref = useRef(stable_stringify(column_filters || {}));
   const prev_active_ref = useRef(active_column_filters || []);
 
+  // Keep helpers accessible to the effect via refs so the effect can
+  // omit them from its dependency array — otherwise every useCallback
+  // recreation would re-run the effect even when nothing observable
+  // has changed.
+  const loading_values_ref = useRef(loading_values);
+  loading_values_ref.current = loading_values;
+  const fetch_active_filter_values_ref = useRef(fetch_active_filter_values);
+  fetch_active_filter_values_ref.current = fetch_active_filter_values;
+
+  // Precompute the column_filters signature once per render and reuse.
+  const column_filters_sig = stable_stringify(column_filters || {});
+
   useEffect(() => {
-    const prev_review = prev_review_ref.current;
-    const prev_filters_sig = prev_filters_sig_ref.current;
     const prev_active = prev_active_ref.current;
     const curr_active = active_column_filters || [];
-    const curr_filters_sig = stable_stringify(column_filters || {});
-
-    const new_filters_added = curr_active.some((f) => !prev_active.includes(f));
-    const review_changed = prev_review !== review_state;
-    const filters_changed = prev_filters_sig !== curr_filters_sig;
+    const new_filters_added = curr_active.some(
+      (f) => !prev_active.includes(f));
+    const review_changed = prev_review_ref.current !== review_state;
+    const filters_changed = prev_filters_sig_ref.current !== column_filters_sig;
 
     prev_review_ref.current = review_state;
-    prev_filters_sig_ref.current = curr_filters_sig;
+    prev_filters_sig_ref.current = column_filters_sig;
     prev_active_ref.current = curr_active;
 
     if (!(new_filters_added || review_changed || filters_changed)) return;
@@ -176,17 +192,11 @@ function ColumnFilterRow(props) {
     // Discard stale in-flight markers; any pending response now
     // belongs to the previous context and must not block a refetch.
     if ((review_changed || filters_changed)
-        && Object.keys(loading_values).length > 0) {
+        && Object.keys(loading_values_ref.current).length > 0) {
       set_loading_values({});
     }
-    fetch_active_filter_values();
-  }, [
-    review_state,
-    column_filters,
-    active_column_filters,
-    loading_values,
-    fetch_active_filter_values,
-  ]);
+    fetch_active_filter_values_ref.current();
+  }, [review_state, column_filters_sig, active_column_filters]);
 
   // ---------- input event helpers ----------
 
