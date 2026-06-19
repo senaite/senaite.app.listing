@@ -970,6 +970,77 @@ selected elements from multiselect
   white-space: nowrap;  /* arrows + funnel never split */
 }
 
+/* --- Column-config trigger group: trigger button + small reset --- */
+/* The wrapper is right-aligned via Bootstrap's `.float-right`; the
+   `inline-flex` here is only for the children's layout (gap between
+   trigger + reset icon). */
+.tcc-trigger-group {
+  display: inline-flex;
+  align-items: center;
+  gap: .15rem;
+}
+.tcc-reset {
+  /* Icon-only, muted; promotes to accent on hover so it reads as
+     "secondary action" next to the main trigger. */
+  padding: .15rem .35rem;
+  line-height: 1;
+  font-size: .85rem;
+  color: var(--sf-muted, #8a94a6);
+  text-decoration: none;
+}
+.tcc-reset:hover, .tcc-reset:focus {
+  color: var(--sf-accent, #1976d2);
+  text-decoration: none;
+}
+
+/* --- Header DnD: grip handle, grab cursor, ghost, drop indicator ---- */
+/* Sits at the trailing edge of the controls cluster (right of the
+   funnel).  Hidden by default; only the hovered or actively-dragged
+   <th> shows it.  visibility (not display) keeps the slot width
+   stable so the title doesn't reflow when the cursor enters. */
+.ajax-contents-table thead th .column-drag-handle {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  margin-left: .15rem;
+  color: var(--sf-muted, #8a94a6);
+  font-size: .8em;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .12s ease, color .12s ease;
+  cursor: grab;
+}
+.ajax-contents-table thead th .column-drag-handle:active { cursor: grabbing; }
+.ajax-contents-table thead th:hover .column-drag-handle,
+.ajax-contents-table thead th.is-dragging .column-drag-handle {
+  opacity: .9;
+  visibility: visible;
+  color: var(--sf-accent, #1976d2);
+}
+.ajax-contents-table thead th.reorderable {
+  /* Grab cursor lives on the handle only — see .column-drag-handle
+     below — so the funnel and sort buttons keep their normal feel. */
+  position: relative;
+}
+.ajax-contents-table thead th.reorderable.is-dragging { opacity: .4; }
+
+/* Drop indicator: a 2px accent rule along the leading/trailing edge
+   of the hovered cell.  Mirrors the above/below indicator in the
+   column-config popover, just rotated 90°. */
+.ajax-contents-table thead th.is-drop-before::before,
+.ajax-contents-table thead th.is-drop-after::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--sf-accent, #1976d2);
+  pointer-events: none;
+  z-index: 2;
+}
+.ajax-contents-table thead th.is-drop-before::before { left: -1px; }
+.ajax-contents-table thead th.is-drop-after::after  { right: -1px; }
+
 /* --- Sort arrows: hidden until hover, revealed on the active col --- */
 .column-sort-arrows {
   display: inline-flex;
@@ -1057,4 +1128,260 @@ selected elements from multiselect
   background: var(--sf-bg-hover);
   border-color: var(--sf-fg-faint);
   color: var(--sf-fg);
+}
+
+/* ================================================================== */
+/* Table column config panel (TableColumnConfig.js)                   */
+/* Calm-clinical: drag handle on the left, eye toggle on the right,   */
+/* search + counter + bulk actions on top, hidden columns muted at    */
+/* the bottom. Drop indicator is a 2px accent line between rows.      */
+/* ================================================================== */
+
+.tcc-panel {
+  /* Portal'd to document.body. The component supplies top/left/width
+     via inline style based on the trigger's bounding rect. Fixed
+     positioning means no parent overflow can clip the panel and the
+     stacking context is the document root, so z-index works globally. */
+  position: fixed;
+  z-index: 1080;
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--sf-bg);
+  border: 1px solid var(--sf-border-card);
+  border-radius: var(--sf-radius-card);
+  box-shadow: var(--sf-shadow-card), 0 8px 24px rgba(16,24,40,.08));
+  padding: 0;
+  font-size: .8125rem;
+  overflow: hidden;
+  animation: tccPanelIn .12s ease-out;
+}
+@keyframes tccPanelIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* --- header --- */
+.tcc-header {
+  border-bottom: 1px solid var(--sf-hairline);
+  padding: .65rem .85rem;
+  flex: 0 0 auto;
+  background: var(--sf-bg-subtle);
+}
+.tcc-header-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .5rem;
+  margin-bottom: .5rem;
+}
+.tcc-title-block { display: flex; flex-direction: column; min-width: 0; }
+.tcc-title {
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--sf-fg-mutest);
+}
+.tcc-description {
+  font-size: .6875rem;
+  color: var(--sf-fg-faint);
+  font-style: italic;
+  margin-top: .15rem;
+}
+.tcc-counter {
+  flex: 0 0 auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .75rem;
+  font-weight: 600;
+  color: var(--sf-fg-muted);
+  background: var(--sf-bg);
+  border: 1px solid var(--sf-hairline);
+  border-radius: 999px;
+  padding: .1rem .55rem;
+}
+.tcc-counter-sep { margin: 0 .15rem; color: var(--sf-fg-faint); }
+
+.tcc-header-tools {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  flex-wrap: wrap;
+}
+.tcc-search { flex: 1 1 14rem; min-width: 12rem; }
+.tcc-bulk   { display: flex; gap: .35rem; flex: 0 0 auto; }
+
+/* --- body --- */
+.tcc-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: .25rem 0 .35rem;
+}
+
+.tcc-section { padding: .25rem 0; }
+.tcc-section.is-muted { background: var(--sf-bg-subtle); }
+.tcc-section.is-muted + .tcc-section { border-top: 1px solid var(--sf-hairline); }
+.tcc-section-header {
+  display: flex;
+  align-items: baseline;
+  gap: .5rem;
+  padding: .35rem .85rem .25rem;
+}
+.tcc-section-label {
+  font-size: .6875rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--sf-fg-mutest);
+}
+.tcc-section-count {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .6875rem;
+  color: var(--sf-fg-faint);
+}
+
+.tcc-empty {
+  padding: .45rem .85rem;
+  font-size: .75rem;
+  color: var(--sf-fg-empty);
+  font-style: italic;
+}
+
+/* --- list rows --- */
+.tcc-list { list-style: none; margin: 0; padding: 0; }
+
+.tcc-row {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .25rem .85rem;
+  position: relative;
+  transition: background-color var(--sf-trans-fast);
+}
+.tcc-row + .tcc-row { border-top: 1px solid var(--sf-divider); }
+.tcc-row:hover { background: var(--sf-bg-row-hover); }
+
+.tcc-row.is-dragging { opacity: .35; }
+
+/* Drop indicator: a hairline 2px accent line above or below the
+   targeted row. Pointer-events:none so it doesn't eat the drop. */
+.tcc-row.is-drop-above::before,
+.tcc-row.is-drop-below::after {
+  content: "";
+  position: absolute;
+  left: .85rem;
+  right: .85rem;
+  height: 2px;
+  background: var(--sf-accent);
+  border-radius: 2px;
+  pointer-events: none;
+}
+.tcc-row.is-drop-above::before { top: -1px; }
+.tcc-row.is-drop-below::after  { bottom: -1px; }
+
+/* drag handle — only this is draggable */
+.tcc-handle {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  width: 1.4rem;
+  height: 1.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  color: var(--sf-fg-faint);
+  cursor: grab;
+  flex: 0 0 auto;
+}
+.tcc-handle:hover { background: var(--sf-shadow-overlay); color: var(--sf-fg-muted); }
+.tcc-handle:active { cursor: grabbing; }
+.tcc-handle i { font-size: .8125rem; }
+.tcc-handle.is-placeholder {
+  /* Hidden rows have no handle — reserve the same width for alignment. */
+  cursor: default;
+  visibility: hidden;
+}
+
+/* label */
+.tcc-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--sf-fg);
+}
+.tcc-section.is-muted .tcc-label { color: var(--sf-fg-muted); }
+
+/* trailing action buttons */
+.tcc-hide, .tcc-show {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  width: 1.6rem;
+  height: 1.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  cursor: pointer;
+  flex: 0 0 auto;
+  transition: background-color var(--sf-trans-fast),
+              color var(--sf-trans-fast);
+}
+.tcc-hide        { color: var(--sf-fg-faint); }
+.tcc-hide:hover  { color: var(--sf-fg);       background: var(--sf-shadow-overlay); }
+.tcc-show        { color: var(--sf-accent);   background: var(--sf-accent-soft); }
+.tcc-show:hover  { color: var(--sf-bg);       background: var(--sf-accent); }
+.tcc-hide i, .tcc-show i { font-size: .75rem; }
+
+/* --- footer --- */
+.tcc-footer {
+  border-top: 1px solid var(--sf-hairline);
+  padding: .45rem .85rem;
+  flex: 0 0 auto;
+  background: var(--sf-bg-subtle);
+}
+.tcc-reset {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: .15rem .35rem;
+  color: var(--sf-fg-mutest);
+  font-size: .75rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  border-radius: 4px;
+  transition: color var(--sf-trans-fast), background-color var(--sf-trans-fast);
+}
+.tcc-reset:hover { color: var(--sf-fg); background: var(--sf-bg-hover); }
+.tcc-reset i { font-size: .7rem; }
+
+/* Column-config trigger — quiet, compact, tertiary affordance.
+   Sits flush right above the table; meant to be discoverable but
+   not loud. */
+.tcc-trigger {
+  margin: 0 0 .25rem .5rem;
+  padding: .05rem .4rem;
+  font-size: .6875rem;
+  line-height: 1.2;
+  letter-spacing: .02em;
+  color: var(--sf-fg-mutest);
+  border-color: var(--sf-hairline);
+  background: transparent;
+}
+.tcc-trigger:hover,
+.tcc-trigger:focus {
+  color: var(--sf-fg-muted);
+  border-color: var(--sf-border-soft);
+  background: var(--sf-bg-hover);
+  box-shadow: none;
+}
+.tcc-trigger i {
+  font-size: .65rem;
+  opacity: .7;
 }

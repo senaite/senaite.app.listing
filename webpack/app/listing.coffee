@@ -18,9 +18,20 @@ import Messages from "./components/Messages.coffee"
 import Modal from "./components/Modal.coffee"
 import Pagination from "./components/Pagination.coffee"
 import SearchBox from "./components/SearchBox.coffee"
-import SavedFilters, { find_default_preset } from "./components/SavedFilters.js"
+import SavedFilters from "./components/SavedFilters.js"
+import { find_default_preset } from "./storage/preset_storage.js"
+import {
+  clear_column_config,
+  keys_from as column_keys_from,
+  merge_column_config,
+  read_column_config,
+  reorder_in,
+  toggle_in,
+  visibility_from,
+  write_column_config,
+} from "./storage/column_config.js"
 import Table from "./components/Table.js"
-import TableColumnConfig from "./components/TableColumnConfig.coffee"
+import TableColumnConfig from "./components/TableColumnConfig.js"
 import ToastNotification from "./components/Toast.js"
 
 import { DndProvider } from "react-dnd"
@@ -76,6 +87,12 @@ class ListingController extends React.Component
     @filterByState = @filterByState.bind @
     @on_api_error = @on_api_error.bind @
     @on_column_config_click = @on_column_config_click.bind @
+    @close_column_config = @close_column_config.bind @
+    @resetColumns = @resetColumns.bind @
+    # Anchor for the column-config popover so it can attach to a
+    # portal at the document root yet still position itself under the
+    # `⋯` trigger button.
+    @column_config_anchor_ref = React.createRef()
     @on_select_checkbox_checked = @on_select_checkbox_checked.bind @
     @on_multi_select_checkbox_checked = @on_multi_select_checkbox_checked.bind @
     @on_category_click = @on_category_click.bind @
@@ -672,33 +689,30 @@ class ListingController extends React.Component
   ###
   toggleColumn: (key) ->
     console.debug "ListingController::toggleColumn: key=#{key}"
+    config = @_merged_column_config()
+    next_config = toggle_in config, key
+    @_persist_column_config next_config
 
-    # restore columns to the initial state and flush the local storage
-    if key is "reset"
-      @setState {columns: @get_default_columns()}
-      @set_local_column_config []
-      return true
+    # Mirror the visibility flag onto @state.columns so consumers that
+    # read column.toggle directly stay in sync. Only the changed
+    # column is reallocated; every other entry shares its old object
+    # reference, so React.memo'd children skip re-renders.
+    column = @state.columns[key]
+    return unless column?
+    visible = visibility_from(next_config)[key]
+    @setState columns: Object.assign({}, @state.columns,
+      "#{key}": Object.assign({}, column, toggle: visible))
+    return visible
 
-    # get the columns from the state
-    columns = @state.columns
-
-    # Toggle the visibility of the column
-    toggle = columns[key]["toggle"]
-    if toggle is undefined then toggle = yes
-    columns[key]["toggle"] = !toggle
-
-    column_config = []
-    for key, column of columns
-      # keep only a record of the column key and visibility in the local storage
-      column_config.push {key: key, toggle: column.toggle}
-
-    # store the new order and visibility in the local storage
-    @set_local_column_config column_config
-
-    # update the columns of the current state
-    @setState {columns: columns}
-
-    return toggle
+  ###*
+   * Reset all column visibility + order back to the server defaults
+   * and drop the local-storage record.
+  ###
+  resetColumns: ->
+    console.debug "ListingController::resetColumns"
+    clear_column_config @get_storage_id()
+    @setState {columns: @get_default_columns()}
+    return true
 
   ###*
    * Handle context menu action
@@ -830,156 +844,91 @@ class ListingController extends React.Component
    * @returns {object} New ordered columns object
   ###
   setColumnsOrder: (order) ->
-    console.debug "ListingController::setColumnsOrder: order=#{order}"
+    console.debug "ListingController::setColumnsOrder: order=", order
+    next_config = reorder_in @_merged_column_config(), order
+    @_persist_column_config next_config
 
-    # This object will hold the new ordered columns
-    ordered_columns = {}
-
-    # Although the column properties seem to be sorted, we keep in the local
-    # storage a list of column "visibility" objects to avoid any order issues
-    # with the JSON serialization step.
-    column_config = []
-
-    # get the keys of all columns (visible or not)
-    keys = Object.keys @state.columns
-
-    # sort the keys according to the passed in column order
-    keys.sort (a, b) ->
-      return order.indexOf(a) - order.indexOf(b)
-
-    # rebuild an object with the new property order
-    for key in keys
+    # Rebuild @state.columns in the new key order so consumers that
+    # iterate Object.keys / Object.entries see the reordered set.
+    next_columns = {}
+    for {key} in next_config
       column = @state.columns[key]
-      toggle = column.toggle
-      if toggle is undefined then toggle = yes
-      # keep only a record of the column key and visibility in the local storage
-      column_config.push {key: key, toggle: toggle}
-      ordered_columns[key] = column
-
-    # store the new order and visibility in the local storage
-    @set_local_column_config column_config
-
-    # update the columns of the current state
-    @setState {columns: ordered_columns}
-    return ordered_columns
+      next_columns[key] = column if column?
+    @setState {columns: next_columns}
+    return next_columns
 
   ###*
-   * Returns all column keys where the visibility toggle is true
+   * Compute the merged column config (stored config reconciled with
+   * current server-defined columns).  The pure helper auto-appends
+   * new add-on columns and drops vanished ones.
    *
-   * @returns columns {array} Array of ordered and visible columns
+   * Internal — call sites should use the public get_columns* methods.
+  ###
+  _merged_column_config: ->
+    # Pass the full columns dict (not just the keys) so the merge
+    # helper can honor the server's default `toggle` for columns the
+    # user has never customised.  Skipping this caused every column
+    # to appear visible on first load, even ones the server marked
+    # `toggle: false` by default.
+    #
+    # Visibility filtering by review_state still happens later in
+    # get_visible_columns — every server-defined key stays in the
+    # merged config so downstream consumers (e.g. TableTransposedCell)
+    # can still look columns up by key.
+    stored = read_column_config @get_storage_id()
+    return merge_column_config stored, (@state.columns or {})
+
+  _persist_column_config: (config) ->
+    write_column_config @get_storage_id(), config
+
+  ###*
+   * Returns all column keys where the visibility toggle is true and
+   * the column is allowed in the current review_state.
+   *
+   * @returns columns {array} Array of ordered and visible column keys
   ###
   get_visible_columns: ->
-    keys = []
-    allowed_keys = @get_allowed_column_keys()
-    visible = @get_columns_visibility()
-    for key in @get_columns_order()
-      # skip non-allowed keys
-      if key not in allowed_keys
-        continue
-      toggle = visible[key]
-      # skip columns which are not visible
-      if toggle is no
-        continue
-      # remember the key
-      keys.push key
-    return keys
+    config = @_merged_column_config()
+    allowed = new Set @get_allowed_column_keys()
+    return (entry.key for entry in config when entry.toggle and allowed.has(entry.key))
 
   ###*
-   * Get the default columns
-   *
-   * This method parses the JSON columns definitions from the DOM.
-   *
-   * @returns columns {object} Object of column definitions
+   * Get the default columns (server-defined, no local customisation).
   ###
   get_default_columns: ->
     return JSON.parse @root_el.dataset.columns
 
   ###*
-   * Get columns in the right order and visibility
-   *
-   * This method takes the local column settings into consideration to set the
-   * visibility and order of the final columns object.
-   *
-   * @returns columns {object} new columns object
+   * Get columns in the right order and visibility.  The result is an
+   * ordered dict (insertion-ordered object) of {key: column} where
+   * each column object carries the resolved `toggle` flag.
   ###
   get_columns: ->
     columns = {}
-    visibility = @get_columns_visibility()
-    for key in @get_columns_order()
-      column = @state.columns[key]
-      if column is undefined
-        console.warn "Skipping nonexisting column '#{key}'."
-        continue
-      toggle = visibility[key]
-      if toggle isnt undefined
-        column["toggle"] = toggle
-      columns[key] = column
+    for entry in @_merged_column_config()
+      column = @state.columns[entry.key]
+      continue unless column?
+      columns[entry.key] = Object.assign {}, column, {toggle: entry.toggle}
     return columns
 
   ###*
-   * Extract all keys from the curent columns
-   *
-   * @returns keys {array} Current colum keys
+   * Keys defined server-side, regardless of customisation.
   ###
   get_columns_keys: ->
     return Object.keys @state.columns
 
   ###*
-   * Return the order of all columns
-   *
-   * This method takes also the local column config into consideration
-   *
-   * @returns keys {array} Current colum keys
+   * Return the order of all columns, taking the local column config
+   * into consideration.
   ###
   get_columns_order: ->
-    keys = []
-    columns_keys = @get_columns_keys()
-    local_config = @get_local_column_config()
-    # filter out removed columns that still exist in the local config
-    local_config = local_config.filter (column) ->
-      columns_keys.indexOf(column.key) != -1
-    # Skip local settings if toggling/ordering is not allowed
-    allowed = @state.show_column_toggles
-
-    if allowed and local_config.length > 0
-      # extract the column keys in the user selected order
-      keys = local_config.map (item, index) ->
-        return item.key
-    else
-      # sort column keys by the current columns settings
-      allowed_keys = @get_allowed_column_keys()
-      keys = allowed_keys.concat columns_keys.filter (k) ->
-        # only append column keys which are not yet in  allowed_keys
-        return allowed_keys.indexOf(k) == -1
-
-    return keys
+    return column_keys_from @_merged_column_config()
 
   ###*
-   * Return the set visibility of all columns
-   *
-   * This method takes also the local column config into consideration
-   *
-   * @returns visibility {object} of column key -> visibility
+   * Return the set visibility of all columns (merged config).
   ###
   get_columns_visibility: ->
-    visibility = {}
-    local_config = @get_local_column_config()
-    # Skip local settings if toggling/ordering is not allowed
-    allowed = @state.show_column_toggles
-
-    if allowed and local_config.length > 0
-      # get the user defined visibility
-      for {key, toggle} in local_config
-        if toggle is undefined then toggle = true
-        visibility[key] = toggle
-    else
-      # use the default visibility of the columns
-      for key, column of @state.columns
-        toggle = column.toggle
-        if toggle is undefined then toggle = true
-        visibility[key] = toggle
-
-    return visibility
+    return visibility_from @_merged_column_config()
 
   ###*
    * Filter the results by the given state
@@ -1079,16 +1028,6 @@ class ListingController extends React.Component
   clearAppliedPreset: ->
     console.debug "ListingController::clearAppliedPreset (→ resetView)"
     return @resetView()
-
-  ###*
-   * Re-apply the currently applied preset, discarding any user edits.
-   * Used by the SavedFilters dropdown's "Revert" action.
-   *
-   * @param preset {object} the preset object {id, name, payload, ...}
-   * @returns {bool} true
-  ###
-  revertToSavedFilter: (preset) ->
-    return @applySavedFilter(preset)
 
   ###*
    * Reset the listing to its initial state — drops every filter,
@@ -1435,7 +1374,7 @@ class ListingController extends React.Component
         return @setState
           fetch_transitions_on_select: toggle
           transitions: []
-      when "reset_columns" then return @toggleColumn("reset")
+      when "reset_columns" then return @resetColumns()
 
     # load action in modal popup if id starts/ends with `modal`
     if id.startsWith("modal") or id.endsWith("modal_transition")
@@ -1920,57 +1859,6 @@ class ListingController extends React.Component
     columns = @state.columns
     keys = keys.filter (key) -> columns[key] isnt undefined
     return keys
-
-  ###*
-   * Calculate a common local storage key for this listing view.
-   *
-   * Note:
-   * The browser view initially calculates the `listing_identifier`, which is
-   * basically a concatenation of the listed items portal_type and view name.
-   *
-   * @returns key {string} with optional prefix and postfix
-  ###
-  get_local_storage_key: (prefix, postfix) ->
-    key = @listing_identifier
-    if @listing_identifier is undefined
-      key = location.pathname
-    if prefix isnt undefined
-      key = prefix + key
-    if postfix isnt undefined
-      key = key + postfix
-    return key
-
-  ###*
-   * Set the columns definition to the local storage
-   *
-   * @param columns {array} Array of {"key":key, "toggle":toggle} records
-   * @returns {bool} true
-  ###
-  set_local_column_config: (columns) ->
-    console.debug "ListingController::set_local_column_config: columns=", columns
-
-    key = @get_local_storage_key "columns-"
-    storage = window.localStorage
-    storage.setItem key, JSON.stringify(columns)
-    return true
-
-  ###*
-   * Returns column definitions of the local storage
-   *
-   * @returns columns {array} of {"key":key, "toggle":toggle} records
-  ###
-  get_local_column_config: ->
-    key = @get_local_storage_key "columns-"
-    storage = window.localStorage
-    columns = storage.getItem key
-
-    if not columns
-      return []
-
-    try
-      return JSON.parse columns
-    catch
-      return []
 
   ###*
    * Calculate the number of displayed columns
@@ -2471,6 +2359,9 @@ class ListingController extends React.Component
     @setState
       show_column_config: toggle
 
+  close_column_config: ->
+    @setState show_column_config: no
+
   on_select_checkbox_checked: (event) ->
     console.debug "°°° ListingController::on_select_checkbox_checked"
     me = this
@@ -2681,20 +2572,36 @@ class ListingController extends React.Component
           <div className="row">
             <div className="col-sm-12 table-responsive">
               {@state.show_column_toggles and
-                <a
-                  href="#"
-                  onClick={@on_column_config_click}
-                  className="pull-right">
-                  <i className="fas fa-ellipsis-h"></i>
-                </a>}
+                <div className="tcc-trigger-group">
+                  <button
+                    type="button"
+                    ref={@column_config_anchor_ref}
+                    onClick={@on_column_config_click}
+                    className="btn btn-sm btn-outline-secondary tcc-trigger"
+                    title={_t("Configure Table Columns")}>
+                    <i className="fas fa-table-columns mr-1"></i>
+                    {_t("Display Columns")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={@resetColumns}
+                    className="btn btn-link btn-sm tcc-reset"
+                    title={_t("Reset column visibility and order to the defaults")}
+                    aria-label={_t("Reset columns")}>
+                    <i className="fas fa-rotate-left"></i>
+                  </button>
+                </div>}
               {@state.show_column_config and
                 <TableColumnConfig
                   title={_t("Configure Table Columns")}
                   description={_t("Click to toggle the visibility or drag&drop to change the order")}
                   columns={columns}
                   columns_order={columns_order}
+                  anchor_ref={@column_config_anchor_ref}
+                  on_request_close={@close_column_config}
                   on_column_toggle_click={@toggleColumn}
-                  on_columns_order_change={@setColumnsOrder}/>}
+                  on_columns_order_change={@setColumnsOrder}
+                  on_reset={@resetColumns}/>}
               <ContextMenu
                 id={@row_context_menu_id}
                 menu={@state.row_context_menu}
@@ -2704,6 +2611,7 @@ class ListingController extends React.Component
                 form_id={@form_id}
                 allow_edit={@state.allow_edit}
                 on_header_column_click={@sortBy}
+                on_columns_order_change={@setColumnsOrder if @show_column_toggles}
                 on_select_checkbox_checked={@on_select_checkbox_checked}
                 on_multi_select_checkbox_checked={@on_multi_select_checkbox_checked}
                 on_context_menu={@on_column_config_click}
