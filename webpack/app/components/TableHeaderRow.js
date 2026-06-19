@@ -147,9 +147,11 @@ class TableHeaderRow extends React.Component {
           title={title}
           alt={alt}
           index={index}
+          sort_on={sort_on}
           sort_order={sort_order}
           className={cls.join(" ")}
           onClick={sortable ? this.on_header_column_click : undefined}
+          on_sort_click={this.props.on_header_column_click}
           />
       );
     }

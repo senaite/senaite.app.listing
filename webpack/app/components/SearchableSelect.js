@@ -10,7 +10,9 @@ class SearchableSelect extends React.Component {
     super(props);
     this.state = {
       is_open: false,
-      search_term: "",
+      // Seed from props so a preset / URL-restored value is visible
+      // immediately instead of only after the next prop change.
+      search_term: props.value || "",
       highlighted_index: -1
     };
 

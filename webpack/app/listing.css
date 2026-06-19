@@ -1,84 +1,227 @@
 /* Listing Styles */
 
+/* ================================================================== */
+/* Palette tokens                                                     */
+/*                                                                    */
+/* All colors used below are declared here so a single edit re-skins  */
+/* the listing. --listing-* covers the original SENAITE workflow      */
+/* state palette; --sf-* covers the Saved Filters + Column Header     */
+/* chrome added later.                                                */
+/* ================================================================== */
+
+:root {
+  /* surfaces + neutrals */
+  --sf-bg:           #fff;
+  --sf-bg-subtle:    #fafbfc;   /* column filter strip                */
+  --sf-bg-hover:     #f1f3f5;   /* neutral hover                      */
+  --sf-bg-row-hover: #f7f9fc;   /* preset row hover                   */
+  --sf-bg-edit-row:  #f4f7fb;   /* inline editor row tint             */
+  --sf-hairline:     #eef0f3;   /* internal dividers                  */
+  --sf-divider:      #f3f4f6;   /* between rows                       */
+  --sf-border:       #ced4da;   /* default control border             */
+  --sf-border-soft:  #d8dde3;   /* softer input border                */
+  --sf-border-card:  #e3e6ea;   /* menu card border                   */
+  --sf-fg:           #212529;   /* body text                          */
+  --sf-fg-muted:     #495057;   /* secondary text                     */
+  --sf-fg-mutest:    #6c757d;   /* tertiary text                      */
+  --sf-fg-faint:     #adb5bd;   /* icon idle                          */
+  --sf-fg-faintest:  #ced4da;   /* inactive sort arrow on active col  */
+  --sf-fg-empty:     #868e96;   /* empty-state copy                   */
+
+  /* accent — SENAITE blue */
+  --sf-accent:        #0b5ed7;
+  --sf-accent-border: #9ec5ff;
+  --sf-accent-soft:   #eaf3ff;
+  --sf-accent-focus:  #6ea8fe;
+  --sf-accent-input-border: #c5d6ee;
+  --sf-accent-overlay-08:  rgba(11, 94, 215, .08);
+  --sf-accent-overlay-15:  rgba(11, 94, 215, .15);
+  --sf-accent-overlay-20:  rgba(0, 123, 255, .20);
+
+  /* success — preset applied */
+  --sf-success:        #198754;
+  --sf-success-border: #a3d9b1;
+  --sf-success-soft:   #e9f7ef;
+  --sf-success-row:    #f0f8f3;
+  --sf-success-row-hover: #e3f1e9;
+
+  /* warning — default-preset gold (star) + dirty amber */
+  --sf-warning-star:        #e0a800;
+  --sf-warning-star-hover:  #c69400;
+  --sf-warning-tag-bg:      #fff4c2;  /* "auto" tag        */
+  --sf-warning-tag-fg:      #8a6d00;
+  --sf-warning-row:         #fbfaf3;  /* default-preset row tint */
+  --sf-warning-row-hover:   #f7f3e3;
+  --sf-warning-row-both:    #f6f7e9;  /* applied + default */
+  --sf-dirty-row:           #fff7e9;
+  --sf-dirty-row-hover:     #fdeed2;
+  --sf-dirty-tag-bg:        #ffe9c2;  /* "modified" tag    */
+  --sf-dirty-tag-fg:        #8a4a00;
+
+  /* danger — destructive */
+  --sf-danger:        #c92a2a;
+  --sf-danger-border: #e6b4b4;
+  --sf-danger-soft:   #fdf3f3;
+  --sf-danger-hairline: #f3dada;
+  --sf-danger-fg:     #842029;
+  --sf-danger-fg-strong: #4d0a0a;
+  --sf-danger-overlay-08: rgba(201, 42, 42, .08);
+
+  /* shadows + animation */
+  --sf-shadow-card:
+    0 1px 2px  rgba(16, 24, 40, .04),
+    0 8px 24px rgba(16, 24, 40, .08);
+  --sf-shadow-overlay: rgba(0, 0, 0, .05);
+  --sf-radius-card: 8px;
+  --sf-radius-pill: 999px;
+  --sf-trans-fast: .12s ease;
+
+  /* ---------------------------------------------------------------- */
+  /* SENAITE workflow / table palette                                 */
+  /* Original swatches sourced from mdbootstrap.com/css/colors/.       */
+  /* ---------------------------------------------------------------- */
+
+  /* table chrome */
+  --listing-border-table:        #ddd;
+  --listing-border-divider:      #e3e3e3;
+  --listing-border-strong:       #000;
+  --listing-bg-muted:            #f5f5f5;
+  --listing-bg-row-alt:          #f9f9f9;
+  --listing-bg-th-hover:         #ccc;
+  --listing-fg-toggle:           #555;
+  --listing-fg-category:         #3E4551;
+  --listing-category-bg:         rgba(96, 125, 139, .1);
+  --listing-overlay-loader:      rgba(255, 255, 255, .6);
+
+  /* progress bar */
+  --listing-progress-fg:         #f5f5f5;
+  --listing-progress-bg:         #33b5e5;
+  --listing-progress-bg-disabled:#c9c9c9;
+
+  /* workflow states — border + row-hover overlay per state           */
+  --listing-state-sample-due:           #ffff8d;
+  --listing-state-sample-due-hover:     rgba(255, 235, 59, .1);
+
+  --listing-state-sample-received:        #a1887f;
+  --listing-state-sample-received-hover:  rgba(121, 85, 72, .1);
+
+  --listing-state-retracted:        #ff6f00;
+  --listing-state-retracted-hover:  rgba(255, 152, 0, .1);
+  --listing-state-retracted-bg:     #eceff1;
+  --listing-state-retracted-fg:     #78909c;
+
+  --listing-state-to-be-verified:        #18ffff;
+  --listing-state-to-be-verified-hover:  rgba(0, 188, 212, .1);
+
+  --listing-state-verified:        #0091ea;
+  --listing-state-verified-hover:  rgba(3, 169, 244, .2);
+
+  --listing-state-published:        #00c853;
+  --listing-state-published-hover:  rgba(76, 175, 80, .2);
+
+  --listing-state-invalid:        #e65100;
+  --listing-state-invalid-hover:  rgba(244, 67, 54, .2);
+
+  --listing-state-rejected:        #abc;
+  --listing-state-rejected-hover:  #abc;
+
+  --listing-state-cancelled:        #000;
+  --listing-state-cancelled-hover:  rgba(0, 0, 0, .1);
+
+  --listing-state-inactive-border:  #616161;
+
+  /* Bootstrap-matching tokens for the searchable-select dropdown and
+     the column-filter-row strip (pre-existing styles). */
+  --listing-bs-primary:           #007bff;
+  --listing-bs-primary-dark:      #0056b3;
+  --listing-bs-secondary:         #6c757d;
+  --listing-bs-border:            #ced4da;
+  --listing-bs-border-soft:       #dee2e6;
+  --listing-bs-bg-light:          #f8f9fa;
+  --listing-bs-bg-hover:          #e9ecef;
+  --listing-shadow-dropdown:      0 4px 6px rgba(0, 0, 0, .1);
+}
+
+
 /* Colors taken from https://mdbootstrap.com/css/colors/ */
-.ajax-contents-table tbody tr { border-left:2px solid #ddd; }
-.ajax-contents-table tbody tr:last-child { border-bottom:1px solid #ddd; }
+.ajax-contents-table tbody tr { border-left:2px solid var(--listing-border-table); }
+.ajax-contents-table tbody tr:last-child { border-bottom:1px solid var(--listing-border-table); }
 
 /* state sample_due */
-.ajax-contents-table tr.state-sample_due { border-left:2px solid #ffff8d !important; }
-.ajax-contents-table td.result.state-sample_due { border-left:2px solid #ffff8d !important; }
-.ajax-contents-table tr.state-sample_due:hover { background-color: rgba(255, 235, 59, 0.1); }
+.ajax-contents-table tr.state-sample_due { border-left:2px solid var(--listing-state-sample-due) !important; }
+.ajax-contents-table td.result.state-sample_due { border-left:2px solid var(--listing-state-sample-due) !important; }
+.ajax-contents-table tr.state-sample_due:hover { background-color: var(--listing-state-sample-due-hover); }
 
 /* state sample_received */
-.ajax-contents-table tr.state-sample_received { border-left:2px solid #a1887f !important; }
-.ajax-contents-table td.result.state-sample_received { border-left:2px solid #a1887f !important; }
-.ajax-contents-table tr.state-sample_received:hover { background-color: rgba(121, 85, 72, 0.1); }
+.ajax-contents-table tr.state-sample_received { border-left:2px solid var(--listing-state-sample-received) !important; }
+.ajax-contents-table td.result.state-sample_received { border-left:2px solid var(--listing-state-sample-received) !important; }
+.ajax-contents-table tr.state-sample_received:hover { background-color: var(--listing-state-sample-received-hover); }
 
 /* state retracted */
-.ajax-contents-table tr.state-retracted { border-left:2px solid #ff6f00 !important; }
-.ajax-contents-table tr.state-retracted>td:not([rowspan]) { background-color: #eceff1 !important; color: #78909c; font-style: italic; }
-.ajax-contents-table td.result.state-retracted { border-left:2px solid #ff6f00 !important; }
-.ajax-contents-table tr.state-retracted:hover { background-color: rgba(255, 152, 0, 0.1); }
+.ajax-contents-table tr.state-retracted { border-left:2px solid var(--listing-state-retracted) !important; }
+.ajax-contents-table tr.state-retracted>td:not([rowspan]) { background-color: var(--listing-state-retracted-bg) !important; color: var(--listing-state-retracted-fg); font-style: italic; }
+.ajax-contents-table td.result.state-retracted { border-left:2px solid var(--listing-state-retracted) !important; }
+.ajax-contents-table tr.state-retracted:hover { background-color: var(--listing-state-retracted-hover); }
 
 /* state to_be_verified */
-.ajax-contents-table tr.state-to_be_verified { border-left:2px solid #18ffff !important; }
-.ajax-contents-table td.result.state-to_be_verified { border-left:2px solid #18ffff !important; }
-.ajax-contents-table tr.state-to_be_verified:hover { background-color: rgba(0, 188, 212, 0.1); }
+.ajax-contents-table tr.state-to_be_verified { border-left:2px solid var(--listing-state-to-be-verified) !important; }
+.ajax-contents-table td.result.state-to_be_verified { border-left:2px solid var(--listing-state-to-be-verified) !important; }
+.ajax-contents-table tr.state-to_be_verified:hover { background-color: var(--listing-state-to-be-verified-hover); }
 
 /* state verified */
-.ajax-contents-table tr.state-verified { border-left:2px solid #0091ea !important; }
-.ajax-contents-table td.result.state-verified { border-left:2px solid #0091ea !important; }
-.ajax-contents-table tr.state-verified:hover { background-color: rgba(3, 169, 244, 0.2); }
+.ajax-contents-table tr.state-verified { border-left:2px solid var(--listing-state-verified) !important; }
+.ajax-contents-table td.result.state-verified { border-left:2px solid var(--listing-state-verified) !important; }
+.ajax-contents-table tr.state-verified:hover { background-color: var(--listing-state-verified-hover); }
 
 /* state published */
-.ajax-contents-table tr.state-published { border-left:2px solid #00c853 !important; }
-.ajax-contents-table td.result.state-published { border-left:2px solid #00c853 !important; }
-.ajax-contents-table tr.state-published:hover { background-color: rgba(76, 175, 80, 0.2); }
+.ajax-contents-table tr.state-published { border-left:2px solid var(--listing-state-published) !important; }
+.ajax-contents-table td.result.state-published { border-left:2px solid var(--listing-state-published) !important; }
+.ajax-contents-table tr.state-published:hover { background-color: var(--listing-state-published-hover); }
 
 /* state invalid */
-.ajax-contents-table tr.state-invalid { border-left:2px solid #e65100 !important; }
-.ajax-contents-table td.result.state-invalid { border-left:2px solid #e65100 !important; }
-.ajax-contents-table tr.state-invalid:hover { background-color: rgba(244, 67, 54, 0.2); }
+.ajax-contents-table tr.state-invalid { border-left:2px solid var(--listing-state-invalid) !important; }
+.ajax-contents-table td.result.state-invalid { border-left:2px solid var(--listing-state-invalid) !important; }
+.ajax-contents-table tr.state-invalid:hover { background-color: var(--listing-state-invalid-hover); }
 
 /* state rejected */
-.ajax-contents-table tr.state-rejected { border-left:2px solid #abc !important; }
-.ajax-contents-table td.result.state-rejected { border-left:2px solid #abc !important; }
-.ajax-contents-table tr.state-rejected:hover { background-color: #abc; }
+.ajax-contents-table tr.state-rejected { border-left:2px solid var(--listing-state-rejected) !important; }
+.ajax-contents-table td.result.state-rejected { border-left:2px solid var(--listing-state-rejected) !important; }
+.ajax-contents-table tr.state-rejected:hover { background-color: var(--listing-state-rejected); }
 
 /* state assigned */
-.ajax-contents-table tr.state-assigned { border-left:2px solid #ddd; }
+.ajax-contents-table tr.state-assigned { border-left:2px solid var(--listing-border-table); }
 .ajax-contents-table td.result.state-assigned { border-left:2px solid transparent; }
 
 /* state unassigned */
-.ajax-contents-table tr.state-unassigned { border-left:2px solid #ddd; }
+.ajax-contents-table tr.state-unassigned { border-left:2px solid var(--listing-border-table); }
 .ajax-contents-table td.result.state-unassigned { border-left:2px solid transparent; }
 
 /* state cancelled */
-.ajax-contents-table tr.state-cancelled { border-left:2px solid #000000 !important; }
-.ajax-contents-table tr.state-cancelled:hover { background-color: rgba(0, 0, 0, 0.1); }
+.ajax-contents-table tr.state-cancelled { border-left:2px solid var(--listing-state-cancelled) !important; }
+.ajax-contents-table tr.state-cancelled:hover { background-color: var(--listing-state-cancelled-hover); }
 
 /* worksheet states */
-.ajax-contents-table tr.state-open { border-left:2px solid #ddd  !important; }
-.ajax-contents-table tr.state-empty-worksheet { border-left:2px solid #ddd !important; }
+.ajax-contents-table tr.state-open { border-left:2px solid var(--listing-border-table)  !important; }
+.ajax-contents-table tr.state-empty-worksheet { border-left:2px solid var(--listing-border-table) !important; }
 
 /* transposed worksheet layout*/
 .ajax-contents-table td.transposed.result.empty { cursor: not-allowed; }
-.ajax-contents-table td.transposed.result:hover { background-color: #e3e3e3!important; }
-.ajax-contents-table td.transposed.result.empty:hover { background-color: #e3e3e3; }
+.ajax-contents-table td.transposed.result:hover { background-color: var(--listing-border-divider)!important; }
+.ajax-contents-table td.transposed.result.empty:hover { background-color: var(--listing-border-divider); }
 
 /* active/inactive states*/
 .ajax-contents-table tr.state-active { border-left:2px solid transparent; }
-.ajax-contents-table tr.state-inactive { border-left:2px solid #616161; }
+.ajax-contents-table tr.state-inactive { border-left:2px solid var(--listing-state-inactive-border); }
 
 .ajax-contents-table th.sortable { cursor: pointer; }
-.ajax-contents-table th.sortable:hover { background-color: #ccc; }
+.ajax-contents-table th.sortable:hover { background-color: var(--listing-bg-th-hover); }
 .ajax-contents-table th:not(.sortable) { cursor: not-allowed; }
 
-.ajax-contents-table th.active.ascending span:after { content: "▲"; margin-left: 0.5em; }
-.ajax-contents-table th.active.descending span:after { content: "▼"; margin-left: 0.5em; }
+/* split-arrow sort indicators are rendered as buttons by
+   TableHeaderCell; the old ::after triangle is no longer needed */
 
 /* category */
-.ajax-contents-table tr.categoryrow { background-color: rgba(96, 125, 139, 0.1)!important; cursor: pointer; font-weight: bold; font-size: 115%; color: #3E4551; }
+.ajax-contents-table tr.categoryrow { background-color: var(--listing-category-bg)!important; cursor: pointer; font-weight: bold; font-size: 115%; color: var(--listing-fg-category); }
 
 /* table load mask */
 #table-overlay {
@@ -88,15 +231,15 @@
   z-index: 1000;
   height: 100%;
   width: 100%;
-  background: rgba(255,255,255, 0.6);
+  background: var(--listing-overlay-loader);
   opacity: 0.6;
 }
 
 /* progress bar */
 .ajax-contents-table tr td div.progress { width: 55px; margin-bottom: 0; height: 17px; }
-.ajax-contents-table tr td div.progress div.progress-bar { color: #f5f5f5; background-color: #33b5e5; line-height: 17px; font-size: 9px; font-weight:bold; }
+.ajax-contents-table tr td div.progress div.progress-bar { color: var(--listing-bg-muted); background-color: var(--listing-progress-bg); line-height: 17px; font-size: 9px; font-weight:bold; }
 .ajax-contents-table tr.state-invalid td div.progress div.progress-bar,
-.ajax-contents-table tr.state-cancelled td div.progress div.progress-bar { background-color: #c9c9c9; }
+.ajax-contents-table tr.state-cancelled td div.progress div.progress-bar { background-color: var(--listing-progress-bg-disabled); }
 
 /* collapsible rows */
 .ajax-contents-table tr.togglerow { cursor: pointer; }
@@ -125,7 +268,7 @@
     line-height: normal;
     padding-right: 0.5rem;
     vertical-align: bottom;
-    color: #555;
+    color: var(--listing-fg-toggle);
     cursor: pointer;
     float: left;
     width: 20px; /* aligns the toggle symbols */
@@ -165,8 +308,8 @@
     min-height: 20px;
     padding: 5px;
     margin: 5px;
-    background-color: #f5f5f5;
-    border: 1px solid #e3e3e3;
+    background-color: var(--listing-bg-muted);
+    border: 1px solid var(--listing-border-divider);
     border-radius: 3px;
 }
 
@@ -175,7 +318,7 @@
     max-height: 120px;
     width: 200px;
     overflow: auto;
-    border: 1px solid #ccc;
+    border: 1px solid var(--listing-bg-th-hover);
     border-radius: 3px;
 }
 .ajax-contents-table tr td div.multichoice ul {
@@ -186,7 +329,7 @@
     padding: 6px;
 }
 .ajax-contents-table tr td div.multichoice li:hover {
-    background-color: #f9f9f9;
+    background-color: var(--listing-bg-row-alt);
 }
 
 /* Result multi choice */
@@ -222,7 +365,7 @@ selected elements from multiselect
 
 /* Rowspan support */
 .ajax-contents-table tr td[rowspan] {
-    border: 1px solid #ddd;
+    border: 1px solid var(--listing-border-table);
     background-color: white!important;
 }
 .ajax-contents-table tr td[rowspan]:hover {
@@ -272,12 +415,12 @@ selected elements from multiselect
 }
 .ajax-contents-table th .column-filter-toggle.active {
   opacity: 1;
-  color: #007bff;
+  color: var(--listing-bs-primary);
 }
 .ajax-contents-table tr.column-filter-row td {
   padding: 0.25rem 0.5rem;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
+  background-color: var(--listing-bs-bg-light);
+  border-bottom: 1px solid var(--listing-bs-border-soft);
 }
 .ajax-contents-table tr.column-filter-row td.empty {
   background-color: transparent;
@@ -295,7 +438,7 @@ selected elements from multiselect
 }
 .ajax-contents-table tr.column-filter-row input:disabled,
 .ajax-contents-table tr.column-filter-row select:disabled {
-  background-color: #e9ecef;
+  background-color: var(--listing-bs-bg-hover);
   cursor: not-allowed;
 }
 .ajax-contents-table tr.column-filter-row select.form-control {
@@ -303,7 +446,7 @@ selected elements from multiselect
   appearance: auto;
 }
 .ajax-contents-table tr.column-filter-row .input-group-append .btn {
-  border-color: #ced4da;
+  border-color: var(--listing-bs-border);
 }
 /* Ensure searchable-select input has correct border radius in input-group */
 .ajax-contents-table tr.column-filter-row .input-group > .searchable-select > .form-control {
@@ -327,11 +470,11 @@ selected elements from multiselect
   max-height: 250px;
   overflow-y: auto;
   background: white;
-  border: 1px solid #ced4da;
+  border: 1px solid var(--listing-bs-border);
   border-top: none;
   border-radius: 0 0 0.25rem 0.25rem;
   z-index: 1050;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--listing-shadow-dropdown);
 }
 .searchable-select-option {
   padding: 0.375rem 0.75rem;
@@ -342,21 +485,576 @@ selected elements from multiselect
 }
 .searchable-select-option:hover,
 .searchable-select-option.highlighted {
-  background-color: #e9ecef;
+  background-color: var(--listing-bs-bg-hover);
 }
 .searchable-select-option.selected {
-  background-color: #007bff;
+  background-color: var(--listing-bs-primary);
   color: white;
 }
 .searchable-select-option.selected.highlighted {
-  background-color: #0056b3;
+  background-color: var(--listing-bs-primary-dark);
 }
 .searchable-select-hint {
   padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
-  color: #6c757d;
-  background: #f8f9fa;
-  border: 1px solid #ced4da;
-  border-top: 1px dashed #dee2e6;
+  color: var(--listing-bs-secondary);
+  background: var(--listing-bs-bg-light);
+  border: 1px solid var(--listing-bs-border);
+  border-top: 1px dashed var(--listing-bs-border-soft);
   text-align: center;
+}
+
+/* ================================================================== */
+/* Saved Filters + Column Filter Controls                             */
+/*                                                                    */
+/* Aesthetic: calm-clinical. One accent (SENAITE blue), hairline      */
+/* dividers, hover-revealed actions, monospaced preset names.         */
+/*                                                                    */
+/* The palette lives in --sf-* custom properties so a single edit     */
+/* re-skins everything. Token roles:                                  */
+/*   bg / fg          surface + text                                  */
+/*   border / hairline   default control + soft divider               */
+/*   accent           SENAITE blue (active / focus)                   */
+/*   success          preset applied                                  */
+/*   warning          default-preset gold + dirty amber               */
+/*   danger           destructive                                     */
+/* Each role exposes a -soft (subtle bg), -border, and -fg variant.   */
+/* ================================================================== */
+
+
+
+/* ------------------------------------------------------------------ */
+/*  1. Saved filters — toggle pill                                    */
+/* ------------------------------------------------------------------ */
+.saved-filters {
+  position: relative;
+  display: inline-flex;
+  margin-left: 0.5rem;
+}
+.saved-filters-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: calc(1.5em + 0.5rem + 2px);  /* matches Bootstrap btn-sm */
+  padding: 0 0.6rem;
+  background: var(--sf-bg);
+  color: var(--sf-fg-muted);
+  border: 1px solid var(--sf-border);
+  border-radius: var(--sf-radius-pill);
+  font-size: 0.8125rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color var(--sf-trans-fast), border-color var(--sf-trans-fast),
+              color var(--sf-trans-fast), box-shadow var(--sf-trans-fast);
+}
+.saved-filters-toggle:hover,
+.saved-filters-toggle.is-open {
+  background: var(--sf-bg-hover);
+  border-color: var(--sf-fg-faint);
+  color: var(--sf-fg);
+}
+.saved-filters-toggle:focus {
+  outline: none;
+  box-shadow: 0 0 0 .15rem var(--sf-accent-overlay-20);
+}
+/* Applied (success) — wins over hover/open */
+.saved-filters-toggle.has-applied {
+  background: var(--sf-success-soft);
+  border-color: var(--sf-success-border);
+  color: var(--sf-success);
+}
+.saved-filters-toggle .saved-filters-count {
+  display: inline-block;
+  min-width: 1.25rem;
+  padding: 0 .3rem;
+  background: var(--sf-fg-mutest);
+  color: var(--sf-bg);
+  font-size: .6875rem;
+  font-weight: 600;
+  line-height: 1.05rem;
+  border-radius: var(--sf-radius-pill);
+  text-align: center;
+}
+.saved-filters-toggle.has-applied .saved-filters-count {
+  background: var(--sf-success);
+}
+
+/* When the toggle sits inside a Bootstrap input-group prepend slot
+   (SearchBox), match the input-group radii and height. */
+.searchbox-prepend {
+  display: flex;
+  align-items: stretch;
+}
+.searchbox-prepend .saved-filters {
+  margin-left: 0;
+  display: flex;
+  align-items: stretch;
+}
+.searchbox-prepend .saved-filters-toggle {
+  height: 100%;
+  padding: 0 0.65rem;
+  border-right: 0;
+  border-radius: 0.2rem 0 0 0.2rem;
+}
+.searchbox-prepend .saved-filters-toggle .saved-filters-count {
+  margin-left: 0.15rem;
+}
+.searchbox-prepend .saved-filters-menu {
+  left: 0;
+  right: auto;
+  text-align: left;
+}
+
+
+/* ------------------------------------------------------------------ */
+/*  2. Saved filters — dropdown menu                                  */
+/* ------------------------------------------------------------------ */
+.saved-filters-menu {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  z-index: 1050;
+  min-width: 280px;
+  background: var(--sf-bg);
+  border: 1px solid var(--sf-border-card);
+  border-radius: var(--sf-radius-card);
+  box-shadow: var(--sf-shadow-card);
+  animation: savedFiltersIn var(--sf-trans-fast)-out;
+}
+@keyframes savedFiltersIn {
+  from { opacity: 0; transform: translateY(-2px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+.saved-filters-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: .65rem .85rem .5rem;
+  border-bottom: 1px solid var(--sf-hairline);
+}
+.saved-filters-title {
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--sf-fg-mutest);
+}
+.saved-filters-hint {
+  font-size: .6875rem;
+  color: var(--sf-fg-faint);
+  font-style: italic;
+}
+.saved-filter-empty {
+  padding: 1.1rem .85rem;
+  font-size: .8125rem;
+  text-align: center;
+  color: var(--sf-fg-empty);
+}
+
+
+/* ------------------------------------------------------------------ */
+/*  3. Saved filters — list rows                                      */
+/* ------------------------------------------------------------------ */
+.saved-filter-list {
+  list-style: none;
+  margin: 0;
+  padding: .25rem 0;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.saved-filter-item {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  position: relative;
+}
+.saved-filter-item + .saved-filter-item {
+  border-top: 1px solid var(--sf-divider);
+}
+.saved-filter-item:hover            { background: var(--sf-bg-row-hover); }
+.saved-filter-item.is-default       { background: var(--sf-warning-row); }
+.saved-filter-item.is-default:hover { background: var(--sf-warning-row-hover); }
+.saved-filter-item.is-applied       { background: var(--sf-success-row); }
+.saved-filter-item.is-applied:hover { background: var(--sf-success-row-hover); }
+.saved-filter-item.is-applied.is-default { background: var(--sf-warning-row-both); }
+/* dirty = applied + user edits diverge from stored payload */
+.saved-filter-item.is-applied.is-dirty       { background: var(--sf-dirty-row); }
+.saved-filter-item.is-applied.is-dirty:hover { background: var(--sf-dirty-row-hover); }
+
+/* Row body: marker + name + tags (button so the whole row is clickable) */
+.saved-filter-apply {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  min-width: 0;
+  padding: .5rem .85rem;
+  background: transparent;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+  color: var(--sf-fg);
+}
+.saved-filter-apply:focus {
+  outline: none;
+  background: var(--sf-accent-soft);
+}
+.saved-filter-marker {
+  flex: 0 0 auto;
+  width: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sf-border);
+  font-size: .75rem;
+}
+.saved-filter-item.is-applied .saved-filter-marker         { color: var(--sf-success); }
+.saved-filter-item.is-applied.is-dirty .saved-filter-marker{ color: var(--sf-warning-star-hover); }
+
+.saved-filter-name {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo,
+               Consolas, "Liberation Mono", monospace;
+  font-size: .8125rem;
+}
+/* Micro tags (auto / modified) — same shape, different colour */
+.saved-filter-default-tag,
+.saved-filter-dirty-tag {
+  flex: 0 0 auto;
+  font-size: .625rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: .05rem .35rem;
+  border-radius: 3px;
+}
+.saved-filter-default-tag { color: var(--sf-warning-tag-fg); background: var(--sf-warning-tag-bg); }
+.saved-filter-dirty-tag   { color: var(--sf-dirty-tag-fg); background: var(--sf-dirty-tag-bg); }
+
+
+/* ------------------------------------------------------------------ */
+/*  4. Saved filters — row actions (rename, star, delete, update,     */
+/*     revert). Hover-revealed except on default and dirty rows.      */
+/* ------------------------------------------------------------------ */
+.saved-filter-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding-right: .35rem;
+  opacity: 0;
+  transition: opacity var(--sf-trans-fast);
+}
+.saved-filter-item:hover         .saved-filter-actions,
+.saved-filter-item:focus-within  .saved-filter-actions,
+.saved-filter-item.is-default    .saved-filter-actions,
+.saved-filter-item.is-dirty      .saved-filter-actions {
+  opacity: 1;
+}
+.saved-filter-action {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  width: 1.4rem;
+  height: 1.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  color: var(--sf-fg-faint);
+  cursor: pointer;
+  transition: color var(--sf-trans-fast), background-color var(--sf-trans-fast);
+}
+/* Pin every action glyph to the same optical box — FontAwesome's
+   per-icon metrics make star/check/×/pen otherwise vary noticeably. */
+.saved-filter-action i {
+  font-size: .75rem;
+  line-height: 1;
+  width: .8rem;
+  height: .8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.saved-filter-action:hover {
+  background: var(--sf-shadow-overlay);
+  color: var(--sf-fg);
+}
+.saved-filter-action-star.is-on        { color: var(--sf-warning-star); }
+.saved-filter-action-star.is-on:hover  { color: var(--sf-warning-star-hover); }
+.saved-filter-action-delete:hover {
+  color: var(--sf-danger);
+  background: var(--sf-danger-overlay-08);
+}
+.saved-filter-action-update        { color: var(--sf-accent); }
+.saved-filter-action-update:hover  { background: var(--sf-accent-overlay-08); color: var(--sf-accent); }
+.saved-filter-action-revert:hover  { background: var(--sf-shadow-overlay); color: var(--sf-fg-muted); }
+
+
+/* ------------------------------------------------------------------ */
+/*  5. Saved filters — footer (Save current view button)              */
+/* ------------------------------------------------------------------ */
+.saved-filters-footer {
+  padding: .5rem .65rem .65rem;
+  border-top: 1px solid var(--sf-hairline);
+}
+.saved-filters-save {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  width: 100%;
+  padding: .4rem .65rem;
+  background: var(--sf-bg);
+  color: var(--sf-accent);
+  border: 1px dashed var(--sf-accent-border);
+  border-radius: 6px;
+  font-size: .8125rem;
+  cursor: pointer;
+  transition: background-color var(--sf-trans-fast), border-color var(--sf-trans-fast);
+}
+.saved-filters-save:hover {
+  background: var(--sf-accent-soft);
+  border-color: var(--sf-accent);
+  border-style: solid;
+}
+.saved-filters-save i { font-size: .7rem; }
+
+
+/* ------------------------------------------------------------------ */
+/*  6. Saved filters — inline editors (save / rename)                 */
+/* ------------------------------------------------------------------ */
+.saved-filter-edit,
+.saved-filters-save-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  background: var(--sf-bg-edit-row);
+}
+.saved-filter-edit       { padding: .35rem .5rem; }
+.saved-filters-save-row  { padding: .5rem .65rem; border-top: 1px solid var(--sf-hairline); }
+
+.saved-filter-edit-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .8125rem;
+  padding: .25rem .5rem;
+  background: var(--sf-bg);
+  border: 1px solid var(--sf-accent-input-border);
+  border-radius: 4px;
+  color: var(--sf-fg);
+  outline: none;
+  transition: border-color var(--sf-trans-fast), box-shadow var(--sf-trans-fast);
+}
+.saved-filter-edit-input:focus {
+  border-color: var(--sf-accent-focus);
+  box-shadow: 0 0 0 .15rem var(--sf-accent-overlay-15);
+}
+.saved-filter-edit-confirm,
+.saved-filter-edit-cancel {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  background: var(--sf-bg);
+  border: 1px solid var(--sf-border-soft);
+  border-radius: 4px;
+  font-size: .75rem;
+  color: var(--sf-fg-muted);
+  cursor: pointer;
+  transition: background-color var(--sf-trans-fast), border-color var(--sf-trans-fast),
+              color var(--sf-trans-fast);
+}
+.saved-filter-edit-confirm        { color: var(--sf-accent); border-color: var(--sf-accent-border); }
+.saved-filter-edit-confirm:hover  { background: var(--sf-accent); border-color: var(--sf-accent); color: var(--sf-bg); }
+.saved-filter-edit-cancel:hover   { background: var(--sf-bg-hover); border-color: var(--sf-fg-faint); color: var(--sf-fg); }
+
+
+/* ------------------------------------------------------------------ */
+/*  7. Saved filters — inline delete confirm                          */
+/* ------------------------------------------------------------------ */
+.saved-filter-confirm {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: .5rem;
+  padding: .45rem .65rem;
+  background: var(--sf-danger-soft);
+  border-top: 1px solid var(--sf-danger-hairline);
+  border-bottom: 1px solid var(--sf-danger-hairline);
+  font-size: .8125rem;
+  color: var(--sf-danger-fg);
+}
+.saved-filter-confirm-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.saved-filter-confirm-text strong {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 600;
+  color: var(--sf-danger-fg-strong);
+}
+.saved-filter-confirm-actions {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 4px;
+}
+.saved-filter-confirm-cancel,
+.saved-filter-confirm-confirm {
+  flex: 0 0 auto;
+  width: 1.4rem;
+  height: 1.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 4px;
+  border: 1px solid;
+  cursor: pointer;
+  background: var(--sf-bg);
+  transition: background-color var(--sf-trans-fast), border-color var(--sf-trans-fast),
+              color var(--sf-trans-fast);
+}
+.saved-filter-confirm-cancel       { border-color: var(--sf-border-soft); color: var(--sf-fg-muted); }
+.saved-filter-confirm-cancel:hover { background: var(--sf-bg-hover); border-color: var(--sf-fg-faint); color: var(--sf-fg); }
+.saved-filter-confirm-confirm      { border-color: var(--sf-danger-border); color: var(--sf-danger-fg); }
+.saved-filter-confirm-confirm:hover{ background: var(--sf-danger); border-color: var(--sf-danger); color: var(--sf-bg); }
+.saved-filter-confirm-cancel i,
+.saved-filter-confirm-confirm i { font-size: .75rem; line-height: 1; }
+
+
+/* ================================================================== */
+/* Column header — title (ellipsis) + sort arrows + filter funnel     */
+/* ================================================================== */
+
+/* Every header cell shares the same height so cells without controls
+   don't collapse to a shorter line and the row bobs up and down. */
+.ajax-contents-table thead th {
+  vertical-align: middle !important;
+  height: 2.5rem;
+  line-height: 1.25;
+}
+
+/* Inner flex container: title flexes (shrinks with ellipsis), the
+   controls cluster stays fully visible on the right edge. */
+.ajax-contents-table thead th .column-header-inner {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  width: 100%;
+  min-width: 0;
+}
+.ajax-contents-table thead th .column-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.ajax-contents-table thead th .column-header-controls {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  white-space: nowrap;  /* arrows + funnel never split */
+}
+
+/* --- Sort arrows: hidden until hover, revealed on the active col --- */
+.column-sort-arrows {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: 0;
+  vertical-align: middle;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity var(--sf-trans-fast);
+}
+.ajax-contents-table th.sortable:hover .column-sort-arrows,
+.ajax-contents-table th.active         .column-sort-arrows {
+  opacity: 1;
+}
+.column-sort-arrow {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  width: 14px;
+  height: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--sf-fg-faint);
+  font-size: .55rem;
+  border-radius: 2px;
+  transition: color var(--sf-trans-fast), background-color var(--sf-trans-fast);
+}
+.column-sort-arrow:hover  { color: var(--sf-accent); background: var(--sf-accent-overlay-08); }
+.column-sort-arrow.active { color: var(--sf-accent); }
+/* Mute the non-active arrow when one is active, so the eye reads the
+   current direction at a glance. */
+.ajax-contents-table th.active .column-sort-arrow:not(.active) {
+  color: var(--sf-border);
+}
+
+/* --- Filter funnel: hidden until hover; permanent when filtering --- */
+.ajax-contents-table th .column-filter-toggle {
+  vertical-align: middle;
+  opacity: 0;
+  transition: opacity var(--sf-trans-fast);
+}
+.ajax-contents-table th:hover         .column-filter-toggle,
+.ajax-contents-table th:focus-within  .column-filter-toggle,
+.ajax-contents-table th .column-filter-toggle.active {
+  opacity: 1;
+}
+
+
+/* ================================================================== */
+/* Column filter row — refined search strip below the header          */
+/* ================================================================== */
+.column-filter-row > td {
+  background: var(--sf-bg-subtle);
+  border-top: 1px solid var(--sf-hairline);
+  border-bottom: 1px solid var(--sf-hairline);
+  padding: .3rem .4rem;
+}
+.column-filter-row > td.empty { background: var(--sf-bg-subtle); }
+
+.column-filter-row .input-group-sm > .form-control,
+.column-filter-row .searchable-select input {
+  background: var(--sf-bg);
+  border-color: var(--sf-border-soft);
+  border-radius: 4px;
+  box-shadow: none;
+  transition: border-color var(--sf-trans-fast), box-shadow var(--sf-trans-fast);
+}
+.column-filter-row .input-group-sm > .form-control:focus,
+.column-filter-row .searchable-select input:focus {
+  border-color: var(--sf-accent-border);
+  box-shadow: 0 0 0 .15rem var(--sf-accent-overlay-15);
+}
+.column-filter-row .btn-outline-secondary {
+  background: var(--sf-bg);
+  border-color: var(--sf-border-soft);
+  color: var(--sf-fg-mutest);
+  transition: color var(--sf-trans-fast), background-color var(--sf-trans-fast),
+              border-color var(--sf-trans-fast);
+}
+.column-filter-row .btn-outline-secondary:hover {
+  background: var(--sf-bg-hover);
+  border-color: var(--sf-fg-faint);
+  color: var(--sf-fg);
 }
