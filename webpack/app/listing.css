@@ -1550,9 +1550,13 @@ selected elements from multiselect
   align-items: center;
   height: 1.6rem;
   padding: 0 .35rem 0 .6rem;
-  background: var(--sf-accent-soft, #eaf3ff);
-  border: 1px solid var(--sf-accent-border, #9ec5ff);
-  color: var(--sf-accent, #0b5ed7);
+  /* Default to the row-chip neutral palette so a Label with no
+     color shows the same grey pill in both places. When the
+     listing controller resolves the per-label color it sets an
+     inline style that wins over these fallbacks. */
+  color: var(--sf-fg-muted, #495057);
+  background: var(--sf-bg-hover, #f1f3f5);
+  border: 1px solid var(--sf-hairline, #e5e7eb);
   border-radius: 3px;
   font-size: .75rem;
   font-weight: 500;
