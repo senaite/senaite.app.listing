@@ -1095,6 +1095,14 @@ class ListingController extends React.Component
     preset = find_default_preset(@get_storage_id())
     return unless preset?.payload
     payload = preset.payload
+    # Push the preset's labels into the URL `?labels=` filter so the
+    # first folderitems fetch carries them (api.coffee#get_api_url
+    # reads location.search fresh). React state (@filter,
+    # @review_state, ...) is mutated below and picked up when
+    # @state is built; labels live outside React state by design.
+    saved_labels = if Array.isArray(payload.labels) then payload.labels else []
+    if saved_labels.length
+      window.history.replaceState null, "", @build_labels_url saved_labels
     @filter = payload.filter or @filter
     @review_state = payload.review_state if payload.review_state
     if payload.column_filters
