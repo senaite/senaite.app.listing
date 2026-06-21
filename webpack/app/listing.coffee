@@ -1203,11 +1203,51 @@ class ListingController extends React.Component
   ###
   filterBySearchterm: (filter="") ->
     console.debug "ListingController::filterBySearchter: filter=#{filter}"
+    # Peel `label:Foo` / `labels:Foo,Bar` tokens out of the search
+    # term and treat them as URL ?labels= filters (additive). What
+    # remains becomes the regular search filter.
+    parsed = @parse_label_search_prefixes filter
+    if parsed.labels.length
+      current = @get_url_labels()
+      merged = current.slice()
+      for name in parsed.labels
+        merged.push name unless name in merged
+      window.history.replaceState null, "", @build_labels_url merged
     @set_state
-      filter: filter
+      filter: parsed.residual
       pagesize: @pagesize  # reset to the initial pagesize on search
       limit_from: 0
     return true
+
+  ###*
+   * Extract `label:Foo` / `labels:Foo,Bar` tokens from a search
+   * term. Returns an object with the list of labels found and the
+   * residual search string (the tokens that were not label prefixes,
+   * rejoined with single spaces).
+   *
+   * Whitespace inside a single quoted token is not supported — the
+   * parser splits on /\s+/. Names containing spaces should be added
+   * via chip click instead.
+   *
+   * @param term {string} the raw search box value
+   * @returns {{labels: string[], residual: string}}
+  ###
+  parse_label_search_prefixes: (term) ->
+    labels = []
+    residual = []
+    seen = {}
+    for tok in (term or "").split /\s+/
+      m = tok.match /^labels?:(.+)$/i
+      if m
+        for raw in m[1].split ","
+          name = raw.trim()
+          continue if not name
+          continue if seen[name]
+          seen[name] = yes
+          labels.push name
+      else if tok
+        residual.push tok
+    {labels: labels, residual: residual.join(" ")}
 
   ###*
    * Sort a column with a specific order
