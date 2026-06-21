@@ -1520,13 +1520,17 @@ selected elements from multiselect
   outline: 2px solid rgba(13, 110, 253, .35);
 }
 
-/* Larger chip variant — used on the single-label view next to the
-   page title (rendered by senaite.core.label.color viewlet). */
+/* Larger chip variant — wraps the page <h1> on the Label view
+   (senaite.core renders the heading itself as the chip via an
+   @@title override). Inherits the surrounding font-size so the
+   chip scales with the heading rather than being capped at the
+   row-chip body size. */
 .sample-label.sample-label--lg {
   height: auto;
-  padding: .2rem .55rem;
-  font-size: .85rem;
-  border-radius: 4px;
+  padding: .25rem .9rem;
+  font-size: inherit;
+  line-height: 1.2;
+  border-radius: 6px;
 }
 .sample-label.sample-label--lg .sample-label-text {
   font-weight: 500;
