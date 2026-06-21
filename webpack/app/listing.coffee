@@ -944,8 +944,119 @@ class ListingController extends React.Component
   ###
   PRESET_URL_PARAMS: [
     "filter", "review_state", "column_filters",
-    "sort_on", "sort_order", "pagesize"
+    "sort_on", "sort_order", "pagesize", "labels"
   ]
+
+  ###*
+   * Parse the active labels filter from the page URL.
+   *
+   * The labels filter lives outside the form_id-prefixed listing state
+   * (review_state, sort, etc.) on the plain ``?labels=…`` query
+   * parameter so it can be shared / bookmarked as a SENAITE-wide
+   * cross-listing filter.
+   *
+   * @returns {Array<string>} sorted unique non-empty label names
+  ###
+  get_url_labels: ->
+    params = new URLSearchParams window.location.search
+    raw = (params.getAll "labels")
+      .reduce ((acc, v) -> acc.concat v.split ","), []
+      .map (s) -> s.trim()
+      .filter (s) -> s.length > 0
+    seen = {}
+    raw.filter (s) ->
+      return no if seen[s]
+      seen[s] = yes
+      yes
+
+  ###*
+   * Build a URL that replaces the active labels filter with the given
+   * list. Preserves all other URL parameters and the hash fragment.
+   *
+   * @param labels {Array<string>}
+   * @returns {string}
+  ###
+  build_labels_url: (labels) ->
+    params = new URLSearchParams window.location.search
+    params.delete "labels"
+    if labels and labels.length
+      params.set "labels", labels.join ","
+    qs = params.toString()
+    url = window.location.pathname
+    url += "?" + qs if qs
+    url += window.location.hash if window.location.hash
+    return url
+
+  ###*
+   * Fetch and cache the available labels (name → color map).
+   *
+   * The fetch is lazy-fired the first time
+   * ``render_active_label_filters`` runs; once it resolves the
+   * controller forces a re-render so the chips paint in their
+   * canonical color.
+  ###
+  ensure_label_colors_loaded: ->
+    return if @_label_colors_promise
+    me = this
+    @_label_colors_promise = fetch "./@@available_labels",
+      credentials: "same-origin"
+      headers:
+        "X-Requested-With": "XMLHttpRequest"
+        "Accept": "application/json"
+    .then (response) ->
+      return {} unless response.ok
+      response.json().then (data) ->
+        out = {}
+        for label in (data.labels or [])
+          out[label.name] = label.color or ""
+        out
+    .then (map) ->
+      me._label_colors = map
+      me.forceUpdate?()
+      map
+    .catch ->
+      me._label_colors = {}
+      {}
+
+  get_label_color: (name) ->
+    return "" unless @_label_colors
+    @_label_colors[name] or ""
+
+  ###*
+   * Render the active labels filter as a row of removable chips
+   * shown right before the search box. Each chip is painted in the
+   * color of its Label content type so the inline filter chip
+   * matches the row chips of the same name.
+  ###
+  render_active_label_filters: ->
+    labels = @get_url_labels()
+    return null unless labels.length
+    @ensure_label_colors_loaded()
+    me = this
+    on_remove = (label) -> (event) ->
+      event.preventDefault()
+      next = labels.filter (l) -> l != label
+      window.location.assign me.build_labels_url next
+    <div className="active-label-filters">
+      {labels.map (label) ->
+        color = me.get_label_color label
+        chip_style = if color
+          backgroundColor: color
+          borderColor: color
+          color: "#fff"
+        else
+          null
+        <span key={"label-" + label}
+              className="active-label-filter"
+              style={chip_style}>
+          <span className="active-label-filter__name">{label}</span>
+          <button type="button"
+                  className="active-label-filter__remove"
+                  title={_t("Remove filter")}
+                  onClick={on_remove(label)}>×</button>
+        </span>
+      }
+    </div>
 
   ###*
    * localStorage scope key for saved presets and other per-listing
@@ -1003,6 +1114,17 @@ class ListingController extends React.Component
   applySavedFilter: (preset={}) ->
     console.debug "ListingController::applySavedFilter: preset=", preset
     payload = preset.payload or {}
+    # If the saved labels filter differs from what is on the URL we
+    # have to navigate, because labels live outside React state — they
+    # are read from ``?labels=`` on every fetch.
+    saved_labels = if Array.isArray(payload.labels) then payload.labels else []
+    url_labels = @get_url_labels()
+    saved_sorted = [].concat(saved_labels).sort()
+    url_sorted = [].concat(url_labels).sort()
+    if saved_sorted.join(",") != url_sorted.join(",")
+      # Full navigation; state machine resumes on the next page load.
+      window.location.assign @build_labels_url saved_labels
+      return true
     # Do not open the column-filter editor cells on preset apply. The
     # filter is in effect via column_filters and the header funnel
     # already marks the column as filtered.
@@ -1038,6 +1160,12 @@ class ListingController extends React.Component
   ###
   resetView: ->
     console.debug "ListingController::resetView"
+    # If the URL carries the cross-listing ``labels`` filter, the
+    # reset must wipe it too. Navigating preserves no state, which is
+    # what the user just asked for.
+    if @get_url_labels().length
+      window.location.assign @build_labels_url []
+      return true
     @set_state
       review_state: @default_review_state
       column_filters: {}
@@ -2344,6 +2472,17 @@ class ListingController extends React.Component
     console.debug "°°° ListingController::on_click"
 
     target = event.target
+
+    # Label chip click toggles the corresponding URL filter. Only
+    # filterable chips opt in; non-filterable ones stay inert. Row
+    # chips have no `×` button — removal is done through the
+    # manage-labels modal.
+    chip = target.closest ".sample-label.is-filterable"
+    if chip
+      event.preventDefault()
+      @on_label_filter_click chip
+      return
+
     link = target.closest "a"
 
     # asynchornously load the link URL and reload the table
@@ -2351,6 +2490,22 @@ class ListingController extends React.Component
       event.preventDefault()
       url = link.href
       @ajaxLoadActionURL(url, reload=yes)
+
+  ###
+   * Navigate to the listing URL with the clicked label toggled in
+   * the `labels` query parameter. Other URL state (review_state,
+   * sort, filter, pagesize, …) is preserved.
+  ###
+  on_label_filter_click: (link) ->
+    label = link.dataset.label
+    return unless label
+    current = @get_url_labels()
+    if label in current
+      next = current.filter (l) -> l != label
+    else
+      next = current.concat [label]
+    window.location.assign @build_labels_url next
+
 
   on_column_config_click: (event) ->
     event.preventDefault()
@@ -2536,7 +2691,8 @@ class ListingController extends React.Component
               <div className="col-sm-1 text-right">
                 <Loader loading={@state.loading} />
               </div>
-              <div className="col-sm-3 text-right">
+              <div className="col-sm-3 text-right d-flex align-items-center justify-content-end">
+                {@render_active_label_filters()}
                 <SearchBox
                   show_search={@state.show_search}
                   on_search={@filterBySearchterm}
@@ -2554,6 +2710,7 @@ class ListingController extends React.Component
                         sort_order: @state.sort_order,
                         pagesize: @state.pagesize,
                         filter: @state.filter,
+                        labels: @get_url_labels(),
                       }}
                       on_apply={@applySavedFilter}
                       on_clear={@clearAppliedPreset}

@@ -112,6 +112,8 @@ function normalize_payload(payload) {
       column_filters[key] = src[key];
     }
   }
+  const labels = Array.isArray(payload.labels) ? payload.labels.slice() : [];
+  labels.sort();
   return {
     review_state: payload.review_state || "",
     column_filters: column_filters,
@@ -119,6 +121,7 @@ function normalize_payload(payload) {
     sort_order: payload.sort_order || "",
     pagesize: payload.pagesize || null,
     filter: payload.filter || "",
+    labels: labels,
   };
 }
 
@@ -134,6 +137,9 @@ export function payloads_equal(a, b) {
  */
 export function capture_payload(current) {
   current = current || {};
+  const labels = Array.isArray(current.labels)
+    ? current.labels.slice().filter((s) => s).sort()
+    : [];
   return {
     review_state: current.review_state || "",
     column_filters: Object.assign({}, current.column_filters || {}),
@@ -141,5 +147,6 @@ export function capture_payload(current) {
     sort_order: current.sort_order || "",
     pagesize: current.pagesize || null,
     filter: current.filter || "",
+    labels: labels,
   };
 }

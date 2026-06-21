@@ -1385,3 +1385,197 @@ selected elements from multiselect
   font-size: .65rem;
   opacity: .7;
 }
+
+/* Sample label chips — rendered under Sample ID by senaite.core's
+   SamplesView.folderitem. The chip itself is a link that toggles
+   the ``?labels=<name>`` URL filter; the × button posts to
+   @@remove_label and refreshes the row. */
+.sample-id-with-labels {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: .15rem;
+}
+.sample-labels {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: .2rem;
+  text-align: left;
+}
+.sample-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 .35rem;
+  height: 1.15rem;
+  font-size: .65rem;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--sf-fg-muted, #495057);
+  background: var(--sf-bg-hover, #f1f3f5);
+  border: 1px solid var(--sf-hairline, #e5e7eb);
+  border-radius: 3px;
+  text-decoration: none;
+  cursor: default;
+  transition: background-color .12s ease, color .12s ease,
+              border-color .12s ease;
+}
+.sample-label.is-filterable {
+  cursor: pointer;
+}
+.sample-label.is-filterable:hover,
+.sample-label.is-filterable:focus {
+  filter: brightness(0.95);
+  text-decoration: none;
+}
+.sample-label.active {
+  box-shadow: 0 0 0 1px var(--sf-accent, #0d6efd) inset;
+}
+.sample-label-text {
+  display: inline-block;
+}
+.sample-label-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: .25rem;
+  margin-right: -.15rem;
+  width: .8rem;
+  height: .8rem;
+  padding: 0;
+  font-size: .7rem;
+  line-height: 1;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: 2px;
+  cursor: pointer;
+  opacity: .6;
+}
+.sample-label-remove:hover,
+.sample-label-remove:focus {
+  opacity: 1;
+  background: rgba(0, 0, 0, .12);
+}
+
+
+/* Manage Labels modal — chip grid + color picker UX. */
+.manage-labels-grid {
+  margin-top: .25rem;
+}
+.manage-labels-toggle {
+  cursor: pointer;
+  opacity: .55;
+  transition: opacity .12s ease, box-shadow .12s ease;
+}
+.manage-labels-toggle:hover,
+.manage-labels-toggle:focus {
+  opacity: 1;
+}
+.manage-labels-toggle.is-selected {
+  opacity: 1;
+  box-shadow: 0 0 0 2px rgba(13, 110, 253, .35);
+}
+.manage-labels-toggle.is-removed {
+  opacity: .55;
+  text-decoration: line-through;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, .35);
+}
+.manage-labels-color {
+  flex: 0 0 2.25rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 2px;
+  border: 1px solid var(--sf-border-soft, #cfd4da);
+  border-radius: .25rem;
+  background: #fff;
+  cursor: pointer;
+}
+.manage-labels-color::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.manage-labels-color::-webkit-color-swatch {
+  border: none;
+  border-radius: 2px;
+}
+.manage-labels-color::-moz-color-swatch {
+  border: none;
+  border-radius: 2px;
+}
+.manage-labels-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .25rem;
+}
+.manage-labels-preset {
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  border: 1px solid rgba(0, 0, 0, .15);
+  border-radius: 50%;
+  cursor: pointer;
+}
+.manage-labels-preset:hover,
+.manage-labels-preset:focus {
+  outline: 2px solid rgba(13, 110, 253, .35);
+}
+
+/* Larger chip variant — used on the single-label view next to the
+   page title (rendered by senaite.core.label.color viewlet). */
+.sample-label.sample-label--lg {
+  height: auto;
+  padding: .2rem .55rem;
+  font-size: .85rem;
+  border-radius: 4px;
+}
+.sample-label.sample-label--lg .sample-label-text {
+  font-weight: 500;
+}
+
+/* Active label filter chips, rendered above-right of the listing,
+   immediately before the search box. The × removes the filter from
+   the page URL. */
+.active-label-filters {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: .25rem;
+  margin-right: .5rem;
+}
+.active-label-filter {
+  display: inline-flex;
+  align-items: center;
+  height: 1.6rem;
+  padding: 0 .35rem 0 .6rem;
+  background: var(--sf-accent-soft, #eaf3ff);
+  border: 1px solid var(--sf-accent-border, #9ec5ff);
+  color: var(--sf-accent, #0b5ed7);
+  border-radius: 3px;
+  font-size: .75rem;
+  font-weight: 500;
+  line-height: 1;
+}
+.active-label-filter__name {
+  display: inline-block;
+}
+.active-label-filter__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: .35rem;
+  width: 1rem;
+  height: 1rem;
+  padding: 0;
+  font-size: .85rem;
+  line-height: 1;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: 2px;
+  cursor: pointer;
+  opacity: .7;
+}
+.active-label-filter__remove:hover,
+.active-label-filter__remove:focus {
+  opacity: 1;
+  background: rgba(0, 0, 0, .08);
+}
