@@ -1,6 +1,7 @@
 2.7.0 (unreleased)
 ------------------
 
+- #XXX Support label chips, click-to-filter, and label-aware saved filters
 - #176 Redesign TableColumnConfig as a searchable popover
 - #174 Add saved filter presets and listing filter refinements
 - #173 Add global "Fetch transitions on select" listing setting
