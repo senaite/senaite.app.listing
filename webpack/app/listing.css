@@ -1548,11 +1548,13 @@ selected elements from multiselect
 .active-label-filter {
   display: inline-flex;
   align-items: center;
-  /* Match the Bootstrap form-control-sm height of the search box
-     so chips, the bookmark icon, and the search input align on a
-     single visual baseline. */
-  height: calc(1.5em + .5rem + 2px);
-  padding: 0 .35rem 0 .75rem;
+  /* Compact pill — deliberately smaller than the form-control-sm
+     search box next to it so the chip reads as a status indicator
+     riding alongside the input, not as a peer button. align-items:
+     center on the parent flex row keeps the chip mid-line with the
+     search box. */
+  height: 1.6rem;
+  padding: 0 .35rem 0 .6rem;
   /* Default to the row-chip neutral palette so a Label with no
      color shows the same grey pill in both places. When the
      listing controller resolves the per-label color it sets an
@@ -1560,8 +1562,8 @@ selected elements from multiselect
   color: var(--sf-fg-muted, #495057);
   background: var(--sf-bg-hover, #f1f3f5);
   border: 1px solid var(--sf-hairline, #e5e7eb);
-  border-radius: 4px;
-  font-size: .875rem;
+  border-radius: 3px;
+  font-size: .75rem;
   font-weight: 500;
   line-height: 1;
 }
