@@ -1548,8 +1548,11 @@ selected elements from multiselect
 .active-label-filter {
   display: inline-flex;
   align-items: center;
-  height: 1.6rem;
-  padding: 0 .35rem 0 .6rem;
+  /* Match the Bootstrap form-control-sm height of the search box
+     so chips, the bookmark icon, and the search input align on a
+     single visual baseline. */
+  height: calc(1.5em + .5rem + 2px);
+  padding: 0 .35rem 0 .75rem;
   /* Default to the row-chip neutral palette so a Label with no
      color shows the same grey pill in both places. When the
      listing controller resolves the per-label color it sets an
@@ -1557,8 +1560,8 @@ selected elements from multiselect
   color: var(--sf-fg-muted, #495057);
   background: var(--sf-bg-hover, #f1f3f5);
   border: 1px solid var(--sf-hairline, #e5e7eb);
-  border-radius: 3px;
-  font-size: .75rem;
+  border-radius: 4px;
+  font-size: .875rem;
   font-weight: 500;
   line-height: 1;
 }

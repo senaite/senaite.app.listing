@@ -1036,7 +1036,12 @@ class ListingController extends React.Component
     on_remove = (label) -> (event) ->
       event.preventDefault()
       next = labels.filter (l) -> l != label
-      window.location.assign me.build_labels_url next
+      # In-place URL update + refetch so the rest of the listing
+      # state (preset id, column filters, ...) survives the chip
+      # removal.
+      window.history.replaceState null, "", me.build_labels_url next
+      me.fetch_folderitems()
+      me.forceUpdate?()
     <div className="active-label-filters">
       {labels.map (label) ->
         color = me.get_label_color label
@@ -1114,17 +1119,18 @@ class ListingController extends React.Component
   applySavedFilter: (preset={}) ->
     console.debug "ListingController::applySavedFilter: preset=", preset
     payload = preset.payload or {}
-    # If the saved labels filter differs from what is on the URL we
-    # have to navigate, because labels live outside React state — they
-    # are read from ``?labels=`` on every fetch.
+    # Sync the URL `?labels=` query without a full reload so the
+    # preset's other state (review_state, filter, sort, ...) and the
+    # `applied_preset_id` marker survive the apply. The next
+    # folderitems fetch reads `location.search` fresh (see
+    # api.coffee#get_api_url), so the new label set takes effect on
+    # the refetch triggered by `set_state` below.
     saved_labels = if Array.isArray(payload.labels) then payload.labels else []
     url_labels = @get_url_labels()
     saved_sorted = [].concat(saved_labels).sort()
     url_sorted = [].concat(url_labels).sort()
     if saved_sorted.join(",") != url_sorted.join(",")
-      # Full navigation; state machine resumes on the next page load.
-      window.location.assign @build_labels_url saved_labels
-      return true
+      window.history.replaceState null, "", @build_labels_url saved_labels
     # Do not open the column-filter editor cells on preset apply. The
     # filter is in effect via column_filters and the header funnel
     # already marks the column as filtered.
@@ -1160,12 +1166,11 @@ class ListingController extends React.Component
   ###
   resetView: ->
     console.debug "ListingController::resetView"
-    # If the URL carries the cross-listing ``labels`` filter, the
-    # reset must wipe it too. Navigating preserves no state, which is
-    # what the user just asked for.
+    # Drop the cross-listing labels filter from the URL in place,
+    # without a full reload, so the rest of the reset (set_state
+    # below) still runs in this turn.
     if @get_url_labels().length
-      window.location.assign @build_labels_url []
-      return true
+      window.history.replaceState null, "", @build_labels_url []
     @set_state
       review_state: @default_review_state
       column_filters: {}
@@ -2544,7 +2549,12 @@ class ListingController extends React.Component
       next = current.filter (l) -> l != label
     else
       next = current.concat [label]
-    window.location.assign @build_labels_url next
+    # Update the URL in place and refetch — a full reload would
+    # discard the listing's current state (column filters, applied
+    # preset id, pagination, etc.).
+    window.history.replaceState null, "", @build_labels_url next
+    @fetch_folderitems()
+    @forceUpdate?()
 
 
   on_column_config_click: (event) ->
