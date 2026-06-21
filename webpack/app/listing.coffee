@@ -998,7 +998,7 @@ class ListingController extends React.Component
   ensure_label_colors_loaded: ->
     return if @_label_colors_promise
     me = this
-    @_label_colors_promise = fetch "./@@available_labels",
+    @_label_colors_promise = fetch "./@@labels/available",
       credentials: "same-origin"
       headers:
         "X-Requested-With": "XMLHttpRequest"
