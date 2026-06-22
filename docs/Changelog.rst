@@ -3,6 +3,7 @@
 
 - #XXX Support label chips, click-to-filter, and label-aware saved filters
 - #176 Redesign TableColumnConfig as a searchable popover
+- #177 Refactor TextField to a modern ReactJS Component
 - #174 Add saved filter presets and listing filter refinements
 - #173 Add global "Fetch transitions on select" listing setting
 - #171 Fix TypeError in SearchableSelect when option values are non-string

@@ -10,7 +10,7 @@ import CalculatedField from "./CalculatedField.coffee"
 import ReadonlyField from "./ReadonlyField"
 import Select from "./Select.coffee"
 import StringField from "./StringField"
-import TextField from "./TextField.coffee"
+import TextField from "./TextField.js"
 import FractionField from "./FractionField.coffee"
 import DateTime from "./DateTime.coffee"
 
