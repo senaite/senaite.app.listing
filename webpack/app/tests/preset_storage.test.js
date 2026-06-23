@@ -147,6 +147,7 @@ describe("capture_payload", () => {
       sort_order: "",
       pagesize: null,
       filter: "",
+      labels: [],
     })
   })
 
@@ -155,5 +156,23 @@ describe("capture_payload", () => {
     const captured = capture_payload(live)
     live.column_filters.a = "2"
     expect(captured.column_filters.a).toBe("1")
+  })
+
+  it("captures labels sorted and stripped of empties", () => {
+    const captured = capture_payload({ labels: ["foo", "", "bar"] })
+    expect(captured.labels).toEqual(["bar", "foo"])
+  })
+
+  it("clones labels so later edits do not leak", () => {
+    const live = { labels: ["foo"] }
+    const captured = capture_payload(live)
+    live.labels.push("bar")
+    expect(captured.labels).toEqual(["foo"])
+  })
+
+  it("normalizes a missing labels value to an empty array", () => {
+    expect(capture_payload({}).labels).toEqual([])
+    expect(capture_payload({ labels: null }).labels).toEqual([])
+    expect(capture_payload({ labels: "not-an-array" }).labels).toEqual([])
   })
 })
