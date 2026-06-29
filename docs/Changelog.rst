@@ -1,6 +1,7 @@
 2.7.0 (unreleased)
 ------------------
 
+- #179 Fix empty filter autocomplete for multi-valued (KeywordIndex) metadata columns
 - #XXX Support label chips, click-to-filter, and label-aware saved filters
 - #176 Redesign TableColumnConfig as a searchable popover
 - #177 Refactor TextField to a modern ReactJS Component
