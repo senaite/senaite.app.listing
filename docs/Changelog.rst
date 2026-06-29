@@ -2,7 +2,7 @@
 ------------------
 
 - #179 Improve KeywordIndex column filtering: populate autocomplete and AND multiple values
-- #XXX Support label chips, click-to-filter, and label-aware saved filters
+- #178 Support label chips, click-to-filter, and label-aware saved filters
 - #176 Redesign TableColumnConfig as a searchable popover
 - #177 Refactor TextField to a modern ReactJS Component
 - #174 Add saved filter presets and listing filter refinements
