@@ -1592,3 +1592,53 @@ selected elements from multiselect
   opacity: 1;
   background: rgba(0, 0, 0, .08);
 }
+
+/* Active column filters indicator, shown on the right of the column
+   config row so the user is aware the listing is narrowed down. */
+.listing-table-toolbar {
+  margin-bottom: .5rem;
+}
+.listing-table-toolbar__right {
+  display: inline-flex;
+  align-items: center;
+}
+.active-column-filters {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: .25rem;
+}
+.active-column-filter {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 .35rem 0 .6rem;
+  color: var(--sf-fg-muted, #495057);
+  background: var(--sf-bg-hover, #f1f3f5);
+  border: 1px solid var(--sf-hairline, #e5e7eb);
+  border-radius: 3px;
+  font-size: .75rem;
+  font-weight: 500;
+  line-height: 1.6rem;
+}
+.active-column-filter__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: .35rem;
+  width: 1rem;
+  height: 1rem;
+  padding: 0;
+  font-size: .85rem;
+  line-height: 1;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: 2px;
+  cursor: pointer;
+  opacity: .7;
+}
+.active-column-filter__remove:hover,
+.active-column-filter__remove:focus {
+  opacity: 1;
+  background: rgba(0, 0, 0, .08);
+}

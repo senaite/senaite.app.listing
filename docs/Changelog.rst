@@ -1,7 +1,8 @@
 2.7.0 (unreleased)
 ------------------
 
-- #XXX Support label chips, click-to-filter, and label-aware saved filters
+- #180 Show active column filters as removable chips in the listing toolbar
+- #178 Support label chips, click-to-filter, and label-aware saved filters
 - #176 Redesign TableColumnConfig as a searchable popover
 - #177 Refactor TextField to a modern ReactJS Component
 - #174 Add saved filter presets and listing filter refinements
