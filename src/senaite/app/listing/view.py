@@ -748,8 +748,15 @@ class ListingView(AjaxListingView):
                 # Field indexes: try exact match
                 query[index_name] = filter_value
             elif index_type == "KeywordIndex":
-                # Keyword indexes: search in list
-                query[index_name] = filter_value
+                # Keyword indexes: support multiple comma-separated values.
+                # When more than one is given every keyword must be present
+                # (AND), which lets the user narrow down by several values.
+                values = [v.strip() for v in filter_value.split(",")
+                          if v.strip()]
+                if len(values) > 1:
+                    query[index_name] = {"query": values, "operator": "and"}
+                else:
+                    query[index_name] = filter_value
             else:
                 # Default: try exact match to be safe
                 query[index_name] = filter_value

@@ -2,6 +2,7 @@
 ------------------
 
 - #180 Show active column filters as removable chips in the listing toolbar
+- #179 Improve KeywordIndex column filtering: populate autocomplete and AND multiple values
 - #178 Support label chips, click-to-filter, and label-aware saved filters
 - #176 Redesign TableColumnConfig as a searchable popover
 - #177 Refactor TextField to a modern ReactJS Component

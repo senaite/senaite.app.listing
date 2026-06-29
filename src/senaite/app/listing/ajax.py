@@ -888,7 +888,14 @@ class AjaxListingView(BrowserView):
                 # Handle callable attributes
                 if callable(value):
                     value = value()
-                unique_values.add(value)
+                # Multi-valued metadata (e.g. KeywordIndex columns) holds a
+                # sequence per brain; expand it into its individual values
+                # so each one becomes a selectable filter option.
+                if isinstance(value, (list, tuple, set)):
+                    unique_values.update(
+                        v for v in value if v not in (None, ""))
+                else:
+                    unique_values.add(value)
             except Exception:
                 continue
 
