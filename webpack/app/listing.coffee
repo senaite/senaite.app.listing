@@ -1064,6 +1064,42 @@ class ListingController extends React.Component
     </div>
 
   ###*
+   * Render the active column filters as removable chips, so the user is
+   * aware the listing is narrowed down and can clear each filter.
+  ###
+  render_active_column_filters: ->
+    filters = @state.column_filters or {}
+    keys = Object.keys(filters).filter (k) ->
+      filters[k] not in [null, undefined, ""]
+    return null unless keys.length
+    columns = @get_columns()
+    me = this
+    on_remove = (key) -> (event) ->
+      event.preventDefault()
+      next = Object.assign {}, me.state.column_filters
+      delete next[key]
+      active = (me.state.active_column_filters or []).filter (k) -> k != key
+      me.set_state
+        column_filters: next
+        active_column_filters: active
+        limit_from: 0
+    <div className="active-column-filters">
+      {keys.map (key) ->
+        column = columns[key] or {}
+        title = column.title or key
+        <span key={"colfilter-" + key} className="active-column-filter">
+          <span className="active-column-filter__name">
+            {title}: {filters[key]}
+          </span>
+          <button type="button"
+                  className="active-column-filter__remove"
+                  title={_t("Remove filter")}
+                  onClick={on_remove(key)}>×</button>
+        </span>
+      }
+    </div>
+
+  ###*
    * localStorage scope key for saved presets and other per-listing
    * client-side state.
    *
@@ -2786,26 +2822,33 @@ class ListingController extends React.Component
           </div>}
           <div className="row">
             <div className="col-sm-12 table-responsive">
-              {@state.show_column_toggles and
-                <div className="tcc-trigger-group">
-                  <button
-                    type="button"
-                    ref={@column_config_anchor_ref}
-                    onClick={@on_column_config_click}
-                    className="btn btn-sm btn-outline-secondary tcc-trigger"
-                    title={_t("Configure Table Columns")}>
-                    <i className="fas fa-table-columns mr-1"></i>
-                    {_t("Display Columns")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={@resetColumns}
-                    className="btn btn-link btn-sm tcc-reset"
-                    title={_t("Reset column visibility and order to the defaults")}
-                    aria-label={_t("Reset columns")}>
-                    <i className="fas fa-rotate-left"></i>
-                  </button>
-                </div>}
+              <div className="d-flex justify-content-between align-items-start listing-table-toolbar">
+                <div className="listing-table-toolbar__left">
+                  {@state.show_column_toggles and
+                    <div className="tcc-trigger-group">
+                      <button
+                        type="button"
+                        ref={@column_config_anchor_ref}
+                        onClick={@on_column_config_click}
+                        className="btn btn-sm btn-outline-secondary tcc-trigger"
+                        title={_t("Configure Table Columns")}>
+                        <i className="fas fa-table-columns mr-1"></i>
+                        {_t("Display Columns")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={@resetColumns}
+                        className="btn btn-link btn-sm tcc-reset"
+                        title={_t("Reset column visibility and order to the defaults")}
+                        aria-label={_t("Reset columns")}>
+                        <i className="fas fa-rotate-left"></i>
+                      </button>
+                    </div>}
+                </div>
+                <div className="listing-table-toolbar__right">
+                  {@render_active_column_filters()}
+                </div>
+              </div>
               {@state.show_column_config and
                 <TableColumnConfig
                   title={_t("Configure Table Columns")}
