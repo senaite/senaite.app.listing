@@ -660,20 +660,26 @@ class ListingView(AjaxListingView):
         logger.info(u"ListingView::get_catalog_query: query={}".format(query))
         return query
 
-    def apply_column_filters(self, query):
+    def apply_column_filters(self, query, exclude=None):
         """Apply column filters to the catalog query
 
         :param query: The catalog query dictionary
+        :param exclude: Optional iterable of column keys to skip when
+            applying filters. Used when computing unique values for a
+            specific column to avoid filtering out the column itself.
         :returns: Modified catalog query with column filters applied
         """
         column_filters = self.get_column_filters()
         if not column_filters:
             return query
 
+        exclude = set(exclude or [])
         catalog = self.get_catalog()
         catalog_indexes = catalog.indexes()
 
         for column_key, filter_value in column_filters.items():
+            if column_key in exclude:
+                continue
             if not filter_value:
                 continue
 
@@ -742,8 +748,15 @@ class ListingView(AjaxListingView):
                 # Field indexes: try exact match
                 query[index_name] = filter_value
             elif index_type == "KeywordIndex":
-                # Keyword indexes: search in list
-                query[index_name] = filter_value
+                # Keyword indexes: support multiple comma-separated values.
+                # When more than one is given every keyword must be present
+                # (AND), which lets the user narrow down by several values.
+                values = [v.strip() for v in filter_value.split(",")
+                          if v.strip()]
+                if len(values) > 1:
+                    query[index_name] = {"query": values, "operator": "and"}
+                else:
+                    query[index_name] = filter_value
             else:
                 # Default: try exact match to be safe
                 query[index_name] = filter_value

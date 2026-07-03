@@ -831,6 +831,12 @@ class AjaxListingView(BrowserView):
             for k, v in self.review_state.get("contentFilter", {}).items():
                 query[k] = v
 
+        # Apply OTHER active column filters so the returned values reflect
+        # the rows the user actually sees. Exclude the column we are
+        # computing values for, otherwise the user would only ever see the
+        # value they already picked.
+        query = self.apply_column_filters(query, exclude=[column_key])
+
         # Determine which index and attribute to use
         # Priority: explicit column config > default mapping > column index
         orig_index = column.get("index")
@@ -882,7 +888,14 @@ class AjaxListingView(BrowserView):
                 # Handle callable attributes
                 if callable(value):
                     value = value()
-                unique_values.add(value)
+                # Multi-valued metadata (e.g. KeywordIndex columns) holds a
+                # sequence per brain; expand it into its individual values
+                # so each one becomes a selectable filter option.
+                if isinstance(value, (list, tuple, set)):
+                    unique_values.update(
+                        v for v in value if v not in (None, ""))
+                else:
+                    unique_values.add(value)
             except Exception:
                 continue
 

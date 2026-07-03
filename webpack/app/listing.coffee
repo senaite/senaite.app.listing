@@ -18,8 +18,20 @@ import Messages from "./components/Messages.coffee"
 import Modal from "./components/Modal.coffee"
 import Pagination from "./components/Pagination.coffee"
 import SearchBox from "./components/SearchBox.coffee"
+import SavedFilters from "./components/SavedFilters.js"
+import { find_default_preset } from "./storage/preset_storage.js"
+import {
+  clear_column_config,
+  keys_from as column_keys_from,
+  merge_column_config,
+  read_column_config,
+  reorder_in,
+  toggle_in,
+  visibility_from,
+  write_column_config,
+} from "./storage/column_config.js"
 import Table from "./components/Table.js"
-import TableColumnConfig from "./components/TableColumnConfig.coffee"
+import TableColumnConfig from "./components/TableColumnConfig.js"
 import ToastNotification from "./components/Toast.js"
 
 import { DndProvider } from "react-dnd"
@@ -75,6 +87,12 @@ class ListingController extends React.Component
     @filterByState = @filterByState.bind @
     @on_api_error = @on_api_error.bind @
     @on_column_config_click = @on_column_config_click.bind @
+    @close_column_config = @close_column_config.bind @
+    @resetColumns = @resetColumns.bind @
+    # Anchor for the column-config popover so it can attach to a
+    # portal at the document root yet still position itself under the
+    # `⋯` trigger button.
+    @column_config_anchor_ref = React.createRef()
     @on_select_checkbox_checked = @on_select_checkbox_checked.bind @
     @on_multi_select_checkbox_checked = @on_multi_select_checkbox_checked.bind @
     @on_category_click = @on_category_click.bind @
@@ -100,6 +118,9 @@ class ListingController extends React.Component
     @toggleColumnFilter = @toggleColumnFilter.bind @
     @onColumnFilterChange = @onColumnFilterChange.bind @
     @onColumnFilterSubmit = @onColumnFilterSubmit.bind @
+    @applySavedFilter = @applySavedFilter.bind @
+    @clearAppliedPreset = @clearAppliedPreset.bind @
+    @resetView = @resetView.bind @
 
     # root element
     @root_el = @props.root_el
@@ -136,7 +157,15 @@ class ListingController extends React.Component
     # column filter parameters from URL
     @column_filters = @parse_json(
       @api.get_url_parameter("column_filters"), {})
-    @active_column_filters = Object.keys(@column_filters)
+    # Keep the editor cells hidden on initial load — funnel icons in
+    # the column headers already mark which columns are filtered. The
+    # user can click a funnel to open the editor for that column.
+    @active_column_filters = []
+
+    # Auto-apply the user's default saved preset only when the URL
+    # carries no explicit listing state, so bookmarked share-links
+    # win over the personal default.
+    @apply_default_preset_unless_url_state()
 
     # last selected item
     @last_select = null
@@ -232,6 +261,11 @@ class ListingController extends React.Component
       column_filters: @column_filters or {}
       # active column filters (which filters are shown)
       active_column_filters: @active_column_filters or []
+      # id of the saved preset currently driving the view, if any.
+      # The SavedFilters menu uses this both to mark the preset as
+      # applied and to compare current state against the preset's
+      # stored payload (dirty detection).
+      applied_preset_id: @applied_preset_id or null
 
   ###*
    * Translate the given i18n string
@@ -655,33 +689,30 @@ class ListingController extends React.Component
   ###
   toggleColumn: (key) ->
     console.debug "ListingController::toggleColumn: key=#{key}"
+    config = @_merged_column_config()
+    next_config = toggle_in config, key
+    @_persist_column_config next_config
 
-    # restore columns to the initial state and flush the local storage
-    if key is "reset"
-      @setState {columns: @get_default_columns()}
-      @set_local_column_config []
-      return true
+    # Mirror the visibility flag onto @state.columns so consumers that
+    # read column.toggle directly stay in sync. Only the changed
+    # column is reallocated; every other entry shares its old object
+    # reference, so React.memo'd children skip re-renders.
+    column = @state.columns[key]
+    return unless column?
+    visible = visibility_from(next_config)[key]
+    @setState columns: Object.assign({}, @state.columns,
+      "#{key}": Object.assign({}, column, toggle: visible))
+    return visible
 
-    # get the columns from the state
-    columns = @state.columns
-
-    # Toggle the visibility of the column
-    toggle = columns[key]["toggle"]
-    if toggle is undefined then toggle = yes
-    columns[key]["toggle"] = !toggle
-
-    column_config = []
-    for key, column of columns
-      # keep only a record of the column key and visibility in the local storage
-      column_config.push {key: key, toggle: column.toggle}
-
-    # store the new order and visibility in the local storage
-    @set_local_column_config column_config
-
-    # update the columns of the current state
-    @setState {columns: columns}
-
-    return toggle
+  ###*
+   * Reset all column visibility + order back to the server defaults
+   * and drop the local-storage record.
+  ###
+  resetColumns: ->
+    console.debug "ListingController::resetColumns"
+    clear_column_config @get_storage_id()
+    @setState {columns: @get_default_columns()}
+    return true
 
   ###*
    * Handle context menu action
@@ -813,156 +844,91 @@ class ListingController extends React.Component
    * @returns {object} New ordered columns object
   ###
   setColumnsOrder: (order) ->
-    console.debug "ListingController::setColumnsOrder: order=#{order}"
+    console.debug "ListingController::setColumnsOrder: order=", order
+    next_config = reorder_in @_merged_column_config(), order
+    @_persist_column_config next_config
 
-    # This object will hold the new ordered columns
-    ordered_columns = {}
-
-    # Although the column properties seem to be sorted, we keep in the local
-    # storage a list of column "visibility" objects to avoid any order issues
-    # with the JSON serialization step.
-    column_config = []
-
-    # get the keys of all columns (visible or not)
-    keys = Object.keys @state.columns
-
-    # sort the keys according to the passed in column order
-    keys.sort (a, b) ->
-      return order.indexOf(a) - order.indexOf(b)
-
-    # rebuild an object with the new property order
-    for key in keys
+    # Rebuild @state.columns in the new key order so consumers that
+    # iterate Object.keys / Object.entries see the reordered set.
+    next_columns = {}
+    for {key} in next_config
       column = @state.columns[key]
-      toggle = column.toggle
-      if toggle is undefined then toggle = yes
-      # keep only a record of the column key and visibility in the local storage
-      column_config.push {key: key, toggle: toggle}
-      ordered_columns[key] = column
-
-    # store the new order and visibility in the local storage
-    @set_local_column_config column_config
-
-    # update the columns of the current state
-    @setState {columns: ordered_columns}
-    return ordered_columns
+      next_columns[key] = column if column?
+    @setState {columns: next_columns}
+    return next_columns
 
   ###*
-   * Returns all column keys where the visibility toggle is true
+   * Compute the merged column config (stored config reconciled with
+   * current server-defined columns).  The pure helper auto-appends
+   * new add-on columns and drops vanished ones.
    *
-   * @returns columns {array} Array of ordered and visible columns
+   * Internal — call sites should use the public get_columns* methods.
+  ###
+  _merged_column_config: ->
+    # Pass the full columns dict (not just the keys) so the merge
+    # helper can honor the server's default `toggle` for columns the
+    # user has never customised.  Skipping this caused every column
+    # to appear visible on first load, even ones the server marked
+    # `toggle: false` by default.
+    #
+    # Visibility filtering by review_state still happens later in
+    # get_visible_columns — every server-defined key stays in the
+    # merged config so downstream consumers (e.g. TableTransposedCell)
+    # can still look columns up by key.
+    stored = read_column_config @get_storage_id()
+    return merge_column_config stored, (@state.columns or {})
+
+  _persist_column_config: (config) ->
+    write_column_config @get_storage_id(), config
+
+  ###*
+   * Returns all column keys where the visibility toggle is true and
+   * the column is allowed in the current review_state.
+   *
+   * @returns columns {array} Array of ordered and visible column keys
   ###
   get_visible_columns: ->
-    keys = []
-    allowed_keys = @get_allowed_column_keys()
-    visible = @get_columns_visibility()
-    for key in @get_columns_order()
-      # skip non-allowed keys
-      if key not in allowed_keys
-        continue
-      toggle = visible[key]
-      # skip columns which are not visible
-      if toggle is no
-        continue
-      # remember the key
-      keys.push key
-    return keys
+    config = @_merged_column_config()
+    allowed = new Set @get_allowed_column_keys()
+    return (entry.key for entry in config when entry.toggle and allowed.has(entry.key))
 
   ###*
-   * Get the default columns
-   *
-   * This method parses the JSON columns definitions from the DOM.
-   *
-   * @returns columns {object} Object of column definitions
+   * Get the default columns (server-defined, no local customisation).
   ###
   get_default_columns: ->
     return JSON.parse @root_el.dataset.columns
 
   ###*
-   * Get columns in the right order and visibility
-   *
-   * This method takes the local column settings into consideration to set the
-   * visibility and order of the final columns object.
-   *
-   * @returns columns {object} new columns object
+   * Get columns in the right order and visibility.  The result is an
+   * ordered dict (insertion-ordered object) of {key: column} where
+   * each column object carries the resolved `toggle` flag.
   ###
   get_columns: ->
     columns = {}
-    visibility = @get_columns_visibility()
-    for key in @get_columns_order()
-      column = @state.columns[key]
-      if column is undefined
-        console.warn "Skipping nonexisting column '#{key}'."
-        continue
-      toggle = visibility[key]
-      if toggle isnt undefined
-        column["toggle"] = toggle
-      columns[key] = column
+    for entry in @_merged_column_config()
+      column = @state.columns[entry.key]
+      continue unless column?
+      columns[entry.key] = Object.assign {}, column, {toggle: entry.toggle}
     return columns
 
   ###*
-   * Extract all keys from the curent columns
-   *
-   * @returns keys {array} Current colum keys
+   * Keys defined server-side, regardless of customisation.
   ###
   get_columns_keys: ->
     return Object.keys @state.columns
 
   ###*
-   * Return the order of all columns
-   *
-   * This method takes also the local column config into consideration
-   *
-   * @returns keys {array} Current colum keys
+   * Return the order of all columns, taking the local column config
+   * into consideration.
   ###
   get_columns_order: ->
-    keys = []
-    columns_keys = @get_columns_keys()
-    local_config = @get_local_column_config()
-    # filter out removed columns that still exist in the local config
-    local_config = local_config.filter (column) ->
-      columns_keys.indexOf(column.key) != -1
-    # Skip local settings if toggling/ordering is not allowed
-    allowed = @state.show_column_toggles
-
-    if allowed and local_config.length > 0
-      # extract the column keys in the user selected order
-      keys = local_config.map (item, index) ->
-        return item.key
-    else
-      # sort column keys by the current columns settings
-      allowed_keys = @get_allowed_column_keys()
-      keys = allowed_keys.concat columns_keys.filter (k) ->
-        # only append column keys which are not yet in  allowed_keys
-        return allowed_keys.indexOf(k) == -1
-
-    return keys
+    return column_keys_from @_merged_column_config()
 
   ###*
-   * Return the set visibility of all columns
-   *
-   * This method takes also the local column config into consideration
-   *
-   * @returns visibility {object} of column key -> visibility
+   * Return the set visibility of all columns (merged config).
   ###
   get_columns_visibility: ->
-    visibility = {}
-    local_config = @get_local_column_config()
-    # Skip local settings if toggling/ordering is not allowed
-    allowed = @state.show_column_toggles
-
-    if allowed and local_config.length > 0
-      # get the user defined visibility
-      for {key, toggle} in local_config
-        if toggle is undefined then toggle = true
-        visibility[key] = toggle
-    else
-      # use the default visibility of the columns
-      for key, column of @state.columns
-        toggle = column.toggle
-        if toggle is undefined then toggle = true
-        visibility[key] = toggle
-
-    return visibility
+    return visibility_from @_merged_column_config()
 
   ###*
    * Filter the results by the given state
@@ -972,6 +938,295 @@ class ListingController extends React.Component
    * @param review_state {string} The state to filter, e.g. verified, published
    * @returns {bool} true
   ###
+  ###*
+   * Listing parameters that participate in saved presets and in the
+   * "URL state present?" detection used during auto-apply.
+  ###
+  PRESET_URL_PARAMS: [
+    "filter", "review_state", "column_filters",
+    "sort_on", "sort_order", "pagesize", "labels"
+  ]
+
+  ###*
+   * Parse the active labels filter from the page URL.
+   *
+   * The labels filter lives outside the form_id-prefixed listing state
+   * (review_state, sort, etc.) on the plain ``?labels=…`` query
+   * parameter so it can be shared / bookmarked as a SENAITE-wide
+   * cross-listing filter.
+   *
+   * @returns {Array<string>} sorted unique non-empty label names
+  ###
+  get_url_labels: ->
+    params = new URLSearchParams window.location.search
+    raw = (params.getAll "labels")
+      .reduce ((acc, v) -> acc.concat v.split ","), []
+      .map (s) -> s.trim()
+      .filter (s) -> s.length > 0
+    seen = {}
+    raw.filter (s) ->
+      return no if seen[s]
+      seen[s] = yes
+      yes
+
+  ###*
+   * Build a URL that replaces the active labels filter with the given
+   * list. Preserves all other URL parameters and the hash fragment.
+   *
+   * @param labels {Array<string>}
+   * @returns {string}
+  ###
+  build_labels_url: (labels) ->
+    params = new URLSearchParams window.location.search
+    params.delete "labels"
+    if labels and labels.length
+      params.set "labels", labels.join ","
+    qs = params.toString()
+    url = window.location.pathname
+    url += "?" + qs if qs
+    url += window.location.hash if window.location.hash
+    return url
+
+  ###*
+   * Fetch and cache the available labels (name → color map).
+   *
+   * The fetch is lazy-fired the first time
+   * ``render_active_label_filters`` runs; once it resolves the
+   * controller forces a re-render so the chips paint in their
+   * canonical color.
+  ###
+  ensure_label_colors_loaded: ->
+    return if @_label_colors_promise
+    me = this
+    @_label_colors_promise = fetch "./@@senaite_labels/available",
+      credentials: "same-origin"
+      headers:
+        "X-Requested-With": "XMLHttpRequest"
+        "Accept": "application/json"
+    .then (response) ->
+      return {} unless response.ok
+      response.json().then (data) ->
+        out = {}
+        for label in (data.labels or [])
+          out[label.name] = label.color or ""
+        out
+    .then (map) ->
+      me._label_colors = map
+      me.forceUpdate?()
+      map
+    .catch ->
+      me._label_colors = {}
+      {}
+
+  get_label_color: (name) ->
+    return "" unless @_label_colors
+    @_label_colors[name] or ""
+
+  ###*
+   * Render the active labels filter as a row of removable chips
+   * shown right before the search box. Each chip is painted in the
+   * color of its Label content type so the inline filter chip
+   * matches the row chips of the same name.
+  ###
+  render_active_label_filters: ->
+    labels = @get_url_labels()
+    return null unless labels.length
+    @ensure_label_colors_loaded()
+    me = this
+    on_remove = (label) -> (event) ->
+      event.preventDefault()
+      next = labels.filter (l) -> l != label
+      # In-place URL update + refetch so the rest of the listing
+      # state (preset id, column filters, ...) survives the chip
+      # removal.
+      window.history.replaceState null, "", me.build_labels_url next
+      me.fetch_folderitems()
+      me.forceUpdate?()
+    <div className="active-label-filters">
+      {labels.map (label) ->
+        color = me.get_label_color label
+        chip_style = if color
+          backgroundColor: color
+          borderColor: color
+          color: "#fff"
+        else
+          null
+        <span key={"label-" + label}
+              className="active-label-filter"
+              style={chip_style}>
+          <span className="active-label-filter__name">{label}</span>
+          <button type="button"
+                  className="active-label-filter__remove"
+                  title={_t("Remove filter")}
+                  onClick={on_remove(label)}>×</button>
+        </span>
+      }
+    </div>
+
+  ###*
+   * Render the active column filters as removable chips, so the user is
+   * aware the listing is narrowed down and can clear each filter.
+  ###
+  render_active_column_filters: ->
+    filters = @state.column_filters or {}
+    keys = Object.keys(filters).filter (k) ->
+      filters[k] not in [null, undefined, ""]
+    return null unless keys.length
+    columns = @get_columns()
+    me = this
+    on_remove = (key) -> (event) ->
+      event.preventDefault()
+      next = Object.assign {}, me.state.column_filters
+      delete next[key]
+      active = (me.state.active_column_filters or []).filter (k) -> k != key
+      me.set_state
+        column_filters: next
+        active_column_filters: active
+        limit_from: 0
+    <div className="active-column-filters">
+      {keys.map (key) ->
+        column = columns[key] or {}
+        title = column.title or key
+        <span key={"colfilter-" + key} className="active-column-filter">
+          <span className="active-column-filter__name">
+            {title}: {filters[key]}
+          </span>
+          <button type="button"
+                  className="active-column-filter__remove"
+                  title={_t("Remove filter")}
+                  onClick={on_remove(key)}>×</button>
+        </span>
+      }
+    </div>
+
+  ###*
+   * localStorage scope key for saved presets and other per-listing
+   * client-side state.
+   *
+   * Prefers `listing_identifier` (calculated server-side per listing
+   * kind — e.g. "AnalysisRequestsListing" for the global samples
+   * folder vs the per-client folder, "Batch", "Worksheet", …) so
+   * presets do not bleed between unrelated listings that happen to
+   * reuse the same `form_id` ("folder_contents" et al). Falls back
+   * to `form_id` only when no identifier is provided.
+   *
+   * @returns {string}
+  ###
+  get_storage_id: ->
+    return @listing_identifier or @form_id
+
+  ###*
+   * Auto-apply the user's default saved preset on first mount —
+   * unless the URL already carries explicit listing state, so a
+   * bookmarked share-link still wins.
+   *
+   * Mutates @filter / @review_state / @column_filters / @sort_on /
+   * @sort_order / @pagesize / @applied_preset_id in place; intended
+   * to be called from the constructor before @state is built.
+  ###
+  apply_default_preset_unless_url_state: ->
+    for name in @PRESET_URL_PARAMS
+      if @api.get_url_parameter(name) != ""
+        return  # URL state wins
+    preset = find_default_preset(@get_storage_id())
+    return unless preset?.payload
+    payload = preset.payload
+    # Push the preset's labels into the URL `?labels=` filter so the
+    # first folderitems fetch carries them (api.coffee#get_api_url
+    # reads location.search fresh). React state (@filter,
+    # @review_state, ...) is mutated below and picked up when
+    # @state is built; labels live outside React state by design.
+    saved_labels = if Array.isArray(payload.labels) then payload.labels else []
+    if saved_labels.length
+      window.history.replaceState null, "", @build_labels_url saved_labels
+    @filter = payload.filter or @filter
+    @review_state = payload.review_state if payload.review_state
+    if payload.column_filters
+      @column_filters = Object.assign {}, payload.column_filters
+      # keep editor cells closed; the funnel icons mark filtered cols
+      @active_column_filters = []
+    @sort_on = payload.sort_on if payload.sort_on
+    @sort_order = payload.sort_order if payload.sort_order
+    @pagesize = payload.pagesize if payload.pagesize
+    @applied_preset_id = preset.id
+    return
+
+  ###*
+   * Apply a saved filter preset
+   *
+   * Replaces the current review_state, column_filters, sort, pagesize
+   * and search term in one go and triggers a single refetch.
+   *
+   * @param preset {object} preset object from localStorage
+   * @returns {bool} true
+  ###
+  applySavedFilter: (preset={}) ->
+    console.debug "ListingController::applySavedFilter: preset=", preset
+    payload = preset.payload or {}
+    # Sync the URL `?labels=` query without a full reload so the
+    # preset's other state (review_state, filter, sort, ...) and the
+    # `applied_preset_id` marker survive the apply. The next
+    # folderitems fetch reads `location.search` fresh (see
+    # api.coffee#get_api_url), so the new label set takes effect on
+    # the refetch triggered by `set_state` below.
+    saved_labels = if Array.isArray(payload.labels) then payload.labels else []
+    url_labels = @get_url_labels()
+    saved_sorted = [].concat(saved_labels).sort()
+    url_sorted = [].concat(url_labels).sort()
+    if saved_sorted.join(",") != url_sorted.join(",")
+      window.history.replaceState null, "", @build_labels_url saved_labels
+    # Do not open the column-filter editor cells on preset apply. The
+    # filter is in effect via column_filters and the header funnel
+    # already marks the column as filtered.
+    @set_state
+      review_state: payload.review_state or @default_review_state
+      column_filters: Object.assign {}, payload.column_filters or {}
+      active_column_filters: []
+      filter: payload.filter or ""
+      sort_on: payload.sort_on or @state.sort_on
+      sort_order: payload.sort_order or @state.sort_order
+      pagesize: payload.pagesize or @pagesize
+      limit_from: 0
+      applied_preset_id: preset.id or null
+    return true
+
+  ###*
+   * Release the currently applied preset and reset the view in one
+   * step. The user asked for a clean slate, not a half-applied view
+   * they would have to clear by hand.
+   *
+   * @returns {bool} true
+  ###
+  clearAppliedPreset: ->
+    console.debug "ListingController::clearAppliedPreset (→ resetView)"
+    return @resetView()
+
+  ###*
+   * Reset the listing to its initial state — drops every filter,
+   * the search term, the sort, the active preset, and resets the
+   * review state to its default. Triggers one refetch.
+   *
+   * @returns {bool} true
+  ###
+  resetView: ->
+    console.debug "ListingController::resetView"
+    # Drop the cross-listing labels filter from the URL in place,
+    # without a full reload, so the rest of the reset (set_state
+    # below) still runs in this turn.
+    if @get_url_labels().length
+      window.history.replaceState null, "", @build_labels_url []
+    @set_state
+      review_state: @default_review_state
+      column_filters: {}
+      active_column_filters: []
+      filter: ""
+      sort_on: ""
+      sort_order: ""
+      pagesize: @pagesize
+      limit_from: 0
+      applied_preset_id: null
+    return true
+
   filterByState: (review_state="default") ->
     console.debug "ListingController::filterByState: review_state=#{review_state}"
     state = @get_review_state_by_id review_state
@@ -997,11 +1252,51 @@ class ListingController extends React.Component
   ###
   filterBySearchterm: (filter="") ->
     console.debug "ListingController::filterBySearchter: filter=#{filter}"
+    # Peel `label:Foo` / `labels:Foo,Bar` tokens out of the search
+    # term and treat them as URL ?labels= filters (additive). What
+    # remains becomes the regular search filter.
+    parsed = @parse_label_search_prefixes filter
+    if parsed.labels.length
+      current = @get_url_labels()
+      merged = current.slice()
+      for name in parsed.labels
+        merged.push name unless name in merged
+      window.history.replaceState null, "", @build_labels_url merged
     @set_state
-      filter: filter
+      filter: parsed.residual
       pagesize: @pagesize  # reset to the initial pagesize on search
       limit_from: 0
     return true
+
+  ###*
+   * Extract `label:Foo` / `labels:Foo,Bar` tokens from a search
+   * term. Returns an object with the list of labels found and the
+   * residual search string (the tokens that were not label prefixes,
+   * rejoined with single spaces).
+   *
+   * Whitespace inside a single quoted token is not supported — the
+   * parser splits on /\s+/. Names containing spaces should be added
+   * via chip click instead.
+   *
+   * @param term {string} the raw search box value
+   * @returns {{labels: string[], residual: string}}
+  ###
+  parse_label_search_prefixes: (term) ->
+    labels = []
+    residual = []
+    seen = {}
+    for tok in (term or "").split /\s+/
+      m = tok.match /^labels?:(.+)$/i
+      if m
+        for raw in m[1].split ","
+          name = raw.trim()
+          continue if not name
+          continue if seen[name]
+          seen[name] = yes
+          labels.push name
+      else if tok
+        residual.push tok
+    {labels: labels, residual: residual.join(" ")}
 
   ###*
    * Sort a column with a specific order
@@ -1040,14 +1335,14 @@ class ListingController extends React.Component
       # Remove the filter
       active_filters.splice index, 1
       # Also clear the filter value
+      had_value = !!@state.column_filters[column_key]
       column_filters = Object.assign {}, @state.column_filters
       delete column_filters[column_key]
       @setState
         active_column_filters: active_filters
         column_filters: column_filters
       , =>
-        # Refetch if there was a filter value
-        if @state.column_filters[column_key]
+        if had_value
           @fetch_folderitems()
     else
       # Add the filter
@@ -1323,7 +1618,7 @@ class ListingController extends React.Component
         return @setState
           fetch_transitions_on_select: toggle
           transitions: []
-      when "reset_columns" then return @toggleColumn("reset")
+      when "reset_columns" then return @resetColumns()
 
     # load action in modal popup if id starts/ends with `modal`
     if id.startsWith("modal") or id.endsWith("modal_transition")
@@ -1810,57 +2105,6 @@ class ListingController extends React.Component
     return keys
 
   ###*
-   * Calculate a common local storage key for this listing view.
-   *
-   * Note:
-   * The browser view initially calculates the `listing_identifier`, which is
-   * basically a concatenation of the listed items portal_type and view name.
-   *
-   * @returns key {string} with optional prefix and postfix
-  ###
-  get_local_storage_key: (prefix, postfix) ->
-    key = @listing_identifier
-    if @listing_identifier is undefined
-      key = location.pathname
-    if prefix isnt undefined
-      key = prefix + key
-    if postfix isnt undefined
-      key = key + postfix
-    return key
-
-  ###*
-   * Set the columns definition to the local storage
-   *
-   * @param columns {array} Array of {"key":key, "toggle":toggle} records
-   * @returns {bool} true
-  ###
-  set_local_column_config: (columns) ->
-    console.debug "ListingController::set_local_column_config: columns=", columns
-
-    key = @get_local_storage_key "columns-"
-    storage = window.localStorage
-    storage.setItem key, JSON.stringify(columns)
-    return true
-
-  ###*
-   * Returns column definitions of the local storage
-   *
-   * @returns columns {array} of {"key":key, "toggle":toggle} records
-  ###
-  get_local_column_config: ->
-    key = @get_local_storage_key "columns-"
-    storage = window.localStorage
-    columns = storage.getItem key
-
-    if not columns
-      return []
-
-    try
-      return JSON.parse columns
-    catch
-      return []
-
-  ###*
    * Calculate the number of displayed columns
    *
    * This method also counts the selection column if present.
@@ -2324,7 +2568,14 @@ class ListingController extends React.Component
       params = params.concat "#{name}=#{encoded}"
 
     hash = params.join("&")
-    location.hash = "#?#{hash}"
+    next_hash = "#?#{hash}"
+    return if location.hash is next_hash
+    # Mark this hash write as self-induced so on_popstate can tell
+    # it apart from a real back/forward navigation and skip resetting
+    # active_column_filters (which would close any open editor cell
+    # while the user is still typing — see #174 follow-up).
+    @suppress_next_popstate = yes
+    location.hash = next_hash
 
   ###*
    * EVENT HANDLERS
@@ -2337,6 +2588,17 @@ class ListingController extends React.Component
     console.debug "°°° ListingController::on_click"
 
     target = event.target
+
+    # Label chip click toggles the corresponding URL filter. Only
+    # filterable chips opt in; non-filterable ones stay inert. Row
+    # chips have no `×` button — removal is done through the
+    # manage-labels modal.
+    chip = target.closest ".sample-label.is-filterable"
+    if chip
+      event.preventDefault()
+      @on_label_filter_click chip
+      return
+
     link = target.closest "a"
 
     # asynchornously load the link URL and reload the table
@@ -2345,12 +2607,36 @@ class ListingController extends React.Component
       url = link.href
       @ajaxLoadActionURL(url, reload=yes)
 
+  ###
+   * Navigate to the listing URL with the clicked label toggled in
+   * the `labels` query parameter. Other URL state (review_state,
+   * sort, filter, pagesize, …) is preserved.
+  ###
+  on_label_filter_click: (link) ->
+    label = link.dataset.label
+    return unless label
+    current = @get_url_labels()
+    if label in current
+      next = current.filter (l) -> l != label
+    else
+      next = current.concat [label]
+    # Update the URL in place and refetch — a full reload would
+    # discard the listing's current state (column filters, applied
+    # preset id, pagination, etc.).
+    window.history.replaceState null, "", @build_labels_url next
+    @fetch_folderitems()
+    @forceUpdate?()
+
+
   on_column_config_click: (event) ->
     event.preventDefault()
     return unless @state.show_column_toggles
     toggle = not @state.show_column_config
     @setState
       show_column_config: toggle
+
+  close_column_config: ->
+    @setState show_column_config: no
 
   on_select_checkbox_checked: (event) ->
     console.debug "°°° ListingController::on_select_checkbox_checked"
@@ -2435,6 +2721,12 @@ class ListingController extends React.Component
 
   on_popstate: (event) ->
     console.debug "°°° ListingController::on_popstate:event=", event
+    # Browsers fire popstate for hash changes too. set_url() flags
+    # its own writes so we can ignore them here and only react to
+    # real back/forward navigation.
+    if @suppress_next_popstate
+      @suppress_next_popstate = no
+      return
     params = @api.parse_hash location.hash
     reload = no
     for idx, param of params
@@ -2455,8 +2747,11 @@ class ListingController extends React.Component
         value = decodeURIComponent(value)
         try
           value = JSON.parse(value)
-          # Also update active_column_filters
-          @state.active_column_filters = Object.keys(value)
+          # Real back/forward to a URL that carries column_filters:
+          # keep the editor cells closed (the funnel icons already
+          # mark filtered columns) and let the user re-open per
+          # column if they want to edit.
+          @state.active_column_filters = []
         catch
           value = {}
       if value isnt @state[name]
@@ -2517,12 +2812,31 @@ class ListingController extends React.Component
               <div className="col-sm-1 text-right">
                 <Loader loading={@state.loading} />
               </div>
-              <div className="col-sm-3 text-right">
+              <div className="col-sm-3 text-right d-flex align-items-center justify-content-end">
+                {@render_active_label_filters()}
                 <SearchBox
                   show_search={@state.show_search}
                   on_search={@filterBySearchterm}
+                  on_reset={@resetView}
                   filter={@state.filter}
-                  placeholder={_t("Search")} />
+                  placeholder={_t("Search")}
+                  prepend={
+                    <SavedFilters
+                      storage_id={@get_storage_id()}
+                      applied_preset_id={@state.applied_preset_id}
+                      current={{
+                        review_state: @state.review_state,
+                        column_filters: @state.column_filters,
+                        sort_on: @state.sort_on,
+                        sort_order: @state.sort_order,
+                        pagesize: @state.pagesize,
+                        filter: @state.filter,
+                        labels: @get_url_labels(),
+                      }}
+                      on_apply={@applySavedFilter}
+                      on_clear={@clearAppliedPreset}
+                      on_reset={@resetView} />
+                  } />
               </div>
             </div>
           }
@@ -2535,21 +2849,44 @@ class ListingController extends React.Component
           </div>}
           <div className="row">
             <div className="col-sm-12 table-responsive">
-              {@state.show_column_toggles and
-                <a
-                  href="#"
-                  onClick={@on_column_config_click}
-                  className="pull-right">
-                  <i className="fas fa-ellipsis-h"></i>
-                </a>}
+              <div className="d-flex justify-content-between align-items-start listing-table-toolbar">
+                <div className="listing-table-toolbar__left">
+                  {@state.show_column_toggles and
+                    <div className="tcc-trigger-group">
+                      <button
+                        type="button"
+                        ref={@column_config_anchor_ref}
+                        onClick={@on_column_config_click}
+                        className="btn btn-sm btn-outline-secondary tcc-trigger"
+                        title={_t("Configure Table Columns")}>
+                        <i className="fas fa-table-columns mr-1"></i>
+                        {_t("Display Columns")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={@resetColumns}
+                        className="btn btn-link btn-sm tcc-reset"
+                        title={_t("Reset column visibility and order to the defaults")}
+                        aria-label={_t("Reset columns")}>
+                        <i className="fas fa-rotate-left"></i>
+                      </button>
+                    </div>}
+                </div>
+                <div className="listing-table-toolbar__right">
+                  {@render_active_column_filters()}
+                </div>
+              </div>
               {@state.show_column_config and
                 <TableColumnConfig
                   title={_t("Configure Table Columns")}
                   description={_t("Click to toggle the visibility or drag&drop to change the order")}
                   columns={columns}
                   columns_order={columns_order}
+                  anchor_ref={@column_config_anchor_ref}
+                  on_request_close={@close_column_config}
                   on_column_toggle_click={@toggleColumn}
-                  on_columns_order_change={@setColumnsOrder}/>}
+                  on_columns_order_change={@setColumnsOrder}
+                  on_reset={@resetColumns}/>}
               <ContextMenu
                 id={@row_context_menu_id}
                 menu={@state.row_context_menu}
@@ -2559,6 +2896,7 @@ class ListingController extends React.Component
                 form_id={@form_id}
                 allow_edit={@state.allow_edit}
                 on_header_column_click={@sortBy}
+                on_columns_order_change={@setColumnsOrder if @show_column_toggles}
                 on_select_checkbox_checked={@on_select_checkbox_checked}
                 on_multi_select_checkbox_checked={@on_multi_select_checkbox_checked}
                 on_context_menu={@on_column_config_click}
