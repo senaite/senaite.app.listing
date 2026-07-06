@@ -1,6 +1,7 @@
 2.7.0 (unreleased)
 ------------------
 
+- #181 Fix "me is undefined" crash in loadModal breaking all listing actions
 - #172 Support AllowManualEntry for select result options
 - #180 Show active column filters as removable chips in the listing toolbar
 - #179 Improve KeywordIndex column filtering: populate autocomplete and AND multiple values
