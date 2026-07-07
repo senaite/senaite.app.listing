@@ -1582,11 +1582,11 @@ class ListingController extends React.Component
 
     request = new Request(url)
     fetch(request)
-    .then (response) ->
-      return response.text().then (text) ->
+    .then (response) =>
+      return response.text().then (text) =>
         el.empty()
         el.append(text)
-        me.bind_modal_manual_result_toggle(el)
+        @bind_modal_manual_result_toggle(el)
         el.one "submit", on_submit
         el.modal("show")
 
