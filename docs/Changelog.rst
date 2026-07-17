@@ -1,6 +1,7 @@
 2.7.0 (unreleased)
 ------------------
 
+- #182 Fix result-variable column order and keep them on column reset
 - #181 Fix "me is undefined" crash in loadModal breaking all listing actions
 - #172 Support AllowManualEntry for select result options
 - #180 Show active column filters as removable chips in the listing toolbar
