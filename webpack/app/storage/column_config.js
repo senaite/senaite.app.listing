@@ -66,10 +66,18 @@ export function clear_column_config(storage_id) {
  *      Add-on packages that remove columns no longer leave dead
  *      entries floating in the user's config.
  *
- *   2. Walk the server keys and APPEND any that are missing from the
- *      stored config, defaulting them to `toggle: true` (visible).
- *      This is what makes new add-on columns auto-visible without
- *      the user having to hit "Reset columns".
+ *   2. Insert any server keys missing from the stored config at their
+ *      server-defined position — right after their nearest preceding
+ *      server neighbour that is already placed (or at the front if
+ *      none), defaulting them to `toggle: true` (visible). Anchoring to
+ *      the neighbour keeps genuinely-trailing add-on columns at the end
+ *      while restoring columns the server slots mid-list (e.g. interim /
+ *      result-variable fields inserted before "Result") to their proper
+ *      position instead of the far right. This is also what makes new
+ *      columns auto-visible without the user hitting "Reset columns".
+ *      NOTE: `server_columns` must therefore be supplied in the intended
+ *      display order (the caller passes the review_state column order),
+ *      not merely the columns-dict key order.
  *
  *   3. Preserve the user's chosen order for keys that already lived
  *      in the stored config.
@@ -138,15 +146,30 @@ export function merge_column_config(stored, server_columns, allowed_keys) {
     seen.add(entry.key);
   }
 
-  // 2: append server keys that weren't in stored, in server order.
-  // Honor the server's default `toggle` so columns the server hides
-  // (e.g. opt-in detail columns) stay hidden until the user reveals
-  // them.  This is what auto-detects new add-on columns AND respects
-  // their declared default visibility.
-  for (const key of server_keys) {
+  // 2: insert server keys that weren't in stored at their server-defined
+  // position, walking in server order. Each new key lands right after
+  // the nearest preceding server key already placed in `out` (or at the
+  // front if it has none), so a column the server slots mid-list — e.g.
+  // an interim / result-variable column inserted before "Result" — ends
+  // up in that slot instead of appended at the tail. Honor the server's
+  // default `toggle` so columns the server hides (e.g. opt-in detail
+  // columns) stay hidden until the user reveals them.
+  for (let i = 0; i < server_keys.length; i++) {
+    const key = server_keys[i];
     if (seen.has(key)) continue;
     if (!is_allowed(key)) continue;
-    out.push({ key, toggle: default_toggle_for(key) });
+
+    // find the slot: just after the nearest preceding server key that
+    // already made it into `out`; default to the front when none does
+    let insert_at = 0;
+    for (let j = i - 1; j >= 0; j--) {
+      const idx = out.findIndex((entry) => entry.key === server_keys[j]);
+      if (idx !== -1) {
+        insert_at = idx + 1;
+        break;
+      }
+    }
+    out.splice(insert_at, 0, { key, toggle: default_toggle_for(key) });
     seen.add(key);
   }
 
