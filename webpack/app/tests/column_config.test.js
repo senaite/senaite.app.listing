@@ -43,6 +43,54 @@ describe("merge_column_config", () => {
     expect(visibility_from(merged).D).toBe(true)
   })
 
+  it("inserts a mid-list new server key at its server slot, not the tail", () => {
+    // A dynamically added result-variable column ("growth") that the
+    // server slots between "Service" and "Result". The user's stored
+    // config only ever knew the static columns, so "growth" is new; it
+    // must land in its server slot, not at the far right.
+    const stored = [
+      { key: "Service", toggle: true },
+      { key: "Result", toggle: true },
+      { key: "Unit", toggle: true },
+    ]
+    const server = ["Service", "growth", "Result", "Unit"]
+    const merged = merge_column_config(stored, server)
+    expect(keys_from(merged)).toEqual(
+      ["Service", "growth", "Result", "Unit"])
+  })
+
+  it("inserts several new mid-list keys preserving their server order", () => {
+    const stored = [
+      { key: "Service", toggle: true },
+      { key: "Result", toggle: true },
+    ]
+    const server = ["Service", "growth", "tot", "Result"]
+    const merged = merge_column_config(stored, server)
+    expect(keys_from(merged)).toEqual(
+      ["Service", "growth", "tot", "Result"])
+  })
+
+  it("inserts a new leading server key at the front", () => {
+    const stored = [{ key: "B", toggle: true }, { key: "C", toggle: true }]
+    const merged = merge_column_config(stored, ["A", "B", "C"])
+    expect(keys_from(merged)).toEqual(["A", "B", "C"])
+  })
+
+  it("anchors a new key to its neighbour even when the user reordered", () => {
+    // User moved "Unit" ahead of "Result". A new server column "growth"
+    // sits after "Service" server-side, so it anchors there regardless
+    // of the user's custom arrangement of the other columns.
+    const stored = [
+      { key: "Service", toggle: true },
+      { key: "Unit", toggle: true },
+      { key: "Result", toggle: true },
+    ]
+    const server = ["Service", "growth", "Result", "Unit"]
+    const merged = merge_column_config(stored, server)
+    expect(keys_from(merged)).toEqual(
+      ["Service", "growth", "Unit", "Result"])
+  })
+
   it("drops stored entries whose keys no longer exist server-side", () => {
     // Simulates an add-on package that removed column "B".
     const stored = [

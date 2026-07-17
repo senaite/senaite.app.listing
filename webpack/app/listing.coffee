@@ -711,7 +711,15 @@ class ListingController extends React.Component
   resetColumns: ->
     console.debug "ListingController::resetColumns"
     clear_column_config @get_storage_id()
-    @setState {columns: @get_default_columns()}
+    # Re-render from the LIVE server columns, which include the
+    # dynamically added result-variable columns fetched with the
+    # folderitems.  We must NOT fall back to `@get_default_columns()`
+    # (the page-render `dataset.columns` snapshot): that snapshot is
+    # captured before `folderitems` runs and therefore lacks those
+    # dynamic columns, which is why they used to vanish on reset.  With
+    # the stored config now cleared, the merged config recomputes the
+    # server-default order and visibility on this re-render.
+    @setState {columns: Object.assign({}, @state.columns)}
     return true
 
   ###*
@@ -876,7 +884,30 @@ class ListingController extends React.Component
     # merged config so downstream consumers (e.g. TableTransposedCell)
     # can still look columns up by key.
     stored = read_column_config @get_storage_id()
-    return merge_column_config stored, (@state.columns or {})
+    return merge_column_config stored, @_columns_in_review_state_order()
+
+  ###*
+   * Live server columns, reordered to follow the active review_state's
+   * column order.
+   *
+   * `@state.columns` is keyed in server columns-dict order, where
+   * dynamically added columns (interim / result-variable fields) sit at
+   * the tail.  The authoritative display order lives in the
+   * review_state's `columns` list — the server slots those dynamic
+   * columns into their proper position there (e.g. right before
+   * "Result").  Feeding that order into `merge_column_config` is what
+   * lets newly-seen columns land in the right slot instead of the far
+   * right.  Columns not declared by the review_state are kept at the
+   * end (defensive) so no column definition is lost.
+  ###
+  _columns_in_review_state_order: ->
+    columns = @state.columns or {}
+    ordered = {}
+    for key in @get_allowed_column_keys()
+      ordered[key] = columns[key] if columns[key]?
+    for own key of columns
+      ordered[key] = columns[key] unless ordered[key]?
+    return ordered
 
   _persist_column_config: (config) ->
     write_column_config @get_storage_id(), config
