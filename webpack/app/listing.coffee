@@ -98,6 +98,7 @@ class ListingController extends React.Component
     @on_category_click = @on_category_click.bind @
     @on_category_select = @on_category_select.bind @
     @on_reload = @on_reload.bind @
+    @on_global_reload = @on_global_reload.bind @
     @saveAjaxQueue = @saveAjaxQueue.bind @
     @saveEditableField = @saveEditableField.bind @
     @setColumnsOrder = @setColumnsOrder.bind @
@@ -464,6 +465,10 @@ class ListingController extends React.Component
        root_el: @root_el
        data: data
     @root_el.addEventListener("click", @on_click)
+    # Subscribe to the global reload bus so code outside the React tree
+    # (e.g. a modal opened from anywhere) can refresh this listing by
+    # dispatching a "listing:reload" event on document.body
+    document.body.addEventListener("listing:reload", @on_global_reload)
     window.senaite.core.listings[@form_id] = @
 
 
@@ -473,6 +478,7 @@ class ListingController extends React.Component
   componentWillUnmount: ->
     window.removeEventListener("popstate", @on_popstate, false);
     @root_el.removeEventListener("click", @on_click)
+    document.body.removeEventListener("listing:reload", @on_global_reload)
 
   ###*
    * componentDidUpdate(prevProps, prevState, snapshot)
@@ -2749,6 +2755,45 @@ class ListingController extends React.Component
   on_reload: (event) ->
     console.debug "°°° ListingController::on_reload:event=", event
     @fetch_folderitems()
+
+  ###*
+   * Global reload bus handler
+   *
+   * Reacts to a "listing:reload" event dispatched on document.body by
+   * code outside the React tree. This lets a modal that was opened from
+   * anywhere refresh the underlying listing(s) without holding a
+   * controller handle or knowing the table selector.
+   *
+   * The event detail may narrow the target: a `form_id` and/or
+   * `listing_identifier` (each a string or an array of strings) reloads
+   * only the matching listings. An empty detail reloads every mounted
+   * listing on the page.
+   *
+   * @param event {CustomEvent} the reload event, optionally with detail
+  ###
+  on_global_reload: (event) ->
+    detail = event.detail or {}
+    return unless @matches_reload_filter detail
+    console.debug "°°° ListingController::on_global_reload:event=", event
+    @fetch_folderitems()
+
+  ###*
+   * Check if this listing matches the reload filter
+   *
+   * Each provided filter key is treated as a constraint (AND): this
+   * listing must match every key present in the detail. Values within a
+   * key are matched as OR (an array means "any of"). An empty detail
+   * matches every listing.
+   *
+   * @param detail {object} the reload event detail
+   * @returns {bool} true if this listing should reload
+  ###
+  matches_reload_filter: (detail) ->
+    for key in ["form_id", "listing_identifier"] when detail[key]?
+      wanted = detail[key]
+      wanted = [wanted] unless Array.isArray wanted
+      return no unless @[key] in wanted
+    return yes
 
   on_popstate: (event) ->
     console.debug "°°° ListingController::on_popstate:event=", event
