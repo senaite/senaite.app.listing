@@ -131,6 +131,7 @@ class ListingController extends React.Component
     @columns = JSON.parse @root_el.dataset.columns
     @form_id = @root_el.dataset.form_id
     @listing_identifier = @root_el.dataset.listing_identifier
+    @catalog = @root_el.dataset.catalog
     @pagesize = parseInt @root_el.dataset.pagesize
     @review_states = @parse_json @root_el.dataset.review_states
     @default_review_state = @root_el.dataset.default_review_state or "default"
@@ -2764,10 +2765,10 @@ class ListingController extends React.Component
    * anywhere refresh the underlying listing(s) without holding a
    * controller handle or knowing the table selector.
    *
-   * The event detail may narrow the target: a `form_id` and/or
-   * `listing_identifier` (each a string or an array of strings) reloads
-   * only the matching listings. An empty detail reloads every mounted
-   * listing on the page.
+   * The event detail may narrow the target: a `form_id`,
+   * `listing_identifier` and/or `catalog` (each a string or an array of
+   * strings) reloads only the matching listings. An empty detail
+   * reloads every mounted listing on the page.
    *
    * @param event {CustomEvent} the reload event, optionally with detail
   ###
@@ -2789,7 +2790,7 @@ class ListingController extends React.Component
    * @returns {bool} true if this listing should reload
   ###
   matches_reload_filter: (detail) ->
-    for key in ["form_id", "listing_identifier"] when detail[key]?
+    for key in ["form_id", "listing_identifier", "catalog"] when detail[key]?
       wanted = detail[key]
       wanted = [wanted] unless Array.isArray wanted
       return no unless @[key] in wanted
