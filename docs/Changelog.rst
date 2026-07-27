@@ -1,6 +1,7 @@
 2.7.0 (unreleased)
 ------------------
 
+- #184 Extend senaite.core's buildout.base.cfg and drop the unused Travis config
 - #183 Add a global "listing:reload" event bus to refresh listings from outside the React tree
 - #182 Fix result-variable column order and keep them on column reset
 - #181 Fix "me is undefined" crash in loadModal breaking all listing actions
