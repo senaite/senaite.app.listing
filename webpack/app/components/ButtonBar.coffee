@@ -101,8 +101,9 @@ class ButtonBar extends React.Component
   build_buttons: ->
     buttons = []
 
-    # Add a clear button if the select column is rendered
-    if @props.show_select_column
+    # Add a clear button if the select column is rendered and there is a
+    # selection to clear
+    if @props.show_select_column and @props.selected_uids.length > 0
       if @props.transitions.length > 0
         buttons.push(
           <button
@@ -164,7 +165,7 @@ class ButtonBar extends React.Component
           help={help}
           url={url}
           className={cls}
-          badge={@props.selected_uids.length}
+          badge={@props.selected_uids.length or null}
           onClick={@on_transition_button_click}
           disabled={@props.lock_buttons}
           attrs={attrs}/>
@@ -173,8 +174,10 @@ class ButtonBar extends React.Component
     return buttons
 
   render: ->
+    # no buttons without selected items, unless the review state allows it
     if @props.selected_uids.length == 0
-      return null
+      if not @props.review_state.allow_empty_selection
+        return null
 
     <div className="#{@props.className}">
       {@build_buttons()}
