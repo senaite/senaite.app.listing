@@ -74,6 +74,10 @@ class MultiSelect extends React.Component
     props_options.map (option, index) =>
       value = option.ResultValue
       title = option.ResultText
+      # Native select controls do not support the placeholder attribute. Use
+      # the empty option for the still-unselected value as its prompt.
+      if value == "" and not title
+        title = @props.placeholder or ""
       description = option.ResultDescription
       <option key={"#{@props.name}-#{value || index}"}
               description={description}

@@ -103,6 +103,8 @@ class MultiChoice extends React.Component
   render: ->
     <div className={@props.field_css or "multichoice"}>
       {@props.before and <span className={@props.before_css or "before_field"} dangerouslySetInnerHTML={{__html: @props.before}}></span>}
+      {@props.placeholder and not @props.before and not @to_array(@state.value).filter((value) -> value isnt "").length and
+        <span className="field-placeholder">{@props.placeholder}</span>}
       <ul className="list-unstyled">
         {@build_checkboxes()}
       </ul>
