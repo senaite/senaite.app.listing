@@ -175,6 +175,10 @@ class Select extends React.Component
     @props.options.map (option, index) =>
       value = option.ResultValue
       title = option.ResultText
+      # Native select controls do not support the placeholder attribute. Use
+      # the existing empty option as its visible equivalent instead.
+      if value == "" and not title
+        title = @props.placeholder or ""
       description = option.ResultDescription
       <option key={"#{@props.name}-#{value || index}"}
               title={description}
@@ -209,6 +213,7 @@ class Select extends React.Component
                value={@state.other_value}
                column_key={@props.column_key}
                disabled={@props.disabled}
+               placeholder={@props.placeholder}
                onBlur={@on_other_blur}
                onChange={@on_other_change}
                className={(@props.className or "form-control form-control-sm") + " mt-1 result-other-input"}

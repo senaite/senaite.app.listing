@@ -738,6 +738,7 @@ class TableCell extends React.Component
         column_key={column_key}
         title={title}
         help={help}
+        placeholder={title}
         disabled={disabled}
         selected={selected}
         required={required}
@@ -794,6 +795,7 @@ class TableCell extends React.Component
         column_key={column_key}
         title={title}
         help={help}
+        placeholder={title}
         disabled={disabled}
         selected={selected}
         required={required}
@@ -852,6 +854,7 @@ class TableCell extends React.Component
         column_key={column_key}
         title={title}
         help={help}
+        placeholder={title}
         disabled={disabled}
         selected={selected}
         required={required}
@@ -909,6 +912,7 @@ class TableCell extends React.Component
         column_key={column_key}
         title={title}
         help={help}
+        placeholder={title}
         disabled={disabled}
         selected={selected}
         required={required}

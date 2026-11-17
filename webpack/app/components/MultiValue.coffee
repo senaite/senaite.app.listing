@@ -88,6 +88,7 @@ class MultiValue extends React.Component
                  uid={@props.uid}
                  name={@props.name}
                  title={@props.help or @props.title}
+                 placeholder={@props.placeholder}
                  onChange={@props.onChange or @on_change}
                  column_key={@props.column_key}
                  className={@props.className}

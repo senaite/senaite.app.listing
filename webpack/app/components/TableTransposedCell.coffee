@@ -222,6 +222,8 @@ class TableTransposedCell extends TableCell
           fields = fields.concat @create_numeric_field props:props
         else if type == "string"
           fields = fields.concat @create_string_field props:props
+        else if type == "text"
+          fields = fields.concat @create_text_field props:props
         else if type in ["date", "datetime"]
           fields = fields.concat @create_datetime_field props:props
         else if type == "fraction"
