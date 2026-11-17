@@ -1,6 +1,7 @@
 2.7.0 (unreleased)
 ------------------
 
+- #186 Add placeholders to interim result variable controls
 - #185 Allow to display custom transitions with no items selected
 - #183 Add a global "listing:reload" event bus to refresh listings from outside the React tree
 - #182 Fix result-variable column order and keep them on column reset
