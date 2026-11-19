@@ -97,6 +97,10 @@ class ListingView(AjaxListingView):
     # - If review_state[x]["custom_transitions"] is defined, e.g.:
     #     "custom_transitions": [{"id": "x"}]
     # The possible transitions will be extended by those defined.
+    #
+    # - If review_state[x]["allow_empty_selection"] is True, the custom
+    #   transitions are also displayed when no item is selected, e.g. to save
+    #   a form where all items can be unselected
     review_states = [
         {
             "id": "default",
@@ -104,6 +108,7 @@ class ListingView(AjaxListingView):
             "contentFilter": {},
             "transitions": [],
             "custom_transitions": [],
+            "allow_empty_selection": False,
             "columns": [],
         }
     ]

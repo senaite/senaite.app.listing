@@ -2268,9 +2268,14 @@ class ListingController extends React.Component
   fetch_transitions: (selected_uids, loader=yes) ->
     selected_uids ?= @state.selected_uids
 
-    # empty the possible transitions if no UID is selected
+    # empty the possible transitions if no UID is selected, but keep the
+    # custom transitions if the review state allows an empty selection
     if selected_uids.length == 0
-      @setState {transitions: []}
+      transitions = []
+      review_state = @get_review_state_by_id(@state.review_state)
+      if review_state.allow_empty_selection
+        transitions = review_state.custom_transitions or []
+      @setState {transitions: transitions}
       return
 
     # turn loader on
