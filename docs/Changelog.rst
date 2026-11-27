@@ -1,6 +1,7 @@
 2.7.0 (unreleased)
 ------------------
 
+- #187 Load with three cells of the SENAITE logo hexagon
 - #184 Extend senaite.core's buildout.base.cfg and drop the unused Travis config
 - #185 Allow to display custom transitions with no items selected
 - #183 Add a global "listing:reload" event bus to refresh listings from outside the React tree

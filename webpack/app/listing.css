@@ -92,6 +92,8 @@
   --listing-fg-category:         #3E4551;
   --listing-category-bg:         rgba(96, 125, 139, .1);
   --listing-overlay-loader:      rgba(255, 255, 255, .6);
+  --listing-loader-cell:         #d6dadb;
+  --listing-loader-active:       #606969;
 
   /* progress bar */
   --listing-progress-fg:         #f5f5f5;

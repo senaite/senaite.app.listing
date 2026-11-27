@@ -1,95 +1,44 @@
+/* Three cells of the SENAITE logo hexagon that light up one after the
+   other, from the grey of the logo to its ink */
+
 .loader {
-  position: relative;
-  width: 44px;
-  height: 8px;
+  display: flex;
+  justify-content: center;
+  gap: 3px;
+  height: 16px;
   margin: 12px auto;
 }
 
-.dot {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 4px;
-  background: #ccc;
-  position: absolute;
+.loader svg {
+  display: block;
+  width: 14px;
+  height: 16px;
 }
 
-.dot_1 {
-  animation: animateDot1 1.5s linear infinite;
-  left: 12px;
-  background: #e579b8;
+.loader polygon {
+  fill: var(--listing-loader-cell, #d6dadb);
+  animation: listing-loader-cell 1.5s ease-in-out infinite;
 }
 
-.dot_2 {
-  animation: animateDot2 1.5s linear infinite;
+.loader svg:nth-child(2) polygon {
+  animation-delay: 0.25s;
+}
+
+.loader svg:nth-child(3) polygon {
   animation-delay: 0.5s;
-  left: 24px;
 }
 
-.dot_3 {
-  animation: animateDot3 1.5s linear infinite;
-  left: 12px;
+@keyframes listing-loader-cell {
+  0%, 60%, 100% {
+    fill: var(--listing-loader-cell, #d6dadb);
+  }
+  25% {
+    fill: var(--listing-loader-active, #606969);
+  }
 }
 
-.dot_4 {
-  animation: animateDot4 1.5s linear infinite;
-  animation-delay: 0.5s;
-  left: 24px;
-}
-
-@keyframes animateDot1 {
-  0% {
-    transform: rotate(0deg) translateX(-12px);
-  }
-  25% {
-    transform: rotate(180deg) translateX(-12px);
-  }
-  75% {
-    transform: rotate(180deg) translateX(-12px);
-  }
-  100% {
-    transform: rotate(360deg) translateX(-12px);
-  }
-}
-@keyframes animateDot2 {
-  0% {
-    transform: rotate(0deg) translateX(-12px);
-  }
-  25% {
-    transform: rotate(-180deg) translateX(-12px);
-  }
-  75% {
-    transform: rotate(-180deg) translateX(-12px);
-  }
-  100% {
-    transform: rotate(-360deg) translateX(-12px);
-  }
-}
-@keyframes animateDot3 {
-  0% {
-    transform: rotate(0deg) translateX(12px);
-  }
-  25% {
-    transform: rotate(180deg) translateX(12px);
-  }
-  75% {
-    transform: rotate(180deg) translateX(12px);
-  }
-  100% {
-    transform: rotate(360deg) translateX(12px);
-  }
-}
-@keyframes animateDot4 {
-  0% {
-    transform: rotate(0deg) translateX(12px);
-  }
-  25% {
-    transform: rotate(-180deg) translateX(12px);
-  }
-  75% {
-    transform: rotate(-180deg) translateX(12px);
-  }
-  100% {
-    transform: rotate(-360deg) translateX(12px);
+@media (prefers-reduced-motion: reduce) {
+  .loader polygon {
+    animation: none;
   }
 }
